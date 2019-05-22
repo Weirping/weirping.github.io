@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="LTR模型可以分为 point-wise、pair-wise、list-wise三类，Prank算法属于point-wise模型。 Pointwise可以用于推荐系统中也可以用于IR中。 以Pointwise在IR中的应用为例，它处理对象是doc-query pair，将doc-query的match信息转化为特征向量后，机器学习系统根据训练得出的模型对doc-query pair进行打分，打分的">
+<meta name="keywords" content="Machine Learning,LTR">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PRank算法">
+<meta property="og:url" content="http://weirping.coding.me/blog/PRank.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="LTR模型可以分为 point-wise、pair-wise、list-wise三类，Prank算法属于point-wise模型。 Pointwise可以用于推荐系统中也可以用于IR中。 以Pointwise在IR中的应用为例，它处理对象是doc-query pair，将doc-query的match信息转化为特征向量后，机器学习系统根据训练得出的模型对doc-query pair进行打分，打分的">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/PRank/score-rank.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/PRank/wrong-left.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/PRank/wrong-right.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/PRank/update-rule.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/PRank/prank-algorithm.png">
+<meta property="og:updated_time" content="2018-08-09T06:24:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PRank算法">
+<meta name="twitter:description" content="LTR模型可以分为 point-wise、pair-wise、list-wise三类，Prank算法属于point-wise模型。 Pointwise可以用于推荐系统中也可以用于IR中。 以Pointwise在IR中的应用为例，它处理对象是doc-query pair，将doc-query的match信息转化为特征向量后，机器学习系统根据训练得出的模型对doc-query pair进行打分，打分的">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/PRank/score-rank.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/PRank.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>PRank算法 | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/PRank.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PRank算法
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-04-13 22:22:22" itemprop="dateCreated datePublished" datetime="2018-04-13T22:22:22+08:00">2018-04-13</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/LTR/" itemprop="url" rel="index"><span itemprop="name">LTR</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>LTR模型可以分为 point-wise、pair-wise、list-wise三类，Prank算法属于point-wise模型。</p>
+<p>Pointwise可以用于推荐系统中也可以用于IR中。</p>
+<p>以Pointwise在IR中的应用为例，它处理对象是doc-query pair，将doc-query的match信息转化为特征向量后，机器学习系统根据训练得出的模型对doc-query pair进行打分，打分的顺序即为搜索排序的结果。计算打分的公式如下：</p>
+<p>$$<br>\mathrm{score} =  \mathbf w \cdot \mathbf x<br>$$</p>
+<p>其中$\mathbf w$为特征各维度的权重，$\mathbf x$为doc-query match信息转化为的特征向量。</p>
+<p>在Ranking问题中我们使用的训练样本的label值不是分数，而是一个具有强弱分级的label，如<code>Perfect &gt; Excellent &gt; Good &gt; Fair &gt; Bad</code> 这样具有强弱关系的五级label。为了将score映射到分级label，需要设置5个阈值来区分score的label。如果score落在某两个相邻阈值之间，则划分为相应的label，常见算法包括：PRank、McRank。如下图所示为PRank算法示意图：</p>
+<p><img src="PRank/score-rank.png" alt></p>
+<h1 id="算法思想"><a href="#算法思想" class="headerlink" title="算法思想"></a>算法思想</h1><p>数据：$X_{T \times n}$ ， $y， y \in  {1, 2, 3, \dots, k}$， 即训练样本量为$T$， 特征维度为n，$y$共有k个等级的取值。</p>
+<p>PRank的目标是训练一个ranking rule H : $R^n \rightarrow y​$ ，即，将样本特征投影到$k​$个等级上。$H​$ 定义如下：<br>$$<br>H(\mathbf x)=\min_{r \in {1, 2, 3, \dots, k}}\{r: \mathbf w \cdot \mathbf x - b_r &lt; 0 \}<br>$$<br>其中：$\mathbf w$ 和 $b_r, r \in {1, 2, 3, \dots, k}$ 是模型参数。 $ \mathbf w \cdot \mathbf x$ 就是上文中所说的score，$k$ 个 $b_r$ 就是上文所说的阈值，$b_1 \le \dots \le  b_{k-1} \le  b_k = \infty$ 。如上文所述如果一个样本满足$b_{r-1} \lt \mathbf w \cdot \mathbf x \le b_r$ ，则该样本的预测rank值为$r$，即，$\hat y = H(\mathbf x) = r$。</p>
+<h1 id="模型参数估计"><a href="#模型参数估计" class="headerlink" title="模型参数估计"></a>模型参数估计</h1><p>PRank模型存在两组参数$\mathbf w$ 和 $b_r, r \in {1, 2, 3, \dots, k}$ ，只要能将这两组参数确定下来，就大功告成。下面讲解参数的确定过程。PRank更新参数的方法类似于随机梯度下降法，即，每当预测错误一个样本后，就更新参数。</p>
+<p>对于一个样本$(\mathbf x, y)$ 和模型参数$\mathbf w$ 和 $b_r, r \in \{1, 2, 3, \dots, k\}$ 。如果模型能够正确预测，则 :<br>$$<br>\begin {align}<br>&amp; \mathbf w \cdot \mathbf x \gt b_r ,  r \le y-1 \\<br>&amp; \mathbf w \cdot \mathbf x \lt b_r ,  r \ge y<br>\end {align}<br>$$</p>
+<p>如上所述，$y$的取值是从集合$\{1, 2, 3, \dots, k\}$ 中选取。模型引入辅助变量$s$(原文中依然使用$y$，我认为可能产生符号混淆，所以改用$s$) ， </p>
+<p>$s$是一个向量，长度为$k-1$ ， $s$ 与 $y$ 是一一对应的(类似于多分类问题中，使用onehot编码将label向量化)。对于样本 $(\mathbf x, y)$来说，s的各维度值定义如下：<br>$$<br>\begin {align}<br>&amp; s_r = +1 , r \le y-1 \\<br>&amp; s_r = -1,  r \ge y , r \lt k<br>\end {align}<br>$$<br>例如当 $k=5$时，$y$的取值与$s$的关系如下：</p>
+<p>$$<br>\begin {align}<br>&amp; y=1 \Leftrightarrow s=[-1,  -1, -1, -1] \\<br>&amp; y=2 \Leftrightarrow s=[ +1, -1, -1, -1] \\<br>&amp; y=3 \Leftrightarrow s=[ +1,+1, -1, -1] \\<br>&amp; y=4 \Leftrightarrow s=[ +1,+1,+1, -1] \\<br>&amp; y=5 \Leftrightarrow s=[ +1,+1,+1,+1]<br>\end {align}<br>$$</p>
+<p>对于样本$(\mathbf x, y)$来说， 对于所有的$r \in \{1, \dots , k-1\}$ ：</p>
+<ol>
+<li>如果模型预测结果是正确的，则$s_r\cdot (\mathbf w \cdot \mathbf x - b_r ) \gt 0$，此时参数不需要更新</li>
+<li>如果模型预测结果是错误的，则<strong>存在</strong>$s_r\cdot (\mathbf w \cdot \mathbf x - b_r ) \le 0$，此时需要更新参数</li>
+</ol>
+<p>对于特定的$r$，如果$s_r\cdot (\mathbf w \cdot \mathbf x - b_r ) \le 0$， 则说明score值$\mathbf w \cdot \mathbf x$ 落在了阈值$b_r$的<strong>错误的一侧</strong>，为了改正这个错误的预测，只需要将$\mathbf w \cdot \mathbf x$和$b_r$<strong>相对</strong>移动就能完成对于参数$\mathbf w$ 和 $b_r$ 的更新。更新公式如下：</p>
+<p>对于$s_r\cdot (\mathbf w \cdot \mathbf x - b_r ) \le 0​$：<br>$$<br>\begin {align}<br>&amp; b_r = b_r - s_r \\<br>&amp; \mathbf w = \mathbf w + s_r \cdot \mathbf x<br>\end {align}<br>$$<br>当$y=4$ ，预测值落在了Rank 3 范围内时：$s_ 3= +1$ ，此时需要将$b_3$向左移动， $\mathbf w \cdot \mathbf x$向右移动。<br>$$<br>\begin {align}<br>&amp; b_3 = b3 - s_3  = b3 - (+1) \\<br>&amp; \mathbf w = \mathbf w + (+1) \cdot \mathbf x  \Leftrightarrow \mathbf w \cdot \mathbf x = \mathbf w \cdot \mathbf x + (+1) \mathbf x^2<br>\end {align}<br>$$</p>
+<p><img src="PRank/wrong-left.png" alt></p>
+<p>当$y=2$ ，预测值落在了Rank 3 范围内时：$s_ 2= -1$ ，此时需要将$b_2$向右移动， $\mathbf w \cdot \mathbf x$向左移动。<br>$$<br>\begin {align}<br>&amp; b_2 = b2 - s_2  = b3 - (-1) \\<br>&amp; \mathbf w = \mathbf w + (-1) \cdot \mathbf x  \Leftrightarrow \mathbf w \cdot \mathbf x = \mathbf w \cdot \mathbf x + (-1) \mathbf x^2<br>\end {align}<br>$$<br><img src="PRank/wrong-right.png" alt></p>
+<p>如果有存在多个$r$ 使得$s_r\cdot (\mathbf w \cdot \mathbf x - b_r ) \le 0$时，更新过程如下图所示：</p>
+<p><img src="PRank/update-rule.png" alt></p>
+<h1 id="实现流程"><a href="#实现流程" class="headerlink" title="实现流程"></a>实现流程</h1><p>PRank算法比较简单，基本流程如下所示：</p>
+<p><img src="PRank/prank-algorithm.png" alt></p>
+<h1 id="实现代码"><a href="#实现代码" class="headerlink" title="实现代码"></a>实现代码</h1><p>以下为PRank算法的Python实现代码</p>
+<p>note：由于实际环境中我们使用的rate是从0开始的，如5级使用的是$\{0, 1, 2, 3 ,4\}$ 来做标记，所以下面的代码和上文中的论述有一点出入。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">prank</span><span class="params">(X, y, rate_levels, epochs=<span class="number">10</span>, delta=<span class="number">0.01</span>)</span>:</span></span><br><span class="line">    <span class="string">'''</span></span><br><span class="line"><span class="string">    epochs: int, 收敛之前 遍历样本次数</span></span><br><span class="line"><span class="string">    rate_lavels: int, y中rate的级别数量，如y用 0,1,2,3 标记，则rate_lavels = 4</span></span><br><span class="line"><span class="string">    X: 训练样本feature集合</span></span><br><span class="line"><span class="string">    y: 训练样本的rate集合，需要从 0开始。如果未5级标注，需要为 0, 1, 2, 3, 4</span></span><br><span class="line"><span class="string">    delta: float, 终止迭代条件</span></span><br><span class="line"><span class="string">    '''</span></span><br><span class="line">    N = len(X)  <span class="comment"># 样本量</span></span><br><span class="line">    D = len(X[<span class="number">0</span>])  <span class="comment"># 样本维度</span></span><br><span class="line">    theta = np.zeros(D)</span><br><span class="line">    b = np.zeros(rate_levels - <span class="number">1</span>)</span><br><span class="line">    s = np.zeros((N, rate_levels - <span class="number">1</span>))  <span class="comment"># 辅助变量，类似于y的one-hot表示</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, rate_levels - <span class="number">1</span>):  <span class="comment"># 初始化b</span></span><br><span class="line">        b[i] = i</span><br><span class="line">    <span class="keyword">for</span> n <span class="keyword">in</span> range(<span class="number">0</span>, N):  <span class="comment"># 初始化 s</span></span><br><span class="line">        <span class="keyword">for</span> l <span class="keyword">in</span> range(<span class="number">0</span>, rate_levels - <span class="number">1</span>):</span><br><span class="line">            <span class="keyword">if</span> (y[n] &lt;= l):</span><br><span class="line">                s[n][l] = <span class="number">-1</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                s[n][l] = <span class="number">1</span></span><br><span class="line">    last_err_ratio = <span class="number">1.0</span> + delta</span><br><span class="line">    <span class="keyword">for</span> it <span class="keyword">in</span> range(<span class="number">0</span>, epochs):</span><br><span class="line">        err_cnt = <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> n <span class="keyword">in</span> range(<span class="number">0</span>, N):</span><br><span class="line">            E = np.zeros(rate_levels - <span class="number">1</span>) - <span class="number">1</span>  <span class="comment"># 用于记录该样本</span></span><br><span class="line">            <span class="keyword">for</span> l <span class="keyword">in</span> range(<span class="number">0</span>, rate_levels - <span class="number">1</span>):</span><br><span class="line">                <span class="keyword">if</span> (s[n][l] * (np.dot(theta, X[n]) - b[l])) &lt;= <span class="number">0</span>:</span><br><span class="line">                    E[l] = l</span><br><span class="line">            <span class="keyword">if</span>(len(E[E &gt;= <span class="number">0</span>]) &gt; <span class="number">0</span>):</span><br><span class="line">                err_cnt += <span class="number">1</span></span><br><span class="line">                sumval = <span class="number">0</span>  <span class="comment"># 预测rate和真正rate 的间距，真正label是3，预测label是1，则sumval=3-1=2</span></span><br><span class="line">                <span class="keyword">for</span> l <span class="keyword">in</span> range(<span class="number">0</span>, rate_levels - <span class="number">1</span>):  <span class="comment"># 统计 sumval</span></span><br><span class="line">                    <span class="keyword">if</span>(E[l] &gt;= <span class="number">0</span>):</span><br><span class="line">                        sumval += s[n][int(E[l])]</span><br><span class="line">                <span class="keyword">for</span> d <span class="keyword">in</span> range(<span class="number">0</span>, D):  <span class="comment"># 更新theta</span></span><br><span class="line">                    theta[d] += sumval * X[n][d]</span><br><span class="line">                <span class="keyword">for</span> l <span class="keyword">in</span> range(<span class="number">0</span>, rate_levels - <span class="number">1</span>):  <span class="comment"># 更新b</span></span><br><span class="line">                    <span class="keyword">if</span>(E[l] &gt;= <span class="number">0</span>):</span><br><span class="line">                        b[int(E[l])] -= s[n][int(E[l])]</span><br><span class="line">        cur_err_ratio = err_cnt * <span class="number">1.0</span> / N</span><br><span class="line">        print(err_cnt, N, cur_err_ratio)</span><br><span class="line">        <span class="keyword">if</span> abs(last_err_ratio - cur_err_ratio) &lt; delta:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        last_err_ratio = cur_err_ratio</span><br><span class="line">    <span class="keyword">return</span> theta, b</span><br></pre></td></tr></table></figure>
+<p>sklearn estimator版</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sklearn.base <span class="keyword">import</span> TransformerMixin</span><br><span class="line"><span class="keyword">from</span> sklearn.base <span class="keyword">import</span> BaseEstimator</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PRank</span><span class="params">(BaseEstimator, TransformerMixin)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, rate_levels, epochs, delta)</span>:</span></span><br><span class="line">        self._rate_levels =  rate_levels</span><br><span class="line">        self._epochs = epochs</span><br><span class="line">        self._delta = delta</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_prank</span><span class="params">(self, X, y, rate_levels, epochs=<span class="number">10</span>, delta=<span class="number">0.01</span>)</span>:</span></span><br><span class="line">        <span class="string">'''</span></span><br><span class="line"><span class="string">        epochs: int, 收敛之前 遍历样本次数</span></span><br><span class="line"><span class="string">        rate_lavels: int, y中rate级别的数量，如y用 0,1,2,3 标记，则rate_lavels = 4</span></span><br><span class="line"><span class="string">        X: array 训练样本feature集合</span></span><br><span class="line"><span class="string">        y: list 训练样本的rate集合，需要从 0开始。如为5级标注，需要为 0, 1, 2, 3, 4</span></span><br><span class="line"><span class="string">        delta: float, 终止迭代条件</span></span><br><span class="line"><span class="string">        '''</span></span><br><span class="line">        N = len(X)  <span class="comment"># 样本量</span></span><br><span class="line">        D = len(X[<span class="number">0</span>])  <span class="comment"># 样本维度</span></span><br><span class="line">        theta = np.zeros(D)</span><br><span class="line">        b = np.zeros(rate_levels - <span class="number">1</span>)</span><br><span class="line">        s = np.zeros((N, rate_levels - <span class="number">1</span>))  <span class="comment"># 辅助变量，类似于y的one-hot表示</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, rate_levels - <span class="number">1</span>):  <span class="comment"># 初始化b</span></span><br><span class="line">            b[i] = i</span><br><span class="line">        <span class="keyword">for</span> n <span class="keyword">in</span> range(<span class="number">0</span>, N):  <span class="comment"># 初始化 s</span></span><br><span class="line">            <span class="keyword">for</span> l <span class="keyword">in</span> range(<span class="number">0</span>, rate_levels - <span class="number">1</span>):</span><br><span class="line">                <span class="keyword">if</span> (y[n] &lt;= l):</span><br><span class="line">                    s[n][l] = <span class="number">-1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    s[n][l] = <span class="number">1</span></span><br><span class="line">        last_err_ratio = <span class="number">1.0</span> + delta</span><br><span class="line">        <span class="keyword">for</span> it <span class="keyword">in</span> range(<span class="number">0</span>, epochs):</span><br><span class="line">            err_cnt = <span class="number">0</span></span><br><span class="line">            <span class="keyword">for</span> n <span class="keyword">in</span> range(<span class="number">0</span>, N):</span><br><span class="line">                E = np.zeros(rate_levels - <span class="number">1</span>) - <span class="number">1</span>  <span class="comment"># 用于记录该样本</span></span><br><span class="line">                <span class="keyword">for</span> l <span class="keyword">in</span> range(<span class="number">0</span>, rate_levels - <span class="number">1</span>):</span><br><span class="line">                    <span class="keyword">if</span> (s[n][l] * (np.dot(theta, X[n]) - b[l])) &lt;= <span class="number">0</span>:</span><br><span class="line">                        E[l] = l</span><br><span class="line">                <span class="keyword">if</span>(len(E[E &gt;= <span class="number">0</span>]) &gt; <span class="number">0</span>):</span><br><span class="line">                    err_cnt += <span class="number">1</span></span><br><span class="line">                    sumval = <span class="number">0</span>  <span class="comment"># 预测rate和真正rate 的间距，真正label是3，预测label是1，则sumval=3-2=1</span></span><br><span class="line">                    <span class="keyword">for</span> l <span class="keyword">in</span> range(<span class="number">0</span>, rate_levels - <span class="number">1</span>):  <span class="comment"># 统计 sumval</span></span><br><span class="line">                        <span class="keyword">if</span>(E[l] &gt;= <span class="number">0</span>):</span><br><span class="line">                            sumval += s[n][int(E[l])]</span><br><span class="line">                    <span class="keyword">for</span> d <span class="keyword">in</span> range(<span class="number">0</span>, D):  <span class="comment"># 更新theta</span></span><br><span class="line">                        theta[d] += sumval * X[n][d]</span><br><span class="line">                    <span class="keyword">for</span> l <span class="keyword">in</span> range(<span class="number">0</span>, rate_levels - <span class="number">1</span>):  <span class="comment"># 更新b</span></span><br><span class="line">                        <span class="keyword">if</span>(E[l] &gt;= <span class="number">0</span>):</span><br><span class="line">                            b[int(E[l])] -= s[n][int(E[l])]</span><br><span class="line">            cur_err_ratio = err_cnt * <span class="number">1.0</span> / N</span><br><span class="line">            <span class="comment"># print(err_cnt, N, cur_err_ratio)</span></span><br><span class="line">            <span class="keyword">if</span> abs(last_err_ratio - cur_err_ratio) &lt; delta:</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            last_err_ratio = cur_err_ratio</span><br><span class="line">        <span class="keyword">return</span> theta, b</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">fit</span><span class="params">(self, X, y)</span>:</span></span><br><span class="line">        self.theta_, self.b_ = self._prank(X, y, self._rate_levels, self._epochs, self._delta)</span><br><span class="line">        <span class="keyword">return</span> self</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">predict</span><span class="params">(self, X)</span>:</span></span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">get_rank</span><span class="params">(row)</span>:</span></span><br><span class="line">            rank = len(row)</span><br><span class="line">            <span class="keyword">for</span> ind <span class="keyword">in</span> range(len(row)):</span><br><span class="line">                <span class="keyword">if</span> row[ind] &lt; <span class="number">0</span>:</span><br><span class="line">                    rank = ind</span><br><span class="line">                    <span class="keyword">break</span></span><br><span class="line">            <span class="keyword">return</span> rank</span><br><span class="line">        scores = np.dot(X_test_scale, pranker.theta_)[:, np.newaxis] - pranker.b_ </span><br><span class="line">        pred = np.apply_along_axis(get_rank, <span class="number">1</span>, scores)</span><br><span class="line">        <span class="keyword">return</span> pred</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">score</span><span class="params">()</span>:</span></span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="http://papers.nips.cc/paper/2023-pranking-with-ranking.pdf" target="_blank" rel="noopener">Pranking with Ranking</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+            <a href="/tags/LTR/" rel="tag"># LTR</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/multiprocessing-in-Python.html" rel="next" title="multiprocessing - Python中的并发处理">
+                <i class="fa fa-chevron-left"></i> multiprocessing - Python中的并发处理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/hexo-config.html" rel="prev" title="Hexo配置">
+                Hexo配置 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#算法思想"><span class="nav-number">1.</span> <span class="nav-text">算法思想</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#模型参数估计"><span class="nav-number">2.</span> <span class="nav-text">模型参数估计</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实现流程"><span class="nav-number">3.</span> <span class="nav-text">实现流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实现代码"><span class="nav-number">4.</span> <span class="nav-text">实现代码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

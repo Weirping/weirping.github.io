@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="本文曾发表在博客园中，重新修订发表于此。 马氏距离就是用于度量两个坐标点之间的距离关系，表示数据的协方差距离。与尺度无关的(scale-invariant)，即独立于测量尺度。 基本思想（intuition）如下图的过程（以两个维度作为例子），此例的数据重心为原点，$P1$,$P2$到原点的欧氏距离相同，但点$P2$在$y$轴上相对原点有较大的变异，而点$P1$在$x$轴上相对原点有较小的变异。所">
+<meta name="keywords" content="Math">
+<meta property="og:type" content="article">
+<meta property="og:title" content="马氏距离与其推导">
+<meta property="og:url" content="http://weirping.coding.me/blog/Mahalanobis-distance.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="本文曾发表在博客园中，重新修订发表于此。 马氏距离就是用于度量两个坐标点之间的距离关系，表示数据的协方差距离。与尺度无关的(scale-invariant)，即独立于测量尺度。 基本思想（intuition）如下图的过程（以两个维度作为例子），此例的数据重心为原点，$P1$,$P2$到原点的欧氏距离相同，但点$P2$在$y$轴上相对原点有较大的变异，而点$P1$在$x$轴上相对原点有较小的变异。所">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/Mahalanobis-distance/p1.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Mahalanobis-distance/p2.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Mahalanobis-distance/p3.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Mahalanobis-distance/p4.png">
+<meta property="og:updated_time" content="2018-09-05T07:53:02.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="马氏距离与其推导">
+<meta name="twitter:description" content="本文曾发表在博客园中，重新修订发表于此。 马氏距离就是用于度量两个坐标点之间的距离关系，表示数据的协方差距离。与尺度无关的(scale-invariant)，即独立于测量尺度。 基本思想（intuition）如下图的过程（以两个维度作为例子），此例的数据重心为原点，$P1$,$P2$到原点的欧氏距离相同，但点$P2$在$y$轴上相对原点有较大的变异，而点$P1$在$x$轴上相对原点有较小的变异。所">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/Mahalanobis-distance/p1.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/Mahalanobis-distance.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>马氏距离与其推导 | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/Mahalanobis-distance.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">马氏距离与其推导
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-07-20 22:22:22" itemprop="dateCreated datePublished" datetime="2018-07-20T22:22:22+08:00">2018-07-20</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Math/" itemprop="url" rel="index"><span itemprop="name">Math</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文曾发表在<a href="https://www.cnblogs.com/Weirping/articles/6613013.html" target="_blank" rel="noopener">博客园</a>中，重新修订发表于此。</p>
+<p>马氏距离就是用于度量两个坐标点之间的距离关系，表示数据的协方差距离。与尺度无关的(scale-invariant)，即独立于测量尺度。</p>
+<h1 id="基本思想（intuition）"><a href="#基本思想（intuition）" class="headerlink" title="基本思想（intuition）"></a>基本思想（intuition）</h1><p>如下图的过程（以两个维度作为例子），此例的数据重心为原点，$P1$,$P2$到原点的欧氏距离相同，但点$P2$在$y$轴上相对原点有较大的变异，而点$P1$在$x$轴上相对原点有较小的变异。所以$P1$点距原点的<strong>直观距离</strong>是比$P2$点的小的。</p>
+<p><img src="Mahalanobis-distance/p1.png" alt="Mahalanobis distance img 1"></p>
+<p>马氏距离就是解决这个问题，它将直观距离和欧式距离统一。为了做到这一点， <strong>它先将数据不同维度上的方差统一（即各维度上的方差相同），此时的欧式距离就是直观距离</strong>。</p>
+<p><img src="Mahalanobis-distance/p2.png" alt="Mahalanobis distance img 2"></p>
+<p>如图：统一方差后的图，$\hat{P1}$到原点的距离小于$\hat{P2}$。$P1$到原点的欧式距离和$P2$的相同。<strong>以上所说的直观距离就是马氏距离 </strong>。但是，如果不同维度之间具有相关性，则压缩的效果就不好了。如下图只在横向和纵向上压缩，则达不到上图的压缩效果。</p>
+<p><img src="Mahalanobis-distance/p3.png" alt="Mahalanobis distance img 3"></p>
+<p><img src="Mahalanobis-distance/p4.png" alt="Mahalanobis distance img 3"></p>
+<p>所以在$F1$方向和$F2$方向上压缩数据才能达到较好的效果。所以需要将原始数据在<strong>XY坐标系</strong>中的坐标 表示在<strong>F坐标系</strong>中。然后再分别沿着坐标轴压缩数据。</p>
+<p>所以，计算样本数据的马氏距离分为两个步骤：</p>
+<ol>
+<li>坐标旋转</li>
+<li>数据压缩</li>
+</ol>
+<p><strong>坐标旋转的目标</strong>：使旋转后的各个维度之间线性无关，所以该旋转过程就是主成分分析的过程。<br><strong>数据压缩的目标</strong>：所以将不同的维度上的数据压缩成为方差都是1的的数据集。</p>
+<h1 id="推导过程"><a href="#推导过程" class="headerlink" title="推导过程"></a>推导过程</h1><p>有一个原始的多维样本数据$X_{n \times m}$(m列，n行):</p>
+<p>$$<br>\begin {matrix}<br>x_{11} &amp; x_{12} &amp;  \cdots  &amp; x_{1m}  \\<br>x_{21} &amp; x_{22} &amp;  \cdots  &amp; x_{2m}  \\<br>\vdots  &amp;  \vdots  &amp;  \ddots  &amp;  \vdots   \\<br>x_{n1} &amp; x_{n2} &amp;  \cdots  &amp; x_{nm}  \\<br>\end {matrix}<br>$$</p>
+<p>其中每一行表示一个测试样本（共$n$个）；$X_i$表示样本的第$i$个维度（共$m$个） $X_i=(x_{1i}, x_{2i}, \dots, x_{ni})^{\mathrm{T}}$ ，以上多维样本数据记为${\bf{X}} = \left( {X_1}, {X_2} \cdots {X_m} \right)$。样本的总体均值为$\bf{\mu }_{\bf{X}} = \left( \mu _{X1}, \mu _{X2} \cdots \mu _{Xm} \right)$。其协方差为：<br>$$<br>\bf{\Sigma }_\bf{X}<br>= E\left\{ (\bf{X} - \bf{\mu}_{\bf{X}})^{\bf{T}}(\bf{X} - \bf{\mu}_{\bf{X}}) \right\}<br>= {\frac 1n}{(\bf{X} - \bf{\mu}_{\bf{X}})^{\bf{T}}}(\bf{X} - \bf{\mu}_{\bf{X}})<br>$$</p>
+<p>协方差矩阵表示样本数据各维度之间的关系的。<strong>其中n是样本的数量</strong></p>
+<p>假设将原始数据集$\bf{X}$通过坐标旋转矩阵$\bf{U}$旋转到新的坐标系统中得到一个新的数据集$\bf{F}$。（其实$\bf{X}$和$\bf{F}$表示的是同一组样本数据集，只是由于其坐标值不同，为了易于区分用了两个字母表示）<br>$$<br>\bf{F}^\bf{T} =<br>(\bf{F}_\bf{1}\bf{,}\bf{F}_\bf{2} \cdots \bf{F}_\bf{m})^\mathrm{T} = \bf{U}\bf{X}^\mathrm{T}<br>$$<br>新数据集$\bf{F}$的均值记为$\mu _F = \mu_{F1},\mu_{F2} \cdots \mu_{Fm})$ , $\mu _F = U\mu_X$</p>
+<p>由于将数据集旋转后数据的各维度之间是不相关的，所以新数据集${\bf{F}}$的协方差矩阵${\Sigma_F}$应该为对角阵。<br>由于:<br>$$<br>(\bf{F} - \bf{\mu}_{\bf{F}})^{\mathrm{T}} = \bf{U}(\bf{X} - \bf{\mu}_{\bf{X}})^{\mathrm{T}} \\<br>(\bf{F} - \bf{\mu}_{\bf{F}}) = (\bf{X} - \bf{\mu}_{\bf{X}})\bf{U}^{\mathrm{T}}<br>$$<br>所以：<br>$$<br>\begin {aligned}<br>\bf{\Sigma}_{\bf{F}} &amp;= \bf{E}\left\{\left(\bf{F} - \bf{\mu}_{\bf{F}} \right)^{\bf{T}}\left(\bf{F} - \bf{\mu }_{\bf{F}} \right) \right\} \\<br>&amp; = \frac{\bf{1}}{\bf{n}}\left(\bf{F} - \bf{\mu}_{\bf{F}} \right)^{\bf{T}}\left(\bf{F} - \bf{\mu}_{\bf{F}} \right) \\<br>&amp;= \frac{\bf{1}}{\bf{n}}\bf{U}\left(\bf{X} - \bf{\mu }_{\bf{X}} \right)^{\bf{T}}\left(\bf{X} - \bf{\mu }_{\bf{X}} \right)\bf{U}^{\bf{T}}  \\<br>&amp; = \bf{U}\bf{\Sigma }_X\bf{U}^{\bf{T}}  \\<br>&amp; = \left( {\matrix{   {\lambda 1} &amp; {} &amp; {} &amp; {}  \cr<br>{} &amp; {\lambda 2} &amp; {} &amp; {}  \cr<br>{} &amp; {} &amp;  \ddots  &amp; {}  \cr<br>{} &amp; {} &amp; {} &amp; {\lambda m}  \cr  } } \right)<br>\end {aligned}<br>$$</p>
+<p>其中 $\sqrt{\lambda_i}$ 就是第$i$个维度的方差。 </p>
+<p>由于$\bf \Sigma_{\bf X}$是实对角阵，所以$\bf U$是一个正交矩阵 $\bf U^{\bf T} = \bf U^{-1}$。</p>
+<p>以上是准备知识，下面推导一个样本点$\bf{x} = \left( x_1,x_2 \cdots x_m \right)$到重心$\bf{\mu }_{\bf X} = \left( \mu _{X1},\mu _{X2} \cdots \mu _{Xm} \right)$的马氏距离。等价于求点 $\bf{f} = (f_1,f_2 \cdots f_m)$ <strong>压缩后的坐标</strong>值到数据重心压缩后的坐标值 $\bf{\mu }_\bf{F} = \left( \mu _{F1},\mu _{F2} \cdots \mu _{Fm} \right)$的欧式距离。</p>
+<p>$$<br>\begin {aligned}<br>&amp; d^2(\bf{f},\bf{\mu }_{\bf{F}} ) = (\frac {f_1 - \mu_{F1}}{\sqrt{\lambda_1}})^2 + (\frac{f_2 - \mu_{F2}}{\sqrt{\lambda_2}})^2 +  \cdots  + (\frac{f_m - \mu_{Fm}}{\sqrt{\lambda_m}})^2  \ <br>&amp; = ( f_1 - \mu_{F1},{f_2} - \mu_{F2} \cdots f_m - \mu_{Fm} )<br>\left (<br>    \begin  {matrix}<br>        {\frac 1{\lambda_1}} &amp; {} &amp; {} &amp; {}    \ <br>        {} &amp; {\frac 1 {\lambda _2}} &amp; {} &amp; {}  \ <br>        {} &amp; {} &amp;  \ddots &amp; {}                 \ <br>        {} &amp; {} &amp; {} &amp; {\frac 1 {\lambda _m}}  \ <br>    \end {matrix}<br>\right)<br>\left(<br>    \begin {matrix}<br>        {f_1 - \mu_{F1}}  \ <br>        {f_2 - \mu_{F2}}  \ <br>        \vdots            \ <br>        {f_m - \mu_{Fm}}  \ <br>    \end {matrix}<br>\right)  \ <br>&amp; = (\bf{f} - \bf{\mu}_{\bf{F}})(\bf{U}\bf{\Sigma}_X \bf{U}^{\bf{T}})^{-1}(\bf{f} - \bf{\mu}_{\bf{F}})^T  \ <br>&amp;   \ <br>&amp; = (\bf{x} - \bf{\mu}_X)\bf{U}^T(\bf{U}\bf{\Sigma}_X \bf{U}^\bf{T})^{-1}\bf{U}(\bf{x} - \bf{\mu}_X )^T  \ <br>&amp;   \ <br>&amp; = (\bf{x} - \bf{\mu}_X )\bf{U}^T \bf{U}\bf{\Sigma}_X^{-1}\bf{U}^{\bf{T}}\bf{U}(\bf{x} - \bf{\mu}_X )^T  \ <br>&amp;   \ <br>&amp; = (\bf{x} - \bf{\mu }_X )\bf{\Sigma}_X^{-1}(\bf{x} - \bf{\mu }_X)^T \\<br>\end {aligned}<br>$$<br>这就是马氏距离的的计算公式了。</p>
+<p>如果$\bf{x}$是列向量<br>$$<br>{d^2} = \left( \bf{x} - \bf{\mu }_X \right)^T\bf{\Sigma }_X^{-1}\left( \bf{x} - \bf{\mu }_X \right)<br>$$</p>
+<p>如果并把上文的重心$\bf{\mu }_{\bf{X}} = \left( \mu _{X1},\mu _{X2} \cdots \mu_{Xm} \right)$改为任意一个样本点$\bf{y}$，则可以得到$\bf{x}$和$\bf{y}$两个样本点之间的马氏距离公式为：<br>$$<br>d^2 = \left( \bf{x} - \bf{y} \right)^{\bf{T}}\bf{\Sigma }_{\bf{X}}^{-1}\left( \bf{x} - \bf{y} \right)<br>$$</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p>细说马氏距离</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Math/" rel="tag"># Math</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Regex-in-Vim.html" rel="next" title="Vim中正则表达式汇总">
+                <i class="fa fa-chevron-left"></i> Vim中正则表达式汇总
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/Hyperparameter-Tuning-in-Sklearn.html" rel="prev" title="Hyperparameter Tuning in Sklearn">
+                Hyperparameter Tuning in Sklearn <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#基本思想（intuition）"><span class="nav-number">1.</span> <span class="nav-text">基本思想（intuition）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#推导过程"><span class="nav-number">2.</span> <span class="nav-text">推导过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="损失函数是神经网络设计中的重要一环。在神经网络的设计中，输出层的使用的激活函数和模型损失函数是根据实际问题设计的。本文以最大似然估计为理论基础，阐述回归问题、二分类问题和多分类问题中输出层的激活函数和模型损失函数的选择。 符号定义：  训练集特征$\matrix {X}=\{x^{(1)},x^{(2)} \dots x^{(N)} \}$ ，第$n$个样本的属性特征向量为$x^{(n)}$ ；">
+<meta name="keywords" content="Neural Network,Machine Learning">
+<meta property="og:type" content="article">
+<meta property="og:title" content="输出层激活函数和模型损失函数-神经网络">
+<meta property="og:url" content="http://weirping.coding.me/blog/Output_Units_and_Cost_Functions-Neural_networks.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="损失函数是神经网络设计中的重要一环。在神经网络的设计中，输出层的使用的激活函数和模型损失函数是根据实际问题设计的。本文以最大似然估计为理论基础，阐述回归问题、二分类问题和多分类问题中输出层的激活函数和模型损失函数的选择。 符号定义：  训练集特征$\matrix {X}=\{x^{(1)},x^{(2)} \dots x^{(N)} \}$ ，第$n$个样本的属性特征向量为$x^{(n)}$ ；">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-05-29T06:32:28.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="输出层激活函数和模型损失函数-神经网络">
+<meta name="twitter:description" content="损失函数是神经网络设计中的重要一环。在神经网络的设计中，输出层的使用的激活函数和模型损失函数是根据实际问题设计的。本文以最大似然估计为理论基础，阐述回归问题、二分类问题和多分类问题中输出层的激活函数和模型损失函数的选择。 符号定义：  训练集特征$\matrix {X}=\{x^{(1)},x^{(2)} \dots x^{(N)} \}$ ，第$n$个样本的属性特征向量为$x^{(n)}$ ；">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/Output_Units_and_Cost_Functions-Neural_networks.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>输出层激活函数和模型损失函数-神经网络 | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/Output_Units_and_Cost_Functions-Neural_networks.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">输出层激活函数和模型损失函数-神经网络
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-18 21:49:00" itemprop="dateCreated datePublished" datetime="2018-01-18T21:49:00+08:00">2018-01-18</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Neural-Network/" itemprop="url" rel="index"><span itemprop="name">Neural Network</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>损失函数是神经网络设计中的重要一环。在神经网络的设计中，输出层的使用的激活函数和模型损失函数是根据实际问题设计的。本文以最大似然估计为理论基础，阐述回归问题、二分类问题和多分类问题中输出层的激活函数和模型损失函数的选择。</p>
+<p>符号定义：</p>
+<ul>
+<li><p>训练集特征$\matrix {X}=\{x^{(1)},x^{(2)} \dots x^{(N)} \}$ ，第$n$个样本的属性特征向量为$x^{(n)}$ ；</p>
+</li>
+<li><p>训练集目标值 $T=\{t^{(1)}, t^{(2)} \dots t^{(N)} \}$ ，第$n$个样本的label值为$t^{(n)}$ ；<br>如果是回归问题：$t^{(n)}$为一个实数；<br>如果是分类问题：$t^{(n)}$为一个one-hot编码向量，如二分类中第$i$个样本属于第0个类别时$t^{(n)}=(1, 0)$ 或者$t_0^{(n)}=1, t_1^{(n)}=0$ 。</p>
+</li>
+<li><p>$X$和$T$共同组成了训练集。</p>
+</li>
+<li><p>通过一个模型$y=y(x, w)$ 进行预测：根据样本的属性特征$x^{(n)}$预测样本的label值，预测值为$y$ ，预测值的集合为$Y=\{y^{(1)},y^{(2)} \dots y^{(N)} \}$<br>如果是回归问题：预测值$y$为一个实数；<br>如果是分类问题，预测值$y$为一个向量，各维度通常为概率值。如逻辑回归(二分类)(0.3, 0.7)、softmax(多分类)(0.1, 0.2, 0.7)。</p>
+</li>
+<li><p>损失函数$E(\theta) = g(T, Y)$ 是用来衡量模型预测值和样本真实值相近程度的，模型预测值和样本真实值越相近，则模型越好。其中$Y$ 是通过参数为$\theta$的模型预测得到的。（当然还有正则化问题，本文先不考虑正则化）</p>
+<p>​</p>
+<p>note: <em>下文中的上标表示样本在样本在样本集中的序号，下标表示向量的序号。在必要的时候为了使公式简洁会省略上标</em></p>
+</li>
+</ul>
+<h1 id="1-Maximum-Likehook-Estimator"><a href="#1-Maximum-Likehook-Estimator" class="headerlink" title="1. Maximum Likehook Estimator"></a>1. Maximum Likehook Estimator</h1><p>最大似然函数应该是机器学习中最为常见的损失函数了。</p>
+<p><strong>最大似然理论认为，样本从服从分布$p(\theta)$ 的总体随机抽取的($\theta$是分布的参数，未知的)：</strong><br><strong>那么样本集中的每个样本也服从于分布$p(\theta)$ 。</strong> 即：<br>$$<br>p(t) = p(t|\theta)<br>$$<br><strong>这个分布$p(\theta)$是能够使样本的联合分布最大的分布。</strong> 即：<br>$$<br>p(T| \theta) =\prod_{n=1}^N {p(t^{(n)}|\theta)}<br>$$</p>
+<p>该公式称为<strong>似然函数(Likehook Function)</strong>。由于分布$p(\theta)$是以$\theta$为参数的，也就是说未知数$\theta$是能够使似然函数最大的$\theta_{ML}$:<br>$$<br>\theta_{ML}={\arg\max}_\theta \prod_{n=1}^N {p(t^{(n)}|\theta)}<br>$$</p>
+<p>对两边取对数得 <strong>对数似然函数 (Log Likehook Function)</strong>:<br>$$<br>\begin {aligned}<br>\ln p(T| \theta) &amp;=\sum_{n=1}^N \ln{p(t^{(n)}|\theta)} \\<br>\theta_{ML} &amp;={\arg\max}_\theta \sum_{n=1}^N \ln{p(t^{(n)}|\theta)}<br>\end {aligned}<br>$$</p>
+<p>我们常见的多种损失函数都可以通过这个最大似然理论推导获得。其区别在于对$p(\theta)$的不同解释方式。</p>
+<h1 id="2-回归问题"><a href="#2-回归问题" class="headerlink" title="2. 回归问题"></a>2. 回归问题</h1><p>在回归问题中，可以认为$\theta$是由变量$x^{(i)}$和回归模型参数$w$组成的。并且目标值$t$服从<strong>高斯分布</strong>。<br>$$<br>p(t|x,w)=N(t|y(x,w),\beta^{-1})<br>$$<br>$\beta$为高斯噪声。</p>
+<p>那么其似然函数和对数似然函数为：<br>$$<br>\begin {aligned}<br>p(T|X,w)      &amp;=\prod_{n=1}^N  N(t^{(n)}|y(x^{(n)},w),\beta^{-1}) \\<br>\\<br>\ln p(T|X,w)&amp;=\sum_{n=1}^N \ln N(t^{(n)}|y(x^{(n)},w),\beta^{-1}) \\<br>                     &amp;=\frac N2 \ln \beta -\frac N2  \ln(2\pi) - \beta E_D(w) \\<br>                     &amp;=\frac N2 \ln \beta -\frac N2  \ln(2\pi) - N \beta E_{MSE}(w) \\<br>\\<br>E_D(w)         &amp;=\frac 12 \sum_{n=1}^N (t^{(n)} - y(x^{(n)} ,w))^2 \\<br>\\<br>E_{MSE}(w)         &amp;=\frac 1N \sum_{n=1}^N (t^{(n)} - y(x^{(n)} ,w))^2<br>\end {aligned}<br>$$<br>$E_D$就是被称为<strong>sum-of-squares error function</strong>的一种损失函数，$E_{MSE}$就是被称为<strong>mean squared error function(MSE)</strong>的一种损失函数 。使对数似然函数最大值$w$就是使$E_D$或$E_{MSE}$最小的$w$ 。(在模型训练过程中，我们更关心的是模型参数$w$，$\beta$也可以求解，此处就不提了，有需要的话可以参考PRML 3.1.1或5.2)</p>
+<p>使似然函数或者$E_D$对$w$的导数为0，求得：<br>$$<br>w_{ML} = (X^TX)^{-1}X^TT<br>$$<br>这个公式就是<strong>最小二乘法</strong>的公式。</p>
+<h1 id="3-二分类问题"><a href="#3-二分类问题" class="headerlink" title="3. 二分类问题"></a>3. 二分类问题</h1><p>在二分类问题中，可以认为$\theta$是由变量$x^{(i)}$和模型参数$w$组成的。并且目标值$t^{(i)}$服从<strong>Bernoulli distribution（伯努力分布，0-1分布）</strong>。$t^{(i)}$的取值为0或1。</p>
+<p>使用神经网络处理二分类问题时，输出层通常使用sigmoid函数作为激活函数。而在传统的逻辑回归模型中也是使用的sigmoid函数。即：<br>$$<br>y = \sigma(a) \equiv \frac 1{1+exp(-a)}<br>$$<br>sigmoid函数的一个重要特性就是其输出值表示的是概率，即：$y(x,w)$表示取$t=1$的概率，而$(1-y(x,w))$表示取$t=0$的概率。所以对于任何一个样本$\{ x,t \}$ 满足参数为$y(x,w)$的伯努力分布:<br>$$<br>p(t|x,w)=y(x,w)^t \{1-y(x,w)\}^{(1-t)}<br>$$<br>那么其似然函数和对数似然函数为：<br>$$<br>\begin {aligned}<br>p(T|X,w)     &amp;= \prod_{n=1}^N  y(x^{(n)},w)^{t^{(n)}} \{1-y(x^{(n)},w)\}^{(1-t^{(n)})}  \\<br>\\<br>\ln p(T|X,w)&amp;= \sum_{n=1}^N \{ t^{(n)} \ln y(x^{(n)},w) + (1-t^{(n)}) \ln [1-y(x^{(n)},w)]\} \\<br>\\<br>E(w)             &amp;= - \ln p(T|X,w) \\<br>                    &amp;= - \sum_{n=1}^N \{ t^{(n)} \ln y(x^{(n)},w) + (1-t^{(n)}) \ln [1-y(x^{(n)},w)]\}<br>\end {aligned}<br>$$<br>此处的$E(w)$就是我们常用到的<strong>交叉熵损失函数(cross-entropy error function)</strong> ，是对数似然函数的负数。</p>
+<h1 id="4-多分类问题"><a href="#4-多分类问题" class="headerlink" title="4. 多分类问题"></a>4. 多分类问题</h1><p>首先介绍一下<strong>Multinoulli分布</strong>。在多分类问题中，样本的目标值有$K$种可能的互斥取值，所以每个目标值$t^{(n)}​$可以使用$K​$维向量的one-hot编码。如$K=6$，一个样本属于第3个类别，则$t_3=1, t_k=1,(1 \le k \le K ,k  \ne 3)$，即：<br>$$<br>\begin {aligned}<br>&amp; t =(0,0,1,0,0,0) \\<br>&amp; \sum_{k=1}^K t_k = 1<br>\end {aligned}<br>$$<br>那么从总体抽样时，一个样本属于每个类别的概率也可以使用一个$K$维向量$\mu$表示，$\mu_k$表示$t_k = 1$的概率，且$\sum_{k=1}^K\mu_k =1$ 。</p>
+<p>那么一个样本$t$服从的分布就是：<br>$$<br>\begin {aligned}<br>p(t) &amp;= p(t | \mu)  \\<br>       &amp;= \prod_{k=1}^K p(t_k= 1 | \mu_k) \\<br>       &amp;=\prod_{k=1}^K \mu_k^{ t_k}<br>\end {aligned}<br>$$<br>其中：<br>$$<br>\begin {aligned}<br>t  &amp;= (t_1,t_2 \dots t_K)^T \\<br>\mu &amp;= (\mu_1,\mu_2 \dots \mu_K)^T<br>\end {aligned}<br>$$<br>使用神经网络处理多分类问题时，输出层通常使用softmax函数作为激活函数。即：<br>$$<br>y_k(x,w) = \frac {\exp(a_k(x,w))}{\sum_j^K \exp(a_j(x,w))} , (1 \le k \le K)<br>$$<br>softmax函数的一个重要特性就是其输出值表示的是概率，即:$y_k(x,w)$ 和上文的离散型分布中的$\mu_k$ 的意义是一样，都表示$t_k=1$的概率。所以对于任何一个样本$\{ x,t \}$ :<br>$$<br>\begin {aligned}<br>p(t|x,w)   &amp;=\prod_{k=1}^K y_k^{ t_k} \\<br>                 &amp;=\prod_{k=1}^K y_k(x,w)^{ t_k}<br>\end {aligned}<br>$$</p>
+<p>那么其似然函数和对数似然函数为：<br>$$<br>\begin {aligned}<br>p(T|X,w)         &amp; = \prod_{n=1}^N \prod_{k=1}^K y_k(x^{(n)},w)^{ t_k^{(n)}} \\<br>\\<br>\ln p(T|X,w)   &amp; = \sum_{n=1}^N \sum_{k=1}^K t_k^{(n)} \ln y_k(x^{(n)},w)\\<br>\\<br>E(w)                &amp; = - \ln p(T|X,w) \\<br>                       &amp; = - \sum_{n=1}^N \sum_{k=1}^K t_k^{(n)} \ln y_k(x^{(n)},w)<br>\end {aligned}<br>$$<br>此处的$E(w)$就是我们常用到的<strong>交叉熵损失函数(cross-entropy error function)</strong> ，是对数似然函数的负数。</p>
+<p>二分类问题可以看做是一种特殊的多分类问题，所以在神经网络中也可以使用softmax函数作为二分类问题的输出层激活函数。</p>
+<h1 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h1><p>以上损失函数都是基于最大似然估计推导的，最大似然估计最吸引人的地方在于，它被证明当样本数目$N \to \infty$ 时，就收敛率而言是最好的渐近估计。在合适的条件下，当训练样本数目趋向于无穷大时，参数的最大似然估计会收敛到参数的真实值，这个条件就是：</p>
+<ul>
+<li>真实分布必须在模型分布族中，否则无法估计正式分布。如在处理回归问题是，我们假设真实分布是一个高斯分布，求解过程就是估计高斯分布的参数的，但是如果真实分布不是高斯分布，那么我们按照高斯分布来求解，得到的结果肯定就是错误的。</li>
+<li>真实分布必须刚好对应一个模型分布的$\theta$值，</li>
+</ul>
+<p>神经网络中针对于不同问题使用的输出层激活函数是不同的，进而使用不同的损失函数：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">输出层分布</th>
+<th style="text-align:center">输出层激活函数</th>
+<th style="text-align:center">输出层神经元数量</th>
+<th style="text-align:center">损失函数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">回归</td>
+<td style="text-align:center">Gaussian</td>
+<td style="text-align:center">identity</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">sum-of-squares error function / MSE</td>
+</tr>
+<tr>
+<td style="text-align:center">二分类</td>
+<td style="text-align:center">Bernoulli</td>
+<td style="text-align:center">sigmoid</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">cross-entropy error function</td>
+</tr>
+<tr>
+<td style="text-align:center">多分类</td>
+<td style="text-align:center">Multinoulli</td>
+<td style="text-align:center">softmax</td>
+<td style="text-align:center">K</td>
+<td style="text-align:center">cross-entropy error function</td>
+</tr>
+</tbody>
+</table>
+<p>二分类问题可以看做是一种特殊的多分类问题，所以输出层激活函数也可以使用softmax，损失函数使用多分类的 cross-entropy error function。</p>
+<p>其他：</p>
+<p>​    还有针对于其他问题的设计，如：multiple target variables。当遇到的时候再补充</p>
+<h1 id="参看资料"><a href="#参看资料" class="headerlink" title="参看资料"></a>参看资料</h1><p>Deep Leaning</p>
+<p>Pattern Recognition and Machine Learning</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Neural-Network/" rel="tag"># Neural Network</a>
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Points-in-Information-Theory.html" rel="next" title="信息论中的一些知识点">
+                <i class="fa fa-chevron-left"></i> 信息论中的一些知识点
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/Norm_Regularization_for_DeepLearning-Neural_networks.html" rel="prev" title="范数正则化-神经网络">
+                范数正则化-神经网络 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-Maximum-Likehook-Estimator"><span class="nav-number">1.</span> <span class="nav-text">1. Maximum Likehook Estimator</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-回归问题"><span class="nav-number">2.</span> <span class="nav-text">2. 回归问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-二分类问题"><span class="nav-number">3.</span> <span class="nav-text">3. 二分类问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-多分类问题"><span class="nav-number">4.</span> <span class="nav-text">4. 多分类问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-总结"><span class="nav-number">5.</span> <span class="nav-text">5. 总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参看资料"><span class="nav-number">6.</span> <span class="nav-text">参看资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

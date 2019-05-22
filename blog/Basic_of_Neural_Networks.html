@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="虽然学习神经网络很长时间了，但是也经常遇到问题的时候产生混乱，本次计算做一个神经网络的专题，将我看到的关于神经网络的东西按照我自己的学习和理解习惯整理下来。 本文是这个专题的第一章，介绍基本的神经网络中知识。并在最后整理了一下神经网络的设计中的几个问题，以后会逐一学习。 1 对一个神经元(neuron)建模人工神经网络一开始是用来对生物神经系统进行建模的，后来发现它在机器学习任务中能够获得比较好的">
+<meta name="keywords" content="Neural Network,Machine Learning">
+<meta property="og:type" content="article">
+<meta property="og:title" content="神经网络基础">
+<meta property="og:url" content="http://weirping.coding.me/blog/Basic_of_Neural_Networks.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="虽然学习神经网络很长时间了，但是也经常遇到问题的时候产生混乱，本次计算做一个神经网络的专题，将我看到的关于神经网络的东西按照我自己的学习和理解习惯整理下来。 本文是这个专题的第一章，介绍基本的神经网络中知识。并在最后整理了一下神经网络的设计中的几个问题，以后会逐一学习。 1 对一个神经元(neuron)建模人工神经网络一开始是用来对生物神经系统进行建模的，后来发现它在机器学习任务中能够获得比较好的">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/Basic_of_Neural_Networks/A_cartoon_drawing_of_a_biological_neuron.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Basic_of_Neural_Networks/a_mathematical_neuron_model.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Basic_of_Neural_Networks/muliti_layer_forward_networks.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Basic_of_Neural_Networks/three_layers_networks.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Basic_of_Neural_Networks/backpropagation.png">
+<meta property="og:updated_time" content="2018-01-15T15:52:28.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="神经网络基础">
+<meta name="twitter:description" content="虽然学习神经网络很长时间了，但是也经常遇到问题的时候产生混乱，本次计算做一个神经网络的专题，将我看到的关于神经网络的东西按照我自己的学习和理解习惯整理下来。 本文是这个专题的第一章，介绍基本的神经网络中知识。并在最后整理了一下神经网络的设计中的几个问题，以后会逐一学习。 1 对一个神经元(neuron)建模人工神经网络一开始是用来对生物神经系统进行建模的，后来发现它在机器学习任务中能够获得比较好的">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/Basic_of_Neural_Networks/A_cartoon_drawing_of_a_biological_neuron.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/Basic_of_Neural_Networks.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>神经网络基础 | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/Basic_of_Neural_Networks.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">神经网络基础
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-03 00:02:33" itemprop="dateCreated datePublished" datetime="2018-01-03T00:02:33+08:00">2018-01-03</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Neural-Network/" itemprop="url" rel="index"><span itemprop="name">Neural Network</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>虽然学习神经网络很长时间了，但是也经常遇到问题的时候产生混乱，本次计算做一个神经网络的专题，将我看到的关于神经网络的东西按照我自己的学习和理解习惯整理下来。</p>
+<p>本文是这个专题的第一章，介绍基本的神经网络中知识。并在最后整理了一下神经网络的设计中的几个问题，以后会逐一学习。</p>
+<h1 id="1-对一个神经元-neuron-建模"><a href="#1-对一个神经元-neuron-建模" class="headerlink" title="1 对一个神经元(neuron)建模"></a>1 对一个神经元(neuron)建模</h1><p>人工神经网络一开始是用来对生物神经系统进行建模的，后来发现它在机器学习任务中能够获得比较好的效果，再然后的事情大家就都知道了。</p>
+<p>人工神经网络的一个节点是对生物神经元的数学建模，也就是说两者之间是可以类比的。其类比关系如下：</p>
+<table>
+<thead>
+<tr>
+<th>生物神经元</th>
+<th>突触(synapse)</th>
+<th>树突(dendrity)</th>
+<th>细胞体(cell body)</th>
+<th>轴突(axon)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>人工神经元</strong></td>
+<td>权重 $w_i$</td>
+<td>乘法操作 $w_i \times x_i$</td>
+<td>激活因子  $a=\sum_i {w_i \times x_i }$</td>
+<td>激活函数 $f(a)=f(\sum_i {w_i \times x_i })$</td>
+</tr>
+</tbody>
+</table>
+<p>在生物神经系统中，一个神经元通过树突(dendrity)末梢的突触(synapse)接受另一个神经元传到过来的神经冲动(impulse)，突触上的一些化学物质对接受到的神经冲动产生兴奋或者抑制，树突将通过突触处理的信号传递到细胞体。而一个神经元细胞通过树突和若干个其它细胞相连接，在细胞体上将所有的树突接收到的神经冲动进行汇总，根据汇总的神经冲动决定该神经元是否被激活，并把激活状态信息通过轴突给其它神经元。</p>
+<p><img src="Basic_of_Neural_Networks/A_cartoon_drawing_of_a_biological_neuron.png" alt="生物神经元模型"></p>
+<p>在人工神经网络中，一个节点上最先和上一层节点作用的是权重因子 $w_i$(类比于突触), 其作用是控制前一个节点传递过来的信息对于当前节点的影响(兴奋或抑制) 。然后通过类似于树突的结构将信息$w_i \times x_i$传导到细胞体，在细胞体重将所有影响相加得到激活因子$a$。然后根据激活因子的大小按照激活函数$f(a)$来决定这个节点是否被激活并传递给下一个节点。</p>
+<p><img src="Basic_of_Neural_Networks/a_mathematical_neuron_model.png" alt="数学神经元模型"></p>
+<p>通过以上分析可以看出，一个神经元实际上就是一个以$w_0 \dots w_n$为参数，$x_0\dots x_n$为输入的函数：<br>$$<br>h(x0\dots x_n;w0 \dots w_n)=f(\sum_{i=0}^n {w_i x_i})<br>$$<br>其中$f$是用户的定义的激活函数。</p>
+<h1 id="2-人工神经网络的结构"><a href="#2-人工神经网络的结构" class="headerlink" title="2 人工神经网络的结构"></a>2 人工神经网络的结构</h1><p>人工神经网络是将若干这这样的神经元进行连接来对生物神经系统进行建模的，其中包括 输入层、隐藏层、输入层。每一层由若干节点(神经元)组成。</p>
+<p>输入层 (input layer)：训练数据的各维度属性特征，每一个输入层节点对应一个属性。输入层的神经元数量由数据决定。输入层必须有。</p>
+<p>隐藏层(hidden layer)：由若干上文所述的完整神经元组成的。隐藏层的层数可以由用户定义，每一层的神经元数量也可以定义，隐藏层可以有，也可以没有。</p>
+<p>输出层(output layer)：对于分类问题，输出等的节点数量为类别数量。输出层必须有。</p>
+<p><img src="Basic_of_Neural_Networks/muliti_layer_forward_networks.png" alt="multi_layer_forward_networks"></p>
+<h1 id="3-前向传播算法-forward-propagation"><a href="#3-前向传播算法-forward-propagation" class="headerlink" title="3 前向传播算法(forward propagation)"></a>3 前向传播算法(forward propagation)</h1><p>在Deep Learning中6.5节是这样表述前向传播算法的：</p>
+<blockquote>
+<p>When we use a feedforward neural network to accept an input $x$ and produce an output $\hat y$, information flows forward through the network. The inputs $x$ provide the initial information that then propagates up to the hidden units at each layer and finally produces $\hat y$. This is called forward propagation. </p>
+</blockquote>
+<p>输入信息$x$逐层通过神经网络中的各层，在每一层中经过计算，最终在输出层得到值$\hat y$的过程。 即前向传播算法是将<strong>输入信息</strong>逐层进行<strong>计算</strong>，向前进行传播的过程，在这个过程中输入x是确定的，在设计好的神经网络中每一层的计算方式也是确定的(前向传播过程中每个神经元的权重$w_i$ 是确定值)。</p>
+<h1 id="4-后向传播算法-back-propagation"><a href="#4-后向传播算法-back-propagation" class="headerlink" title="4 后向传播算法(back propagation)"></a>4 后向传播算法(back propagation)</h1><p>先从线性回归模型的训练说起：对于样本集 $(x^{(i)},t^{(i)}),i\in [1,N]$, 括号中上标是样本序号</p>
+<p>线性回归模型为： $\hat y_w^{(i)} = w^Tx^{(i)} = \sum_j{w_j x_j}^{(i)}$ （$x$ 和 $\hat y$ 括号中上标是样本序号，$x$的下表为属性序号）</p>
+<p>损失函数为： $ E_w = \frac12\sum_{i=1}^N (\hat y_w^{(i)} - t^{(i)}))^2 $ </p>
+<p>目标函数就是(实际还需要加正则化)： $\min_w E_w$</p>
+<p>也就是说通过多次调整参数$w$的值使得损失函数最小化。而这个调整参数的过程就是梯度下降法，迭代公式为：<br>$$<br>w_j = w_j - \alpha \frac{\partial}{\partial w_j}E_w<br>$$<br>其中: $\alpha$ 是学习率,<br>$$<br>\begin {aligned} \\<br>\frac{\partial}{\partial w_j}E_w &amp;= \frac{\partial}{\partial w_j} \frac12\sum_{i=1}^N (\hat y_w^{(i)} - t^{(i)})^2 \\<br>&amp; =\sum_{i=1}^N (\hat y_w^{(i)} - t^{(i)})\frac{\partial}{\partial w_j}(\hat y_w^{(i)} - t^{(i)}) \\<br>&amp;=\sum_{i=1}^N (\hat y_w^{(i)} - t^{(i)})\frac{\partial}{\partial w_j}(\sum_j{w_j x_j}^{(i)} - t^{(i)}) \\<br>&amp;=\sum_{i=1}^N (\hat y_w^{(i)} - t^{(i)})x_j^{(i)}<br>\end {aligned}<br>$$<br><em>note: 以上公式是按照梯度下降法推导的, 如果是随机梯度下降法 $N=1$, 如果是mini batch梯度下降法$N=batch size$</em></p>
+<hr>
+<p>回到正题！</p>
+<p>前向传播算法实际上就是一个非线性函数$\hat y(x^{(i)},W)$ 。对于每一个样本$(x^{(i)},t^{(i)})$，前向传播算法以$x^{(i)}$为输入产生一个预测值$\hat y_W^{(i)} =\hat y(x^{(i)},W)$。</p>
+<p>所以其损失函数为：<br>$$<br>E_W^{(i)} = \frac12 (\hat y_W^{(i)} - t^{(i)}))^2<br>$$<br>使用随机梯度下降法的$w \in W$的迭代公式为<br>$$<br>w_j = w_j - \alpha \frac{\partial}{\partial w_j}E_w<br>$$<br>到现在为止一切进行的都很顺利，但是问题来了, $ \frac{\partial}{\partial w_j}E_w$ 怎么求？</p>
+<p><img src="Basic_of_Neural_Networks/three_layers_networks.png" alt="three_layers_networks"></p>
+<p>上图是PRML中的Figure5.1，其中$y_K$的计算公式为：<br>$$<br>y_K(x, w) = \sigma (\sum_{j=1}^M w_{kj}^{(2)} h(\sum_{i=1}^D {w_{ji}^{(1)} x_i} + w_{j0}^{(1)}) + w_{k0}^{(2)})<br>$$<br>该公式中 括号中的上标为神经网络的层号，输入层x是第0层，隐藏层z是第1层，输出层y是第2层。</p>
+<p>如果要求$w_{ji}^{(1)}$ 中的$w_{11}^{(1)}$ ，根据求导法则需要4次求导。如果神经网络有100层呢？</p>
+<p><strong>神经网络由于使用了多层的嵌套结构，导致训练过程中深层的参数$w$的求导过程复杂。</strong></p>
+<p>后向传播算法就是用于解决这个问题的，在Deep Learning中6.5节是这样表述后向传播算法的：</p>
+<blockquote>
+<p>During training, forward propagation can continue onward until it produces a scalar cost $J(\theta)$. The back-propagation algorithm, often simply called backprop, allows the information from the cost to then flow backwards through the network, in order to compute the gradient.</p>
+</blockquote>
+<p>也就是说后向传播是将损失函数的信息由输出层向输入层方向逐层传递，用于计算损失函数对参数w的偏导数。</p>
+<p>下面按照backpropagation来计算下图中的$ \frac{\partial E}{\partial w_{ji}}$ ，以下所有推到都是按照随机梯度下降法，所以只需要求与第n个样本相关的梯度，故省略n：</p>
+<p><img src="Basic_of_Neural_Networks/backpropagation.png" alt="backpropagation"></p>
+<blockquote>
+<p>上图中有做到右依次为输入层(以$i$为, 共$I$个)、隐藏层(以$j$为下标, 共$J$个节点)、输出层(以$k$为下标, 共$K$个节点)。</p>
+<p>对于每个节点：字母$a$表示激活因子，如：$a_j = \sum_{i=0}^I w_{ji}z_i$ ,$a_k = \sum_{j=0}^J w_{kj}z_j$</p>
+<p>隐藏层的激活函数为$h$ ,  输出层的激活函数为identity, </p>
+<p>字母$z$ 表示节点输出值，如: $z_j = h(a_j)$ ,$z_k = a_k$ </p>
+</blockquote>
+<p>首先使用链式法则：</p>
+<p>$$<br>\frac{\partial E}{\partial w_{ji}} = \frac{\partial E}{\partial a_j} \frac{\partial a_j}{\partial w_{ji}} = \delta_j z_i<br>$$</p>
+<p>其中</p>
+<p>$$<br>\frac{\partial a_j}{\partial w_{ji}} =z_i<br>$$</p>
+<p>$$<br>\delta_j \equiv \frac{\partial E}{\partial a_j}<br>$$</p>
+<p><strong>$\delta_j$表示$j$这个节点对最终的误差需要负多少责任。</strong>输出层节点$k$ 的误差是(输出层的激活函数为identity, $\hat y_k = z_k = a_k$ ):<br>$$<br>\delta_k =\frac {\partial}{\partial a_k}\frac12(z_k - t_k)^2 = z_k - t_k<br>$$<br>后向传播算法可以理解为，误差$\delta$从输层向输入成方向传播的过程，所以也叫做 <strong>Error Backpropagation</strong> 。</p>
+<p>下面只需要推导$\delta_j$ , 利用链式法则，<br>$$<br>\begin{aligned}<br>\delta_j &amp; \equiv \frac{\partial E}{\partial a_j} \\<br>&amp;= \sum_{k=1}^K \frac {\partial E}{\partial a_k} \frac{\partial a_k}{\partial a_j} \\<br>&amp; = h’(a_j) \sum_{k=1}^K w_{kj} \delta_k<br>\end{aligned}<br>$$</p>
+<p>其中<br>$$<br>\frac {\partial E}{\partial a_k} = \delta_k<br>$$</p>
+<p>$$<br>\begin{aligned}<br>\frac{\partial a_k}{\partial a_j} &amp; = \frac{\partial }{\partial a_j}(\sum_{j=0}^Jz_j w_{kj}) \\<br>&amp;=\frac{\partial }{\partial a_j}(\sum_{j=0}^J h(a_j) w_{kj}) \\<br>&amp;= h’(a_j) \sum_{k=1}^K w_{kj}<br>\end{aligned}<br>$$<br><strong>后向传播的目标是为了计算偏导数$\frac{\partial E}{\partial w_{ji}}$ ，方法是误差$\delta$ 沿着神经网络向后传播。</strong></p>
+<p>PRLM 中5.3.1 节将后向传播的流程总结如下</p>
+<blockquote>
+<ol>
+<li>Apply an input vector $x_n$ to the network and forward propagate through<br>the network using $a_j=\sum_iw_{ji}z_i$ and $z_j = h(a_j)$ to find the activations of all the hidden and output units.</li>
+<li>Evaluate the $\delta_k$ for all the output units using $\delta_k =\frac {\partial}{\partial a_k}\frac12(z_k - t_k)^2 = z_k - t_k$</li>
+<li>Backpropagate the $\delta$ using $\delta_j =  h’(a_j) \sum_{k=1}^K w_{kj} \delta_k $to obtain $\delta_j$ for each hidden unit in the network.</li>
+<li>Use $\frac{\partial E}{\partial w_{ji}} = \delta_j z_i$ to evaluate the required derivatives</li>
+</ol>
+</blockquote>
+<h1 id="5-神经网络问题大纲"><a href="#5-神经网络问题大纲" class="headerlink" title="5 神经网络问题大纲"></a>5 神经网络问题大纲</h1><p>最后给自己立一个flag，以下是我整理的几个神经网络的设计中的几个问题，以后会逐一学习。</p>
+<ol>
+<li>网络结构设计：隐藏层数量、隐藏层神经元数量</li>
+<li>激活函数选择：ReLu，tanh，sigmoid ……</li>
+<li>Error function 设计：sum-of-squares、Cross Entropy ……</li>
+<li>正则化问题：L2，dropout ……</li>
+<li>优化算法的选择：SGD、GD ……</li>
+</ol>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="http://cs231n.github.io/neural-networks-1/" target="_blank" rel="noopener">CS231n Convolutional Neural Networks for Visual Recognition lecture notes</a></p>
+<p>Deep Leaning</p>
+<p>Pattern Recognition and Machine Learning</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Neural-Network/" rel="tag"># Neural Network</a>
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Parameters_of_Function_in_Python.html" rel="next" title="Python函数的参数">
+                <i class="fa fa-chevron-left"></i> Python函数的参数
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/Activation_Function.html" rel="prev" title="激活函数-神经网络">
+                激活函数-神经网络 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-对一个神经元-neuron-建模"><span class="nav-number">1.</span> <span class="nav-text">1 对一个神经元(neuron)建模</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-人工神经网络的结构"><span class="nav-number">2.</span> <span class="nav-text">2 人工神经网络的结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-前向传播算法-forward-propagation"><span class="nav-number">3.</span> <span class="nav-text">3 前向传播算法(forward propagation)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-后向传播算法-back-propagation"><span class="nav-number">4.</span> <span class="nav-text">4 后向传播算法(back propagation)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-神经网络问题大纲"><span class="nav-number">5.</span> <span class="nav-text">5 神经网络问题大纲</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

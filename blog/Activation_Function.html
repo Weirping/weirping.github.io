@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="1 激活函数的作用 激活函数是用来加入非线性因素的，解决线性模型所不能解决的问题。神经网络之所以区别于线性模型的一点就是应为它有激活函数，如一个三层神经网络模型： $$\begin {aligned}y_K(x, w)&amp;amp; = \sigma (\sum_{j=1}^M w_{kj}^{(2)} h(\sum_{i=1}^D {w_{ji}^{(1)} x_i} + w_{j0}^{(1)})">
+<meta name="keywords" content="Neural Network,Machine Learning">
+<meta property="og:type" content="article">
+<meta property="og:title" content="激活函数-神经网络">
+<meta property="og:url" content="http://weirping.coding.me/blog/Activation_Function.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="1 激活函数的作用 激活函数是用来加入非线性因素的，解决线性模型所不能解决的问题。神经网络之所以区别于线性模型的一点就是应为它有激活函数，如一个三层神经网络模型： $$\begin {aligned}y_K(x, w)&amp;amp; = \sigma (\sum_{j=1}^M w_{kj}^{(2)} h(\sum_{i=1}^D {w_{ji}^{(1)} x_i} + w_{j0}^{(1)})">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/Activation_Function/sigmoid_func.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Activation_Function/tanh_func.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Activation_Function/ReLU_func.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Activation_Function/leaky_ReLU_func.png">
+<meta property="og:updated_time" content="2018-01-15T15:54:32.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="激活函数-神经网络">
+<meta name="twitter:description" content="1 激活函数的作用 激活函数是用来加入非线性因素的，解决线性模型所不能解决的问题。神经网络之所以区别于线性模型的一点就是应为它有激活函数，如一个三层神经网络模型： $$\begin {aligned}y_K(x, w)&amp;amp; = \sigma (\sum_{j=1}^M w_{kj}^{(2)} h(\sum_{i=1}^D {w_{ji}^{(1)} x_i} + w_{j0}^{(1)})">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/Activation_Function/sigmoid_func.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/Activation_Function.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>激活函数-神经网络 | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/Activation_Function.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">激活函数-神经网络
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-07 19:39:12" itemprop="dateCreated datePublished" datetime="2018-01-07T19:39:12+08:00">2018-01-07</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Neural-Network/" itemprop="url" rel="index"><span itemprop="name">Neural Network</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="1-激活函数的作用"><a href="#1-激活函数的作用" class="headerlink" title="1 激活函数的作用"></a>1 激活函数的作用</h1><ul>
+<li><p>激活函数是用来加入非线性因素的，解决线性模型所不能解决的问题。<br>神经网络之所以区别于线性模型的一点就是应为它有激活函数，如一个三层神经网络模型：</p>
+<p>$$<br>\begin {aligned}<br>y_K(x, w)&amp; = \sigma (\sum_{j=1}^M w_{kj}^{(2)} h(\sum_{i=1}^D {w_{ji}^{(1)} x_i} + w_{j0}^{(1)}) + w_{k0}^{(2)}) \\<br>&amp;= \sigma (W^{(2)} h(W^{(1)}X))<br>\end {aligned}<br>$$<br>其中$h$和$\sigma$分别是隐藏层和输出层的激活函数，如果没有这两个激活函数：<br>$$<br>\begin {aligned}<br>y_K(x, w)&amp;= W^{(2)}W^{(1)}X \\<br>&amp;=WX<br>\end {aligned}<br>$$<br>这不就是一个线性模型吗。所以相对于线性模型，激活函数使神经网络具有的更强大的表达能力。</p>
+</li>
+<li><p>在一神经网络模型中：Most hidden units are distinguished from each other only by the choice of the form of the activation<br>function</p>
+</li>
+</ul>
+<h1 id="2-常见激活函数"><a href="#2-常见激活函数" class="headerlink" title="2 常见激活函数"></a>2 常见激活函数</h1><h2 id="2-1-Sigmoid"><a href="#2-1-Sigmoid" class="headerlink" title="2.1 Sigmoid"></a>2.1 Sigmoid</h2><p>$$<br>\begin {aligned}<br>\sigma(x)&amp; = \frac1{1+e^x} \\<br>\\<br>\sigma’(x)&amp; = \sigma(x) (1-\sigma(x) )<br>\end {aligned}<br>$$<br><img src="Activation_Function/sigmoid_func.png" alt></p>
+<p>sigmoid 函数将输入的实数压缩到范围[0, 1]之间。</p>
+<p>优点：</p>
+<ol>
+<li>Sigmoid函数将输入映射在(0,1)之间，单调连续，可以用作输出层。</li>
+<li>求导容易。</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li><p><strong>具有饱和性(saturate)对参数$W$的初始值敏感， 反向传播过程易梯度消失</strong></p>
+<ul>
+<li><p>反向传播过程：梯度消失<br>sigmoid 函数将输入的实数压缩到范围[0, 1]之间，但是在函数的两端的较大范围中，sigmoid 函数的导数接近0。在backpropagation过程中需要迭代更新参数$w_{ji}$：</p>
+<p>$$<br>w_{ji} = w_{ji} - \alpha \frac{\partial}{\partial w_{ji}}E<br>$$</p>
+<p>其中：<br>$$<br>\frac{\partial E}{\partial w_{ji}} = \frac{\partial E}{\partial a_j} \frac{\partial a_j}{\partial w_{ji}} = \delta_j z_i  = h’(a_j) \sum_{k=1}^K w_{kj} \delta_k z_i<br>$$</p>
+<p>函数$h’$是激活函数$h$的梯度，如果$h$是sigmoid函数，在函数的两端的较大范围中，$h’$接近0，从而导致$\frac{\partial E}{\partial w_{ji}}=0$ (kill gradients)，进而在迭代过程中$w_{ji}$得不到更新。</p>
+</li>
+<li><p>饱和性使 模型对参数$W$的初始值敏感<br>sigmoid 函数将输入的实数压缩到范围[0, 1]之间，但是在函数的两端的较大范围中，sigmoid函数的值是0或者1。一个神经元的前向传播为：<br>$$<br>f(a)=f(\sum_i {w_i \times x_i })<br>$$<br>在神经网络训练之前需要对参数$W$进行初始化，如果参数$W$被初始化了一个较大的值，则$a$较大，将使该神经元的输出值长时间是0或者1。<br>同时，在反向传播中有与$a$较大，使得$h’(a)=0$，也就产生了梯度消失现象。</p>
+</li>
+</ul>
+</li>
+<li><p><em>Sigmoid outputs are not zero-centered</em>. This is undesirable since neurons in later layers of processing in a Neural Network (more on this soon) would be receiving data that is not zero-centered. This has implications on the dynamics during gradient descent, because if the data coming into a neuron is always positive (e.g. $x&gt;0$ elementwise in $f=wTx+b$), then the gradient on the weights $w$ will during backpropagation become either all be positive, or all negative (depending on the gradient of the whole expression $f$). This could introduce undesirable zig-zagging dynamics in the gradient updates for the weights. However, notice that once these gradients are added up across a batch of data the final update for the weights can have variable signs, somewhat mitigating this issue. Therefore, this is an inconvenience but it has less severe consequences compared to the saturated activation problem above.</p>
+</li>
+</ol>
+<h2 id="2-2-Tanh"><a href="#2-2-Tanh" class="headerlink" title="2.2 Tanh"></a>2.2 Tanh</h2><p>$$<br>\begin {aligned}<br>    \tanh(x)&amp;=\frac{\sinh(x)}{\cosh(x)}=\frac{e^x-e^{-x}}{e^x+e^{-x}} \\<br>    \tanh(x) &amp;=2\sigma(2x)-1 \\<br>    \tanh’(x)&amp;= 1-\tanh^2(x)<br>    \end {aligned}<br>$$</p>
+<p><img src="Activation_Function/tanh_func.png" alt></p>
+<p>  tanh将实数值压缩到[-1, 1]之间。和sigmoid一样，tanh具有饱和性对参数$W$的初始值敏感， 反向传播过程易梯度消失的缺点。</p>
+<p>  但是tanh是以0位中心，因此，实际应用中，tanh 会比 sigmoid 更好。</p>
+<h2 id="2-3-ReLU"><a href="#2-3-ReLU" class="headerlink" title="2.3 ReLU"></a>2.3 ReLU</h2><p>$$<br>f(x)=\max(0, x)<br>$$<br><img src="Activation_Function/ReLU_func.png" alt></p>
+<p>在设计隐藏层时，ReLU是一个比较好的选择。</p>
+<p>优点：</p>
+<ul>
+<li>ReLU 得到的SGD的收敛速度会比 sigmoid/tanh 快很多</li>
+<li>相比于 sigmoid/tanh，计算简单。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>训练过程中容易存在神经元死亡现象：在某一轮反向传播过程中如果一个参数$w_{ji}$的梯度$\frac{\partial E}{\partial w_{ji}}$非常大，导致更新后$w_{ji} = w_{ji} - \alpha \frac{\partial}{\partial w_{ji}}E$ ，$w$具有一个非常大的值(正值或者负值)。则激活因子 $a_j = \sum_i w_{ji}z_i$ 可能会出负值。此下一轮的正向传播该神经元的输出值是0，反向传播该神经元所有参数$w$的梯度也是0。从而导致该神经元“dead”。<br>实际操作中，如果你的learning rate 很大，那么很有可能你网络中的40%的神经元都”dead”了。 当然，如果你设置了一个合适的较小的learning rate，这个问题发生的情况其实也不会太频繁。</li>
+</ul>
+<h2 id="2-4-Leaky-ReLU"><a href="#2-4-Leaky-ReLU" class="headerlink" title="2.4 Leaky ReLU"></a>2.4 Leaky ReLU</h2><p>  有一些基于ReLU的泛化的激活函数，这些激活函数的效果大部分和ReLU差不多，有的会在具体的某类任务中表现好于ReLU。这些激活函数都具有如下形式：<br>$$<br>  f(x)=\max(0, x) + \alpha \min(0, x)<br>$$</p>
+<p>  当$\alpha = -1$时，$f(x)=|x|$。称为Absolute value rectification。好像不常用。</p>
+<blockquote>
+<p>It is used for object recognition from images, where it makes sense to seek features that are invariant under a polarity reversal of the input illumination.</p>
+</blockquote>
+<p>将$\alpha$值作为参数 参与神经网络模型的训练时称为parametric ReLU 或者 PReLU</p>
+<hr>
+<p>当$\alpha$取一个很小的值时，如$\alpha = 0.01$，称为leaky ReLU:<br>$$<br>f(x)=\max(0, x) +0.01 \min(0, x)<br>$$<br><img src="Activation_Function/leaky_ReLU_func.png" alt></p>
+<p>  Leaky ReLU就是用来解决ReLU的”dead” units问题的。这里的$\alpha$是一个很小的常数。这样，即修正了数据分布，又保留了一些负轴的值，使得负轴信息不会全部丢失。</p>
+<h2 id="2-5-Maxout"><a href="#2-5-Maxout" class="headerlink" title="2.5 Maxout"></a>2.5 Maxout</h2><p>maxout是对ReLU和leaky ReLU的泛化，其公式为：<br>$$<br>f(x) = \max(w_1^Tx+b_1,w_2^Tx+b_2)<br>$$<br>maxout具有ReLU的所有优点：ReLU 得到的SGD的收敛速度会比 sigmoid/tanh 快很多。相比于 sigmoid/tanh，计算简单。</p>
+<p>maxout不具有ReLU的所缺点（dying ReLU）。</p>
+<p>但是它存在两组参数，所以其参数增加为原来的两倍。</p>
+<h1 id="3-激活函数的选择"><a href="#3-激活函数的选择" class="headerlink" title="3 激活函数的选择"></a>3 激活函数的选择</h1><p>神经网络隐藏层的激活函数的选择是比较困难的，这个需要根绝具体的问题进行实验。</p>
+<ul>
+<li>ReLU通常是一个比较好的选择，使用ReLU时要注意学习率(learning rate)的设置，如果太大容易造成节点死亡（ “dead” units）。所以在使用过程中需要监控 “dead” units在总的节点中所占的比例</li>
+<li>如果使用ReLU时“dead” units的比例较高，可以尝试Leaky ReLU 和 Maxout</li>
+<li>sigmoid or tanh：在ReLU出现之前神经网络主要使用sigmoid和tanh作为激活函数，由于上面说明的原因，现在已经很少用了。</li>
+</ul>
+<p>其他常见激活函数<a href="https://en.wikipedia.org/wiki/Activation_function" target="_blank" rel="noopener">请参见</a></p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="http://cs231n.github.io/neural-networks-1/" target="_blank" rel="noopener">http://cs231n.github.io/neural-networks-1/</a></p>
+<p>Deep Leaning</p>
+<p>Pattern Recognition and Machine Learning</p>
+<p><a href="http://blog.csdn.net/memray/article/details/51442059" target="_blank" rel="noopener">神经网络之激活函数(Activation Function)</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Activation_function" target="_blank" rel="noopener">Activation function wikipedia</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Neural-Network/" rel="tag"># Neural Network</a>
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Basic_of_Neural_Networks.html" rel="next" title="神经网络基础">
+                <i class="fa fa-chevron-left"></i> 神经网络基础
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/HMM.html" rel="prev" title="Hidden Markov Models">
+                Hidden Markov Models <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-激活函数的作用"><span class="nav-number">1.</span> <span class="nav-text">1 激活函数的作用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-常见激活函数"><span class="nav-number">2.</span> <span class="nav-text">2 常见激活函数</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-Sigmoid"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 Sigmoid</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-Tanh"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 Tanh</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-ReLU"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 ReLU</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-Leaky-ReLU"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 Leaky ReLU</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-Maxout"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 Maxout</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-激活函数的选择"><span class="nav-number">3.</span> <span class="nav-text">3 激活函数的选择</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

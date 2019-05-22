@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="BM25BM25算法是一种常见用来做相关度打分的公式，思路比较简单，主要就是计算一个query里面所有term和文档的相关度，然后在把分数做累加操作,而每个词的相关度分数主要还是受到tf/idf的影响。公式如下：$$score(Q, d) = \sum_{t \in Q} W_t R(t, d)$$其中：$R(t,d)$是每个词和文档的相关度值；$t$代表query中的term；$d$代表相关的文">
+<meta name="keywords" content="IR">
+<meta property="og:type" content="article">
+<meta property="og:title" content="相关性打分公式">
+<meta property="og:url" content="http://weirping.coding.me/blog/note-of-relevence-socres.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="BM25BM25算法是一种常见用来做相关度打分的公式，思路比较简单，主要就是计算一个query里面所有term和文档的相关度，然后在把分数做累加操作,而每个词的相关度分数主要还是受到tf/idf的影响。公式如下：$$score(Q, d) = \sum_{t \in Q} W_t R(t, d)$$其中：$R(t,d)$是每个词和文档的相关度值；$t$代表query中的term；$d$代表相关的文">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/note-of-relevence-socres/bm25top-phi.png">
+<meta property="og:updated_time" content="2019-03-30T08:35:46.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="相关性打分公式">
+<meta name="twitter:description" content="BM25BM25算法是一种常见用来做相关度打分的公式，思路比较简单，主要就是计算一个query里面所有term和文档的相关度，然后在把分数做累加操作,而每个词的相关度分数主要还是受到tf/idf的影响。公式如下：$$score(Q, d) = \sum_{t \in Q} W_t R(t, d)$$其中：$R(t,d)$是每个词和文档的相关度值；$t$代表query中的term；$d$代表相关的文">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/note-of-relevence-socres/bm25top-phi.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/note-of-relevence-socres.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>相关性打分公式 | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/note-of-relevence-socres.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">相关性打分公式
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-03-30 22:22:22" itemprop="dateCreated datePublished" datetime="2019-03-30T22:22:22+08:00">2019-03-30</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/IR/" itemprop="url" rel="index"><span itemprop="name">IR</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="BM25"><a href="#BM25" class="headerlink" title="BM25"></a>BM25</h1><p>BM25算法是一种常见用来做相关度打分的公式，思路比较简单，主要就是计算一个query里面所有term和文档的相关度，然后在把分数做累加操作,而每个词的相关度分数主要还是受到tf/idf的影响。公式如下：<br>$$<br>score(Q, d) = \sum_{t \in Q} W_t R(t, d)<br>$$<br>其中：$R(t,d)$是每个词和文档的相关度值；$t$代表query中的term；$d$代表相关的文档；$W_t$是词$t$的权重。 </p>
+<p>$W_t$可由外部设置，默认是$idf$值，idf公式的基本思想是：词的重要程度和其出现在总文档集合里的频率成反比。其公式如下:<br>$$<br>IDF(t) = \log \frac{N-n(t) + 0.5}{n(t) + 0.5}<br>$$<br>其中：$N$是文档总数；$n(t)$是包含该词的文档数；0.5是调教系数，避免$n(t)$为0的情况。取个log是为了让idf的值受N和$n(t)$的影响更加平滑。</p>
+<p>从这个公式可以看出当$N$越大，$n(ti)$越小时$idf$值越大，</p>
+<p>下面是$R(t,d)$的公式，<br>$$<br>\begin {align}<br>&amp; R(t, d) = \frac{tf(t)(k_1 + 1)}{tf(t) + K(d)}   \frac{qf(t)(k_2 + 1)}{qf(t) + k_2} \\<br>\\<br>&amp; K(d) = k_1(1-b + b \frac{dl}{avgdl})<br>\end {align}<br>$$<br>其中: $k_1$，$k_2$，$b$都是调节因子，一般$k1=2$，$k2=1$，$b=0.75$； $tf(t)$是词$t$在文档中的次数，$qf(t)$代表词在查询句里的次数；$dl$是文档长度，$avgdl$是文档平均长度；</p>
+<p>可以看出如果其他因素一样$dl$越大，相关度越低；至于除以一个$avgdl$，我想是拿本篇文档长度和整体文档长度水平做比较 ，以免单独取$dl$值时过大。</p>
+<p>乘积的左边因数代表词在文档中的次数关系，乘积的右边因数代表词在查询语句中的次数关系。绝大多数情况下，查询词在查询语句里面出现一次，所以$qf(t)$可以看成是1，又因为$k_2$为1，所以右边因数其实就等于1，所以公式可化简为下面这样:<br>$$<br>R(q_i, d) = \frac{tf(t)(k_1 + 1)}{tf(t) + K}<br>$$<br>公式化简后可得:<br>$$<br>score(Q, d) = \sum_{t \in Q} IDF(t) \frac{tf(t)(k_1 + 1)}{tf(t) + k_1(1-b + b \frac{dl}{avgdl})}   \\<br>$$<br>影响BM25公式的因数有</p>
+<p>1 $idf$：  $idf$越高分数越高</p>
+<p>2 $tf$：  $tf$越高分数越高</p>
+<p>3 $dl/avgdl$ ： 如果该文档长度在文档水平中越高则分数越低。</p>
+<p>4 $k_1, k_2, b$为分数的调节因子</p>
+<h1 id="BM25F-2004"><a href="#BM25F-2004" class="headerlink" title="BM25F(2004)"></a>BM25F(2004)</h1><p>一般情况下，一篇文章是分为多个部分的，如 title，content，description，anchor 等，在BM25F算分公式中，这些部分被称为域(field)。有两篇文章，一篇文章的title部分与query 的BM25相关性得分为 a， 另一篇文章的content部分与query 的BM25相关性得分也为 a。假设不考虑这两篇文章其他部分与query的相关性情况，根据经验，一般第一篇文章应该应该比第一篇文章更相关。BM25F 引入了文章d的每个域的信息，它将每个term在文章d中的每个域中的相关性进行了处理。公式如下：<br>$$<br>\begin {align}<br>&amp; score(Q, d) = \sum_{t \in Q} IDF(t) \frac{w(t,d)}{k_1 + w(t,d)}   \\<br>\\<br>&amp; w(t,d) = \sum_{f \in d} \frac{tf(t,f,d) \times boost_f}{1-b_f + b_f \frac{len(f, d)}{avglen(f)}}<br>\end {align}<br>$$</p>
+<h1 id><a href="#" class="headerlink" title=" "></a> </h1><h1 id="OkaTP-2003"><a href="#OkaTP-2003" class="headerlink" title="OkaTP(2003)"></a>OkaTP(2003)</h1><p>BM25 被也称为 <strong>Okapi BM25</strong>,  OkaTP是BM25与 term proximity 融合的相关性计算公式。</p>
+<p>query中第 $i$ 个term的权重定义为：</p>
+<p>$$<br>qw_i = \frac{qtf_i}{k_3+qtf_i} \cdot \log \frac{N-DF_i}{DF_i}<br>$$</p>
+<ul>
+<li>$N$ is the sum of documents within all collections,</li>
+<li>$DF_i$  is the number of documents containing the term $t_i$ within all collections.</li>
+<li>$qtf_i $query term frequency.</li>
+</ul>
+<p>可以发现 $qw_i$ 的定义在形式上比较像BM25中 query部分与IDF 的乘积。 区别是常量参数的设置。在论文中设置 $k_3 = 1000$.</p>
+<p>term proximity 定义如下</p>
+<p>$$<br>\mathrm {tpi(t_i, t_j)} = \frac {1.0}{dist[t_i, t_j] ^2}<br>$$<br>$d(t_i, t_j)$ is the distance expressed in number of words between search term $t_i$ and $t_j$.</p>
+<p>下式体现了BM25与 term proximity 的融合， 该算法将BM25中的tf 替换成了 $\sum_{occ(t_i, t_j)}tpi(t_i, t_j)$<br>$$<br>w_d(t_i, t_j) = (k_1 +1) \frac{\sum_{occ(t_i, t_j)}tpi(t_i, t_j)}{K+ \sum_{occ(t_i, t_j)}tpi(t_i, t_j)}<br>$$</p>
+<p>$K$ 的定义和BM25相同。</p>
+<p>OkaTP 最终定义为<br>$$<br>OkaTP(q,d) = BM25(q,d) + \sum_{(t_i, t_j) \in S}\min\{qw_i, qw_j\} \cdot w_d(t_i, t_j)<br>$$<br>其中 S是 query中所有term 两两组合的集合。</p>
+<h1 id="BM25TP-2006"><a href="#BM25TP-2006" class="headerlink" title="BM25TP(2006)"></a>BM25TP(2006)</h1><p>该算法与 OkaTP 非常相似。</p>
+<p>其中TP即 term proximity，在该算法中引入了proximity 信息来优化相关性计算效果。</p>
+<p>假设一个query q中包含n个term $\{t_1, \dots, t_n \}$， $d$ 表示一篇文章，任意两个不同term $t_j, t_k$  在文章 $d$ 中所处位置的距离表示为 $dist(t_j, t_k)$。这两个term的<br>$$<br>\begin {align}<br>&amp; BM25TP(q, d) = BM25(q，d) + \sum_i^n \min\{1, W_{t_i}\} \cdot \frac{acc_d (t_i) \cdot (k_1 + 1)}{acc_d (t_i) + K} \\<br>\\<br>&amp; acc_d (t_i) = \sum_{i \neq j} W_{t_i} \cdot \mathrm{tpi}_d(t_i, t_j) \\<br>\\<br>&amp; \mathrm {tpi}_d = \sum_{ o(t_i) \in \mathrm {occurrences of t_i in document d}} \frac {1}{dist[o(t_i), t_j] ^2}<br>\end {align}<br>$$<br>note: query中的第 $i$ 个term可能在 document 可能出现多次， 每一次出现用 $o(t_i)$ 表示。</p>
+<p>原始论文见 Term proximity scoring for ad-hoc retrieval on very large text collections<br>可以结合文章 Selective Term Proximity Scoring Via BP-ANN 理解上面第2，3两个公式。</p>
+<h1 id="newTP-2008"><a href="#newTP-2008" class="headerlink" title="newTP(2008)"></a>newTP(2008)</h1><p>文章认为OkaTP存在两个方面的问题 1. OkaTP 算分公式的后面部分(可以看做对于prase的算分)和前面的BM25部分是有重叠的，即一个term会同时出现在前后两个部分； 2.Linear combination of scores of  unigrams  and  those of loose phrases may break the non-linear property of term frequency。</p>
+<p>基于这两点提出了 newTP算法。 newTP中引入了 span的概念。 span 是根据query term在一个docment中的命中位置，将整个命中列表分割为多个片段，每个片段称为一个 expanded span。 span 的确定规则如下。</p>
+<blockquote>
+<p>(1)  The distance between the current and the next is bigger  than a threshold MAX_DIS, then the chain is separated between these two hits;<br>(2)  The current and the next hit are identical, then the chain is separated between these two hits;<br>(3)  The next hit is identical to a hit with former continuous sub-chain, then the distance between the current and the next  and  the  distance  between  the  identical  hit  and  its next  is  compared,  the  chain  is  separated  at  the  bigger gap.<br>(4)  Otherwise, go on scanning the next hit.</p>
+</blockquote>
+<p>其中 MAX_DIS 是认为设定的。</p>
+<p>根据span的中 query term的密度和数量来确定一个term对于相关性的贡献。从而取代OkaTP 中的 tpi 和 tf部分。</p>
+<p>一个$span_i$ 中的term t的 对于相关性的贡献表示为:<br>$$<br>f(t, espan_i) = [\frac {n_i}{width(espan_i)}]^x \cdot (n_i)^y<br>$$<br>其中:</p>
+<blockquote>
+<ul>
+<li>t is a query term,</li>
+<li>espan_i is an expanded span that contains t,</li>
+<li>n_i is the number of query terms that occur in espan_i</li>
+<li>Width(espan_i) is the width of espan_i</li>
+<li>x is an exponent that is used  to  restrain  that  the  value  decayed too rapidly with the density of an expanded span increasing,</li>
+<li>y is  an  exponent  that  is  used  to  prompting  the  case  that  more unique query terms appear in one expanded span.</li>
+</ul>
+</blockquote>
+<p>一个term t 在整个document 中对相关性的贡献为:<br>$$<br>rc_t = \sum_i f(t, espan_i)<br>$$<br>可以看出 rc 中包含了 proximity的信息 和 tf的信息。</p>
+<p>直接用 rc 替换 BM25 中的 tf， 得到新的相关性计算公式:<br>$$<br>newTP = \sum_{t \in Q} w_t \cdot \frac{rc_t(k_1 + 1)}{rc_t + K}<br>$$</p>
+<h1 id="BM25TOP-2012"><a href="#BM25TOP-2012" class="headerlink" title="BM25TOP(2012)"></a>BM25TOP(2012)</h1><p>其中TOP即 term order proximity.  该算法是在BM25TP的基础上进行的优化。在该算法中引入了 term oder信息， 如果两个term在 query中出现的顺序 与 其在document中的顺序相反则进行惩罚， 如果顺序相同则 reward。</p>
+<p>在BM25TP算法中 使用的 $dist[o(t_i), t_j] ^2$ 来计算proximity， 但是这个公式对于term oder是不敏感的。就会认为 John is faster than Mary 和 Mary is faster than John 两个句子是相同的。</p>
+<p>为了说明 BM25TOP算法，先引入如下两个定义。</p>
+<p>$p_{t_i;Q}$: The position of $t_i$ in query Q<br>$p_{t_i;d}$: The position of $t_i$ in document d</p>
+<p>在BM25TOP 中使用了一个新的公式对 $dist[o(t_i), t_j] ^2$ 进行了替换。这个公式应该符合如下三个条件。</p>
+<ul>
+<li>always positive, regardless of $p_{t_x ;d} -  p_{t_y ;d} &gt; 0$ or $p_{t_x ;d} -  p_{t_y ;d} &lt; 0$; </li>
+<li>rewards term proximity; becoming higher as $p_{t_x ;d} -  p_{t_y ;d}$ increases and vice versa; (since the score is inversely proportional to this quantity).</li>
+<li>rewards correct term ordering, becoming higher in case of $p_{t_x ;d} -  p_{t_y ;d} &lt; 0$ and vice versa; </li>
+</ul>
+<p>满足前两条是BM25TP算法中dist 函数也能满足的，第三条是增加考虑 term order 的一项。</p>
+<p>满足以上三个条件的公式挺多，论文中选择了如下公式。<br>$$<br>\begin {align}<br>&amp; \phi_d(t_x, t_y) = [a_d(t_x, t_y)]^2 - a_d(t_x, t_y) +1 \\<br>\\<br> &amp; a_d(t_x, t_y) = \frac{(p_{t_x ;d} -  p_{t_y ;d}) }{\xi(t_x, t_y)} \\<br>\end {align}<br>$$<br>其中<br>$$<br>\xi(t_x, t_y) = \left\{<br> \begin {align}<br> 1,  &amp; p_{t_x ;Q} -  p_{t_y ;Q} &gt; 0 \\<br> -1, &amp; p_{t_x ;Q} -  p_{t_y ;Q} &lt; 0 \\<br> \end {align}<br> \right .<br>$$<br>$\phi_d(t_x, t_y)$ 的大小表示 $t_x$ 和 $t_y$ 在文档 d 中 的相对距离，符号说明了这两个term在query和document中的顺序是否相同，正号(+) 表示顺序相同，符号(-) 表示这两个term在query和document中的顺序相反。</p>
+<p>$ \phi_d(t_x, t_y)$ 随 $a_d(t_x, t_y)$ 的函数变化图像如下:</p>
+<p><img src="note-of-relevence-socres/bm25top-phi.png" alt></p>
+<p>note:  proximity 是 $\phi_d(t_x, t_y)$ 的倒数，  $\phi_d(t_x, t_y)$ 值越大 proximity 越小。</p>
+<p>从上图可以看出，两个term距离越远， $\phi_d(t_x, t_y)$ 越大， proximity 越小；</p>
+<p>当对于两对term的 $a_d$ 的大小相等，但符号相反时，符号为负(-) 的一对 term 的proximity会更小。</p>
+<p>下面将BM25TOP的计算公正整理如下：<br>$$<br>\begin {align}<br>&amp; BM25TOP(q, d) = BM25(q，d) + \sum_i^n \min\{1, W_{t_i}\} \cdot \frac{acc_d^” (t_i) \cdot (k_1 + 1)}{acc_d^” (t_i) + K} \\<br>\\<br>&amp; acc_d^” (t_i) = \sum_{i \neq j} W_{t_i} \cdot \mathrm{tpi}_d^”(t_i, t_j) \\<br>\\<br>&amp; \mathrm {tpi}_d’’ = \sum_{ o(t_i) \in \mathrm {occurrences of t_i in document d}} \frac {1}{\phi_d(o(t_i), t_j)}  \\<br>\\<br>&amp; \phi_d(o(t_i), t_j) = [a_d(o(t_i), t_j)]^2 - a_d(o(t_i), t_j) +1 \\<br>\\<br> &amp; a_d(t_i, t_j) = \frac{(p_{o(t_i) ;d} -  p_{t_j ;d}) }{\xi(o(t_i), t_j)} \\<br>\end {align}<br>$$<br>其中:<br>$$<br>\xi(o(t_i), t_j) = \left\{<br> \begin {align}<br> 1,  &amp; p_{o(t_i) ;d} -  p_{t_j ;d} &gt; 0 \\<br> -1, &amp; p_{o(t_i) ;d} -  p_{t_j ;d} &lt; 0 \\<br> \end {align}<br> \right .<br>$$</p>
+<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><p>文章： An exploration of proximity measures in information retrieval </p>
+<p>对 Span-based approaches 和 Distance aggregation approaches 两大类方法中的 5 个度量 proximity 的方法进行了测试， 确定 min cover 的度量方法是其中最好的一种 proximity 度量方法。并将 min cover proximity 整合到了 BM25中</p>
+<p>文章 Learning in a Pairwise Term-Term Proximity Framework for Information Retrieval 罗列了 11个proximity 的度量方法，并将它们整合到了 一个统一的相关性计算公式中。</p>
+<h1 id="未完待续"><a href="#未完待续" class="headerlink" title="未完待续"></a>未完待续</h1><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ol>
+<li><a href="https://www.cnblogs.com/hdflzh/p/4034602.html" target="_blank" rel="noopener">BM25相关度打分公式</a></li>
+<li>BM25F： Robertson, S.E., Zaragoza, H., &amp; Taylor, M.J. (2004). Simple BM25 extension to multiple weighted fields. <em>CIKM</em>.</li>
+<li>OkaTP：Y. Rasolofo and J. Savoy. Term Proximity Scoring for Keyword-Based Retrieval Systems. In Proceedings of the 25th European Conference on IR Research (ECIR 2003)  pages 207–218, April 2003</li>
+<li>BM25TP： S. B uttcher, C. L. A. Clarke, and B. Lushman. Term proximity scoring for ad-hoc retrieval on very large text collections. In Proc. SIGIR, pages 621- 622, 2006.</li>
+<li>newTP：Song R , Taylor M J , Wen J R , et al. Viewing Term Proximity from a Different Perspective[C]// European Conference on Information Retrieval. Springer, Berlin, Heidelberg, 2008.</li>
+<li>BM25TOP：L. Akritidis, D. Katsaros, and P. Bozanis. Improved retrieval effectiveness by effcient combination of term proximity and zone scoring: A simulation-based evaluation. Simul. Model. Pract. Th., 22:74{91, 2012.</li>
+<li>5 proximity mmeasures：T. Tao and C. Zhai. An exploration of proximity measures in information retrieval. In Proc. SIGIR,pages 295-302, 2007</li>
+<li>11 proximity mmeasures：Cummins R , O’Riordan C . Learning in a Pairwise Term-Term Proximity Framework for Information Retrieval[C]// International Acm Sigir Conference on Research &amp; Development in Information Retrieval. ACM, 2009.</li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/IR/" rel="tag"># IR</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Chi-Square-Test.html" rel="next" title="卡方检验">
+                <i class="fa fa-chevron-left"></i> 卡方检验
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/tensorflow-datasets.html" rel="prev" title="tensorflow datasets">
+                tensorflow datasets <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#BM25"><span class="nav-number">1.</span> <span class="nav-text">BM25</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BM25F-2004"><span class="nav-number">2.</span> <span class="nav-text">BM25F(2004)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#"><span class="nav-number">3.</span> <span class="nav-text"> </span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#OkaTP-2003"><span class="nav-number">4.</span> <span class="nav-text">OkaTP(2003)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BM25TP-2006"><span class="nav-number">5.</span> <span class="nav-text">BM25TP(2006)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#newTP-2008"><span class="nav-number">6.</span> <span class="nav-text">newTP(2008)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BM25TOP-2012"><span class="nav-number">7.</span> <span class="nav-text">BM25TOP(2012)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#其他"><span class="nav-number">8.</span> <span class="nav-text">其他</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#未完待续"><span class="nav-number">9.</span> <span class="nav-text">未完待续</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">10.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="nDCG(Normalized Discounted Cumulative Gain)源自一篇参考维基百科的文章 Normalized Discounted Cumulative Gain：一种对搜索引擎或相关程序有效性的度量。 2个假设： ​    1.强相关的文档应该出现在结果列表前面，且越靠前（rank越高）越有用。 ​    2.强相关文档比弱相关文档有用，比不相关文档有用。 $DCG$来">
+<meta name="keywords" content="IR">
+<meta property="og:type" content="article">
+<meta property="og:title" content="信息检索评价指标(nDCG,MRR,MAP)">
+<meta property="og:url" content="http://weirping.coding.me/blog/Metrics-in-IR.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="nDCG(Normalized Discounted Cumulative Gain)源自一篇参考维基百科的文章 Normalized Discounted Cumulative Gain：一种对搜索引擎或相关程序有效性的度量。 2个假设： ​    1.强相关的文档应该出现在结果列表前面，且越靠前（rank越高）越有用。 ​    2.强相关文档比弱相关文档有用，比不相关文档有用。 $DCG$来">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-07-25T09:42:46.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="信息检索评价指标(nDCG,MRR,MAP)">
+<meta name="twitter:description" content="nDCG(Normalized Discounted Cumulative Gain)源自一篇参考维基百科的文章 Normalized Discounted Cumulative Gain：一种对搜索引擎或相关程序有效性的度量。 2个假设： ​    1.强相关的文档应该出现在结果列表前面，且越靠前（rank越高）越有用。 ​    2.强相关文档比弱相关文档有用，比不相关文档有用。 $DCG$来">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/Metrics-in-IR.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>信息检索评价指标(nDCG,MRR,MAP) | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/Metrics-in-IR.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">信息检索评价指标(nDCG,MRR,MAP)
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-07-03 22:22:22" itemprop="dateCreated datePublished" datetime="2018-07-03T22:22:22+08:00">2018-07-03</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/IR/" itemprop="url" rel="index"><span itemprop="name">IR</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="nDCG-Normalized-Discounted-Cumulative-Gain"><a href="#nDCG-Normalized-Discounted-Cumulative-Gain" class="headerlink" title="nDCG(Normalized Discounted Cumulative Gain)"></a>nDCG(Normalized Discounted Cumulative Gain)</h1><p>源自一篇参考维基百科的文章</p>
+<p>Normalized Discounted Cumulative Gain：一种对搜索引擎或相关程序有效性的度量。</p>
+<p>2个假设：</p>
+<p>​    1.强相关的文档应该出现在结果列表前面，且越靠前（rank越高）越有用。</p>
+<p>​    2.强相关文档比弱相关文档有用，比不相关文档有用。</p>
+<p>$DCG$来源于一个更早的、更基础的方法—$CG$。</p>
+<h2 id="CG"><a href="#CG" class="headerlink" title="CG"></a>CG</h2><p>$CG$不考虑结果集中的序信息，单纯把分级相关度相加。前个$P$个位置的$CG$值是：</p>
+<p>$$<br>CG_p = \sum\limits_{i=1}^{p}<br>$$</p>
+<p>$rel_i$是搜索结果列表的位置$i$处结果的分级相关度。</p>
+<h2 id="DCG"><a href="#DCG" class="headerlink" title="DCG"></a>DCG</h2><p>$DCG$取代$CG$作为一个更准确的测量方法。</p>
+<p> 如果一个强相关的文档排名靠后则应该受到惩罚，前个$P$个位置的$DCG$值是：</p>
+<p>$$<br>DCG_p = rel_1 + \sum_{i=2}^{p}\frac {rel_i}{log_2 i}<br>$$</p>
+<p>另一个$DCG$计算公式更加强调相关性</p>
+<p>$$<br>DCG_p = \sum_{i=1}^{p} \frac{2^{rel_i}-1}{log_2(1+i)}<br>$$</p>
+<p>若分级相关度只在0和1取二值的话，二公式效果相同</p>
+<h2 id="nDCG"><a href="#nDCG" class="headerlink" title="nDCG"></a>nDCG</h2><p>根据Query的不同，结果列表的长度也不同，所以这一度量考虑了正规化问题</p>
+<p>$$<br>nDCG_p =\frac{DCG_p}{IDCG_p}<br>$$</p>
+<p>$IDCGp$（Ideal DCG）是在一个完美的排序下，$p$所具有的最大$DCG$值</p>
+<p>这样一来无论Query是什么，$nDCG$都可以得到一个平均值，因此不同的Query之间的效能就可以做比较了。</p>
+<p>完美的排序算法会使$DCG_p$和$IDCG_p$相同，从而使$nDCG_p$为1，$nDCG$的取值在0到1之间</p>
+<p>例：查询结果列表中的6篇文档$D1,D2,D3,D4,D5,D6$，判定了他们的相关度是 $3,2,3,0,1,2$ ，则：<br>$$<br>CG_6=\sum_{i=1}^6 rel_i = 3+2+3+0+1+2=11<br>$$</p>
+<table>
+<thead>
+<tr>
+<th>$i$</th>
+<th>$rel_i$</th>
+<th>$\log _{2}(i+1)$</th>
+<th>$\frac {rel_{i}}{\log _{2}(i+1)}$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>3</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2</td>
+<td>1.585</td>
+<td>1.262</td>
+</tr>
+<tr>
+<td>3</td>
+<td>3</td>
+<td>2</td>
+<td>1.5</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0</td>
+<td>2.322</td>
+<td>0</td>
+</tr>
+<tr>
+<td>5</td>
+<td>1</td>
+<td>2.585</td>
+<td>0.387</td>
+</tr>
+<tr>
+<td>6</td>
+<td>2</td>
+<td>2.807</td>
+<td>0.712</td>
+</tr>
+</tbody>
+</table>
+<p>所以 $DCG_6$ 的值为：<br>$$<br>{DCG_{6}} =\sum _{i=1}^{6}{\frac {rel_{i}}{\log _{2}(i+1)}}=3+1.262+1.5+0+0.387+0.712=6.861<br>$$</p>
+<p>一个理想的排序应该是：$3，3，2，2，1，0$ ，所以<br>$$<br>\begin {aligned}<br>&amp;IDCG_{6} =8.740 \\<br>\\<br>&amp; nDCG_{6} ={\frac {DCG_{6}}{IDCG_{6}}}={\frac {6.861}{8.740}}=0.785 \\<br> \end {aligned}<br>$$</p>
+<p>$nDCG$的缺点是：当排序的数很少（比如：只有1-3个），那么任何排序的$nDCG​$值都比较接近，所以可以考虑使用AUC（area under the ROC curve）。</p>
+<p>AUC学习参考文章：<a href="http://blog.csdn.net/chjjunking/article/details/5933105" target="_blank" rel="noopener">http://blog.csdn.net/chjjunking/article/details/5933105</a> </p>
+<p>自己用python写的一个计算ndcg函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">calc_dcg</span><span class="params">(sorted_vec, at)</span>:</span></span><br><span class="line">    <span class="string">'''</span></span><br><span class="line"><span class="string">    sorted_vec: list[tuple], type of element is tuple,</span></span><br><span class="line"><span class="string">    	tuple(v0, v1), v0: predict score; v1: label score</span></span><br><span class="line"><span class="string">    at: int, calculate dcg@at</span></span><br><span class="line"><span class="string">    '''</span></span><br><span class="line">    <span class="keyword">import</span> math</span><br><span class="line">    ranking = [t[<span class="number">1</span>] <span class="keyword">for</span> t <span class="keyword">in</span> sorted_vec[<span class="number">0</span>: at]]</span><br><span class="line">    dcg_ = sum([(<span class="number">2</span>**r - <span class="number">1</span>) / math.log(i + <span class="number">2</span>, <span class="number">2</span>) <span class="keyword">for</span> i, r <span class="keyword">in</span> enumerate(ranking)])</span><br><span class="line">    <span class="keyword">return</span> dcg_</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">calc_ndcg</span><span class="params">(vec, at)</span>:</span></span><br><span class="line">    <span class="string">'''</span></span><br><span class="line"><span class="string">    vec: list[tuple], type of element is tuple,</span></span><br><span class="line"><span class="string">    	tuple(v0, v1), v0: predict score; v1: label score</span></span><br><span class="line"><span class="string">    at: int, calculate ndcg@at</span></span><br><span class="line"><span class="string">    '''</span></span><br><span class="line">    sorted_vec = sorted(vec, key=<span class="keyword">lambda</span> t: t[<span class="number">1</span>], reverse=<span class="literal">True</span>)</span><br><span class="line">    ideal_dcg = calc_dcg(sorted_vec, at)</span><br><span class="line">    sorted_vec = sorted(vec, key=<span class="keyword">lambda</span> t: t[<span class="number">0</span>], reverse=<span class="literal">True</span>)</span><br><span class="line">    cur_dcg = calc_dcg(sorted_vec, at)</span><br><span class="line">    <span class="keyword">if</span> ideal_dcg == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> cur_dcg / ideal_dcg</span><br></pre></td></tr></table></figure>
+<h1 id="MRR-Mean-Reciprocal-Rank"><a href="#MRR-Mean-Reciprocal-Rank" class="headerlink" title="MRR(Mean Reciprocal Rank)"></a>MRR(Mean Reciprocal Rank)</h1><p>这是一个常用来衡量搜索算法效果的指标，目前被广泛用在允许返回多个结果的问题，或者目前还比较难以解决的问题中（由于如果只返回top 1的结果，准确率或召回率会很差，所以在技术不成熟的情况下，先返回多个结果）。在这类问题中，系统会对每一个返回的结果给一个置信度（打分），然后根据置信度排序，将得分高的结果排在前面返回。</p>
+<p>而MRR得核心思想很简单：返回的结果集的优劣，跟第一个正确答案的位置有关，第一个正确答案越靠前，结果越好。</p>
+<p>具体来说：<strong>对于一个query，若第一个正确答案排在第n位，则MRR得分就是$\frac1n$。</strong>（如果没有正确答案，则得分为0）</p>
+<p>公式为： </p>
+<p>$$<br>MRR = \frac1 {\left| Q \right|}\sum\limits_{i = 1}^{\left| Q \right|} \frac 1  {rank_i}<br>$$</p>
+<p>其中，$Q$为样本query集合，${\left| Q \right|}$表示$Q$中query个数，$rank_i$ 表示在第$i$个query中，第一个正确答案的排名</p>
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><p>比如，设测试集有4个query，他们的结果中，前三个query的第一个正确答案分别被排在第3，1，5位，而第四个query没有找到正确答案。则该系统的MRR得分就是： </p>
+<p>$$<br>MRR=\left(\frac13+\frac11+\frac15+0 \right)÷4=0.383<br>$$</p>
+<h1 id="MAP-mean-average-precision"><a href="#MAP-mean-average-precision" class="headerlink" title="MAP(mean average precision)"></a>MAP(mean average precision)</h1><h2 id="Precision"><a href="#Precision" class="headerlink" title="Precision"></a>Precision</h2><p>Precision is the fraction of the documents retrieved that are relevant  to the user’s information need.</p>
+<p>$$<br>precision = \frac {\left| {\{ relevant\;documents\}  \cap \{ retrieved\;documents\} } \right|}  {\left| {\left\{ {retieved\;documents} \right\}} \right|}<br>$$</p>
+<p>Precision takes all retrieved documents into account. It can also be evaluated at a given cut-off rank, considering only the topmost results returned by the system. This measure is called <em>precision at n</em> or <em>P@n</em>.</p>
+<h2 id="Average-precision"><a href="#Average-precision" class="headerlink" title="Average precision"></a>Average precision</h2><p>Precision and recall are single-value metrics based on the whole list of documents returned by the system. For systems that return a ranked sequence of documents, it is desirable to also consider the order in which the returned documents are presented. By computing a precision and recall at every position in the ranked sequence of documents, one can plot a precision-recall curve, plotting precision $p(r)$ as a function of recall $r$. Average precision computes the average value of $p(r)$ over the interval from $r=0$ to $r=1$</p>
+<p>$$<br>AveP=\int_0^1p\left(r\right)dr<br>$$</p>
+<p>这个值就是AUC(rea under the precision-recall curve)</p>
+<p>That is the area under the precision-recall curve. This integral is in practice replaced with a finite sum over every position in the ranked sequence of documents:</p>
+<p>$$<br>AveP = \sum _{k=1}^n{P\left(k\right)}\Delta{r\left(k\right)}<br>$$</p>
+<p>where $ k$ is the order in the sequence of retrieved documents, $n$ is the number of retrieved documents, $P(k)$ is the precision at cut-off $k$ in the list, and $\Delta r(k) $is the change in recall from items $k-1$ to $k$.</p>
+<p>This finite sum is equivalent to:</p>
+<p>$$<br>{AveP} = \frac{\sum_{k=1}^n (P(k) \times {rel}(k))}{number\; of\; relevant \;documents}<br>$$</p>
+<p>where ${rel} (k)$  is an indicator function equaling 1 if the item at k is a relevant document, zero otherwise. Note that the average is over all relevant documents and the relevant documents not retrieved get a precision score of zero.</p>
+<h2 id="Mean-average-precision"><a href="#Mean-average-precision" class="headerlink" title="Mean average precision"></a>Mean average precision</h2><p>Mean average precision for a set of queries is the mean of the average precision scores for each query.</p>
+<p>$$<br>MAP=\frac{\sum_{q=1}^Q{AveP(q)}}{Q}<br>$$</p>
+<p>where <em>Q</em> is the number of queries.</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="http://en.wikipedia.org/wiki/Discounted_cumulative_gain" target="_blank" rel="noopener">http://en.wikipedia.org/wiki/Discounted_cumulative_gain</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/IR/" rel="tag"># IR</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/TF-IDF.html" rel="next" title="TF-IDF">
+                <i class="fa fa-chevron-left"></i> TF-IDF
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/Bayesian-Probabilities-in-ML.html" rel="prev" title="贝叶斯线性回归与贝叶斯逻辑回归">
+                贝叶斯线性回归与贝叶斯逻辑回归 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#nDCG-Normalized-Discounted-Cumulative-Gain"><span class="nav-number">1.</span> <span class="nav-text">nDCG(Normalized Discounted Cumulative Gain)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CG"><span class="nav-number">1.1.</span> <span class="nav-text">CG</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DCG"><span class="nav-number">1.2.</span> <span class="nav-text">DCG</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nDCG"><span class="nav-number">1.3.</span> <span class="nav-text">nDCG</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MRR-Mean-Reciprocal-Rank"><span class="nav-number">2.</span> <span class="nav-text">MRR(Mean Reciprocal Rank)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#例子"><span class="nav-number">2.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MAP-mean-average-precision"><span class="nav-number">3.</span> <span class="nav-text">MAP(mean average precision)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Precision"><span class="nav-number">3.1.</span> <span class="nav-text">Precision</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Average-precision"><span class="nav-number">3.2.</span> <span class="nav-text">Average precision</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mean-average-precision"><span class="nav-number">3.3.</span> <span class="nav-text">Mean average precision</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

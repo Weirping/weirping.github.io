@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="0 概述机器学习的中心问题是在训练集上训练出一个能够在新的输入数据上表现良好的模型。现有的很多策略是在牺牲训练误差来减小泛化误差，这些策略被统称为正则化。 和传统的机器学习算法一样，神经网络的范数正则化方法也是通过限制模型参数来减少过拟合的。但是神经网络的范数正则化也有自己的特点，为了论述方便本文将神经网络的参数分为两类：  $\boldsymbol w$ ：仿射变换权重参数，模型向量两层神经元的">
+<meta name="keywords" content="Neural Network,Machine Learning">
+<meta property="og:type" content="article">
+<meta property="og:title" content="范数正则化-神经网络">
+<meta property="og:url" content="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="0 概述机器学习的中心问题是在训练集上训练出一个能够在新的输入数据上表现良好的模型。现有的很多策略是在牺牲训练误差来减小泛化误差，这些策略被统称为正则化。 和传统的机器学习算法一样，神经网络的范数正则化方法也是通过限制模型参数来减少过拟合的。但是神经网络的范数正则化也有自己的特点，为了论述方便本文将神经网络的参数分为两类：  $\boldsymbol w$ ：仿射变换权重参数，模型向量两层神经元的">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks/L2_regularization.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks/L1_regularization.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks/L2.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks/dropout.png">
+<meta property="og:updated_time" content="2019-04-28T11:44:12.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="范数正则化-神经网络">
+<meta name="twitter:description" content="0 概述机器学习的中心问题是在训练集上训练出一个能够在新的输入数据上表现良好的模型。现有的很多策略是在牺牲训练误差来减小泛化误差，这些策略被统称为正则化。 和传统的机器学习算法一样，神经网络的范数正则化方法也是通过限制模型参数来减少过拟合的。但是神经网络的范数正则化也有自己的特点，为了论述方便本文将神经网络的参数分为两类：  $\boldsymbol w$ ：仿射变换权重参数，模型向量两层神经元的">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks/L2_regularization.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>范数正则化-神经网络 | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">范数正则化-神经网络
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-22 21:49:00" itemprop="dateCreated datePublished" datetime="2018-01-22T21:49:00+08:00">2018-01-22</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Neural-Network/" itemprop="url" rel="index"><span itemprop="name">Neural Network</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="0-概述"><a href="#0-概述" class="headerlink" title="0 概述"></a>0 概述</h1><p>机器学习的中心问题是在训练集上训练出一个能够在新的输入数据上表现良好的模型。现有的很多策略是在牺牲训练误差来减小泛化误差，这些策略被统称为正则化。</p>
+<p>和传统的机器学习算法一样，神经网络的范数正则化方法也是通过限制模型参数来减少过拟合的。但是神经网络的范数正则化也有自己的特点，为了论述方便本文将神经网络的参数分为两类：</p>
+<ul>
+<li>$\boldsymbol w$ ：仿射变换权重参数，模型向量两层神经元的相互作用的参数，不包含偏执(bias)；</li>
+<li>$\boldsymbol \beta$ ：偏执参数；</li>
+<li>$\boldsymbol \theta$ ：包含仿射变换权重参数$w$和偏执参数(bias)。</li>
+</ul>
+<p>在深度学习中，正则化只针对仿射变换权重参数$\boldsymbol w$，而每一层的偏执参数不做正则化处理。这是因为：</p>
+<ul>
+<li>每个偏置仅控制一个单变量(权重参数控制两个变量)，这意味着，我们不对其进行正则化也不会导致太大的偏差</li>
+<li>偏置参数的正则化可能会导致明显的欠拟合。</li>
+</ul>
+<p>正则化之前的目标函数记为 $J(\boldsymbol \theta, \boldsymbol X, y)$ ，正则化后的目标函数记为$\tilde J(\boldsymbol \theta, \boldsymbol X, y)$ ，则:</p>
+<p>$$<br>\tilde{J}(\boldsymbol \theta,\boldsymbol  X, y) = J(\boldsymbol \theta, \boldsymbol X, y) + \alpha \Omega(\boldsymbol \theta)<br>$$</p>
+<p>其中$\Omega$是正则化项，$\alpha \ge 0$ 是超参，$\alpha$越大，正则化力度越大。机器学习中常用的正则化项是p-范数 ($L^p$)：$||\boldsymbol x||_p=(\sum_i |x_i|^p)^{\frac1p}, p \ge 1$</p>
+<ul>
+<li>$p=2$时，$L^2$ 称为2范数，欧几里得范数， $||\boldsymbol x||_2=(\sum_i |x_i|^2)^{\frac12}$ 。实际应用当中，常用的是它的平方， $||\boldsymbol x||_2^2=\sum_i |x_i|^2 = \boldsymbol x^{\mathrm{T}} \boldsymbol x$ 。</li>
+<li>$p=1$时，$L^1$ 称为1范数，$||\boldsymbol x||_1=\sum_i |x_i|$ 。当区分元素 恰好是零 和 非零(但值可能很小) 对于模型很重要的时候使用这种范数。</li>
+<li>$p=\infty$时，$L^\infty$ 称为最大范数，$||\boldsymbol x ||_ \infty=\max_i|x_i|$ 。</li>
+<li>“$L^0​$范数”表示向量中非零元素的个数，但是这个术语在数学意义上是不对的。</li>
+</ul>
+<h1 id="1-L-2-范数正则化"><a href="#1-L-2-范数正则化" class="headerlink" title="1 $L^2$范数正则化"></a>1 $L^2$范数正则化</h1><p>$L^2$范数正则化将目标函数$\tilde J$中正则化项定义为参数的2范数的平方，$\Omega(\boldsymbol \theta) = \frac 12 ||\boldsymbol w||_2^2 = \frac 12 \boldsymbol w ^ {\mathrm{T}} \boldsymbol w$ 。</p>
+<p>下面从三个角度理解$L^2$范数正则化：</p>
+<ol>
+<li><strong>从梯度下降的角度</strong></li>
+</ol>
+<p>目标函数求关于$w$的梯度，最终求的$w$的梯度下降法更新公式过程如下：</p>
+<p>$$<br>\begin {aligned}<br>&amp; \tilde{J}(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y) = J(\boldsymbol w ,\boldsymbol \beta, \boldsymbol X, y) +   \frac \alpha2 \boldsymbol w ^ {\mathrm{T}} \boldsymbol w \\<br>\\<br>&amp; \nabla_w \tilde{J}(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y) = \nabla_w {J}(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y)  + \alpha \boldsymbol  w \\<br>\\<br>&amp; w  \gets w - \epsilon(\nabla_w {J}(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y) + \alpha  w) \\<br>\\<br>&amp;  w  \gets (1-\epsilon\alpha) w - \epsilon \nabla_w {J}(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y)<br>\end {aligned}<br>$$</p>
+<p>其中$\epsilon$为学习率。目标函数 ${J}(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y)$ 不加正则化时的梯度下降更新公式为：</p>
+<p>$$<br>w  \gets   w - \epsilon \nabla_w {J}(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y)<br>$$</p>
+<p>通过以上两个公式的对比可以看出，在梯度下降的每一步中，$L^2$范数正则化先将$w$乘以一个常数因子$(1-\epsilon\alpha) $ ($w$的缩放)，然后执行非正则化的梯度下降。</p>
+<ol start="2">
+<li><strong>从模型训练的整体角度(解析解的推导)</strong></li>
+</ol>
+<p>假设非正则化的目标函数 ${J}(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y)$ 在 $\boldsymbol {\hat w}$ 处取得最小值，即：</p>
+<p>$$<br>\boldsymbol {\hat w} = \arg\min_w {J}(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y)<br>$$</p>
+<p><strong>为了简化分析，我们将目标函数近似为其在$\hat w$处的二阶泰勒展开。</strong> （当目标函数正好为$w$的二次函数时 $\hat J = J$）</p>
+<p>对${J}(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y)$ 在 $\boldsymbol {\hat w}$ 处做二阶泰勒近似并使用$L^2$范数正则化，记为$\hat J(\boldsymbol \theta)$ :<br>$$<br>\begin {aligned}<br>&amp; \hat J(\boldsymbol \theta) = J(\boldsymbol {\hat w}) +\frac12(\boldsymbol {w} - \boldsymbol {\hat w})^{\mathrm{T}}\boldsymbol H(\boldsymbol {w} - \boldsymbol {\hat w}) +   \frac \alpha2 \boldsymbol w ^ {\mathrm{T}} \boldsymbol w \\<br>&amp; \nabla_w \hat J(\boldsymbol \theta) = \boldsymbol H(\boldsymbol {w} - \boldsymbol {\hat w})  + \alpha \boldsymbol w<br>\end {aligned}<br>$$</p>
+<p>其中$\boldsymbol H$ 是目标函数 ${J}(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y)$ 在$\boldsymbol {\hat w}$ 处的Hessian matrix。$ \frac \alpha2 \boldsymbol w ^ {\mathrm{T}} \boldsymbol w$ 为正则化项。</p>
+<p>注意：因为$\boldsymbol {\hat w} = \arg\min_w {J}(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y)$ </p>
+<ul>
+<li>该式中没有一阶项。$\nabla J(\boldsymbol {\hat w}) = 0$ 。</li>
+<li>$\boldsymbol H$ 是半正定矩阵。</li>
+</ul>
+<p>令$\tilde {\boldsymbol w} = \arg\min_w \hat J(\boldsymbol \theta)$ ，即在$\tilde {\boldsymbol w}$处$\hat J(\boldsymbol \theta)$取最小值。此时：</p>
+<p>$$<br>\begin {aligned}<br>&amp; \boldsymbol H(\tilde {\boldsymbol {w}} - \boldsymbol {\hat w}) + \alpha \tilde {\boldsymbol {w}}  =  0 \\<br>&amp; \tilde {\boldsymbol {w}}  = (\boldsymbol H + \alpha \boldsymbol I)^{-1} \boldsymbol H  \boldsymbol {\hat w}<br>\end {aligned}<br>$$</p>
+<p>当$\alpha \to 0$ 时，$\tilde{\boldsymbol {w}} \to \boldsymbol {\hat w}$ 。因为$\boldsymbol H$ 是实对称矩阵，所以它可以分解为三个矩阵：</p>
+<p>$$<br>\boldsymbol {H} = \boldsymbol {Q} \boldsymbol {\Lambda} \boldsymbol {Q }^{\mathrm T}<br>$$</p>
+<p>$\boldsymbol {\Lambda}$ 为$\boldsymbol H$的特征值组成的对角阵， $\boldsymbol {Q}$为$\boldsymbol H$的特征向量组成的标准正交阵(此时$\boldsymbol {Q}^{-1} = \boldsymbol {Q} ^ {\mathrm {T}}$)。所以可以表示为：</p>
+<p>$$<br>\begin {aligned}<br>\tilde {\boldsymbol {w}}  &amp;= (\boldsymbol H + \alpha \boldsymbol I)^{-1} \boldsymbol H  \boldsymbol {\hat w} \\<br>                                             &amp;= (\boldsymbol {Q} \boldsymbol {\Lambda} \boldsymbol {Q }^{\mathrm T} + \alpha \boldsymbol I)^{-1} \boldsymbol {Q} \boldsymbol {\Lambda} \boldsymbol {Q }^{\mathrm T}  \boldsymbol {\hat w} \\<br>                                             &amp;=\boldsymbol {Q} (\boldsymbol {\Lambda} + \alpha \boldsymbol I)^{-1}\boldsymbol {\Lambda} \boldsymbol {Q }^{\mathrm T}\boldsymbol {\hat w}\\<br>\end {aligned}<br>$$</p>
+<p>$L^2$范数正则化的效果是沿着由$\boldsymbol H$的特征向量所定义的轴缩放$\boldsymbol {\hat w}$ ，即将与$\boldsymbol H$的第$i$个特征向量 对齐的$\boldsymbol {\hat w}$的分量 乘以$\frac {\lambda_i}{\lambda_i + \alpha}$得到正则化后的$\tilde {\boldsymbol {w}}$的第$i$个分量。当$\lambda_i \gg \alpha$ 时，$\frac {\lambda_i}{\lambda_i + \alpha} \to 1, \tilde{w}_i \to {\hat w_i}$ ；当$\lambda_i \ll \alpha$ 时$\frac {\lambda_i}{\lambda_i + \alpha} \to 0, \tilde{w}_i \to 0$ 。</p>
+<blockquote>
+<p>$\boldsymbol {H}$ 的特征值 $\Lambda$的物理含义：Hessian矩阵的特征值其对应的特征向量方向上的函数变化率。特征值越大，其对应方向上的变化率越大，特征值越小，其对应方向上的函数变化率越小。(当前理解还不透彻，需要加强)</p>
+</blockquote>
+<ol start="3">
+<li><strong>几何角度</strong></li>
+</ol>
+<p><img src="Norm_Regularization_for_DeepLearning-Neural_networks/L2_regularization.png" alt="L2_regularization"></p>
+<p>蓝线椭圆表示没有正则化目标函数的等值线。红线圆圈表示$L^2$正则化项的等值线。在$\tilde w$点，原始目标函数和正则化项的和达到最小值。目标函数$J$的Hessian的第一维(横向)特征值很小。当横向平移动时，目标函数不会增加得太多。因为目标函数对这个方向没有强烈的偏好，所以正则化项对该轴具有更强烈的影响。正则化项将$w^1$拉向零。而目标函数对沿着第二维的移动非常敏感。对应的特征值较大，表示高曲率。因此，权重衰减对$w^2$的位置影响相对较小。</p>
+<p>可以理解为<strong>原始目标函数$J$</strong> 和<strong>正则化项</strong>竞争的过程。原始目标函数$J$希望最优点落在$\hat w$处，正则化项希望最优点落在原点处。在$w$的各个维度上他们通过比较各自的曲率（二阶导数）来决定谁起主要作用，谁的曲率大，谁就起主导作用。</p>
+<p>note: $L^2$正则化项在原点处各方向上的曲率是相同的。</p>
+<h1 id="2-L-1-范数"><a href="#2-L-1-范数" class="headerlink" title="2 $L^1$范数"></a>2 $L^1$范数</h1><p>下面从两个角度理解$L^1$范数正则化：</p>
+<ol>
+<li><strong>从模型训练的整体角度(解析解的推导)</strong></li>
+</ol>
+<p>$L^1$范数正则化将目标函数$\tilde J$中正则化项定义为参数$\boldsymbol w$的各维度的绝对值之和，$\Omega(\boldsymbol \theta) =||\boldsymbol w||_1 = \sum_i |w_i|$ 。正则化后的目标函数和其导数为：</p>
+<p>$$<br>\DeclareMathOperator{\sign}{sign}<br>\begin {aligned}<br>&amp; \tilde{J}(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y) = J(\boldsymbol w ,\boldsymbol \beta, \boldsymbol X, y) +  \alpha ||\boldsymbol w||_1 \\<br>&amp; \nabla_w  \tilde{J}(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y) = \nabla_w J(\boldsymbol w ,\boldsymbol \beta, \boldsymbol X, y) +  \alpha \sign(\boldsymbol w)<br>\end {aligned}<br>$$</p>
+<p>其中若$w \gt 0$，则$sign(w)= +1$；若$w \lt 0$，则$sign(w) = -1$；若$w=0$，则$sign(w)=0$。</p>
+<p>假设$\boldsymbol {\hat w} = \arg\min_w {J}(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y) $，为了说明问题需要对原始目标函数做近似处理，未正则化的目标函数 $J(\boldsymbol w ,\boldsymbol \beta,\boldsymbol  X, y) $ 在$\boldsymbol {\hat w}$处的二阶泰勒近似为：</p>
+<p>$$<br>J(\boldsymbol {w}) \approx  J(\boldsymbol {\hat w}) +\frac12(\boldsymbol {w} - \boldsymbol {\hat w})^{\mathrm{T}}\boldsymbol H(\boldsymbol {w} - \boldsymbol {\hat w})<br>$$</p>
+<p>此时</p>
+<p>$$<br>\begin {aligned}<br>&amp; \tilde{J}(\boldsymbol w) \approx     J(\boldsymbol {\hat w}) +\frac12(\boldsymbol {w} - \boldsymbol {\hat w})^{\mathrm{T}}\boldsymbol H(\boldsymbol {w} - \boldsymbol {\hat w})  +  \alpha ||\boldsymbol w||_1 \\<br>\end {aligned}<br>$$</p>
+<p>其中$H$是关于$w$的Hessian矩阵。</p>
+<p>)由于$\sign$的存在，我们直接令是正则化的二阶近似的梯度为0还是很难直观的说明问题的。(假设$\tilde w$ 是正则化目标函数的最小值，我们希望最终看到的是$\tilde {w}_i$和$\hat w_i$的代数关系)。为了得到更直观的代数关系，我们对Hessian矩阵进一步简化：假设$H$的所有非对角元素都为0，即，$H$是一个对角矩阵(当训练数据集的各维度的特征是不相关时会出现这种情况，比如使用了PCA算法对训练数据做了预处理)，此时：<br>$$<br>\DeclareMathOperator{\diag}{diag}<br>H = \diag (H_{1,1},H_{2,2},\dots,H_{n,n})<br>$$</p>
+<p>此时正则化的目标函数可以进一步近似为：</p>
+<p>$$<br>\begin {aligned}<br>\tilde{J}(\boldsymbol w) &amp;\approx  \hat{J}(\boldsymbol w) \\<br>                                           &amp;=  J(\boldsymbol {\hat w}) +\frac12(\boldsymbol {w} - \boldsymbol {\hat w})^{\mathrm{T}}\boldsymbol H(\boldsymbol {w} - \boldsymbol {\hat w})  +  \alpha ||\boldsymbol w||_1 \\<br>                                           &amp;= J(\boldsymbol {\hat w}) + \sum_i[\frac 12 H_{i,i}(w_i-\hat w_i)^2] +  \alpha \sum_i|w_i| \\<br>                                           &amp;= J(\boldsymbol {\hat w}) + \sum_i[\frac 12 H_{i,i}(w_i-\hat w_i)^2 +  \alpha |w_i|]<br>\end {aligned} \tag 1<br>$$</p>
+<p>此时我们讨论这一个特殊的目标函数 $\hat{J}(\boldsymbol w) $ ，寻找一个$\tilde w$使 $\hat{J}(\boldsymbol w) $取最小值即：</p>
+<p>$$<br>\tilde w = \arg\min_w \hat{J}(\boldsymbol w)<br>$$</p>
+<p>对$\hat{J}(\boldsymbol w) $关于$w$的每个方向分别独立求导，并使之为0，得：</p>
+<p>$$<br>H_{i,i}(w_i-\hat w_i)+\alpha \cdot sign(w_i)=0 \tag 2<br>$$</p>
+<p>针对上面的公式(1)可以得到如下结论(注意：当前的目标是寻找一个$\tilde w$使 $\hat{J}(\boldsymbol w) $取最小值)：</p>
+<ol>
+<li>可以看到式(1)中的二次函数是关于$\hat w$对称的，所以若要使式(1)最小，那么必有：$|w_i|\lt|\hat w|$，因为在二次项$\frac 12 H_{i,i}(w_i-\hat w_i)^2$不变的前提下，这样可以使得$\alpha|w_i|$更小。</li>
+<li>$sign(w_i)=sign(\hat w_i)$或$w_i=0$，因为在$\alpha|w_i|$不变的情况下，$sign(w_i)=sign(\hat w_i)$或$w_i=0$可以使式(1)更小。</li>
+</ol>
+<p>当$sign(w_i)=sign(\hat w_i)$时结合公式(2)，得：</p>
+<p>$$<br>\begin {aligned}<br>&amp; H_{i,i}(w_i-\hat w_i)+\alpha \cdot sign(\hat w_i) = 0 \\<br>w_i &amp;= \hat w_i - \frac {\alpha}{H_{i,i}} \sign(\hat w_i) \\<br>       &amp; = \sign(\hat w_i) |\hat w_i|  - \frac {\alpha}{H_{i,i}} \sign(\hat w_i) \\<br>       &amp; = \sign(\hat w_i)(|\hat w_i| -  \frac {\alpha}{H_{i,i}})<br>\end {aligned}<br>$$</p>
+<p>但是这个公式不能满足$sign(w_i)=sign(\hat w_i)$这个条件，因为$|\hat w_i| \lt \frac{\alpha}{H_{i,i}}$时，$sign(w_i)= - sign(\hat w_i)$，这就是$w_i=0$时的条件。使 $\hat{J}(\boldsymbol w) $取最小值的$\tilde w$ 的第$i$维是：</p>
+<p>$$<br>\tilde w_i = w_i = \left \{<br>      \begin {aligned}<br>             &amp;\sign(\hat w_i)(|\hat w_i| -  \frac {\alpha}{H_{i,i}})&amp; , &amp; |\hat w_i| &gt;  \frac {\alpha}{H_{i,i}} \\<br>             &amp;0                                                                            &amp; , &amp; |\hat w_i| \le  \frac {\alpha}{H_{i,i}} \\<br>      \end {aligned}<br>\right .<br>$$</p>
+<p>将上式中的分段函数合并一下得到如下公式：</p>
+<p>$$<br>\tilde w_i = sign(\hat w_i) \max\left\{ |\hat w_i| - \frac{\alpha}{H_{i,i}},0 \right\}<br>$$</p>
+<p>根据以上公式总结如下：</p>
+<ul>
+<li>1.若$|\hat w_i| \leq \frac{\alpha}{H_{i,i}}$，$\tilde w_i=0$ 。此时$\hat{J}(\boldsymbol w) $中的正则化项起到的主导作用。</li>
+<li>2.若$|\hat w_i| \gt \frac{\alpha}{H_{i,i}}​$，$\tilde w_i = \sign(\hat w_i)(|\hat w_i| -  \frac {\alpha}{H_{i,i}})​$ ，正则化结果$\tilde w_i​$是将$\hat w_i​$沿着第$i​$个坐标轴向该轴的原点方向移动$\frac{\alpha}{H_{i,i}}​$得到的。</li>
+</ul>
+<ol start="2">
+<li><strong>几何角度</strong></li>
+</ol>
+<p><img src="Norm_Regularization_for_DeepLearning-Neural_networks/L1_regularization.png" alt="L1_regularization"></p>
+<p>蓝线椭圆表示没有正则化目标函数的等值线。红线圆圈表示$L^2$正则化项的等值线。在$\tilde w$点，原始目标函数和正则化项的和达到最小值。</p>
+<h1 id="3-关于近似"><a href="#3-关于近似" class="headerlink" title="3 关于近似"></a>3 关于近似</h1><p>在这一节介绍$L^1$范数和$L^2$范数正则化项对目标函数的影响时都采用了近似。我个人对于这一点是很疑惑的，我思考的结论是这样的：</p>
+<ul>
+<li>我们的目标是：假设$\tilde w$ 是正则化目标函数的最小值，我们希望最终看到的是$\tilde {w}_i$和$\hat w_i$的代数关系。</li>
+<li>近似的作用是使用<strong>特殊情形下的目标函数</strong> 来代替 <strong>一般化的目标函数</strong>进行问题论述的，因为一般化的目标函数很难直观的说明问题(即，$\tilde {w}_i$和$\hat w_i$的代数关系)。</li>
+<li>在$L^2$范数正则化问题中，特殊情形下的目标函数指的是原始目标函数正好是二次函数(quadratic)。</li>
+<li>在$L^1$范数正则化问题中，特殊情形下的目标函数指的是原始目标函数正好是二次函数(quadratic)，并且训练数据集的各维度的特征是不相关的（比如使用了PCA算法对训练数据做了预处理）。</li>
+<li>我们得出的结论都是在这些特殊情形下得出的。</li>
+</ul>
+<p>这种想法可能不对，先放在这里，如果以后有更好的理解在回来修改。</p>
+<h1 id="4-tensorflow实现代码"><a href="#4-tensorflow实现代码" class="headerlink" title="4 tensorflow实现代码"></a>4 tensorflow实现代码</h1><p>下面使用我从 <a href="https://tensorflow.google.cn/tutorials/keras/overfit_and_underfit" target="_blank" rel="noopener">https://tensorflow.google.cn/tutorials/keras/overfit_and_underfit</a>中抽取出来的部分代码展示 正则化在深度学习中的泛化作用，顺带也展示一下dropout 在模型泛化中的作用</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> __future__ <span class="keyword">import</span> absolute_import, division, print_function, unicode_literals</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">from</span> tensorflow <span class="keyword">import</span> keras</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line">%matplotlib inline</span><br><span class="line"></span><br><span class="line"><span class="comment"># download data</span></span><br><span class="line">NUM_WORDS = <span class="number">10000</span></span><br><span class="line">(train_data, train_labels), (test_data, test_labels) = keras.datasets.imdb.load_data(num_words=NUM_WORDS)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">multi_hot_sequences</span><span class="params">(sequences, dimension)</span>:</span></span><br><span class="line">    <span class="comment"># Create an all-zero matrix of shape (len(sequences), dimension)</span></span><br><span class="line">    results = np.zeros((len(sequences), dimension))</span><br><span class="line">    <span class="keyword">for</span> i, word_indices <span class="keyword">in</span> enumerate(sequences):</span><br><span class="line">        results[i, word_indices] = <span class="number">1.0</span>  <span class="comment"># set specific indices of results[i] to 1s</span></span><br><span class="line">    <span class="keyword">return</span> results</span><br><span class="line">train_data = multi_hot_sequences(train_data, dimension=NUM_WORDS)</span><br><span class="line">test_data = multi_hot_sequences(test_data, dimension=NUM_WORDS)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">baseline_model = keras.Sequential([</span><br><span class="line">    <span class="comment"># `input_shape` is only required here so that `.summary` works.</span></span><br><span class="line">    keras.layers.Dense(<span class="number">16</span>, activation=tf.nn.relu, input_shape=(NUM_WORDS,)),</span><br><span class="line">    keras.layers.Dense(<span class="number">16</span>, activation=tf.nn.relu),</span><br><span class="line">    keras.layers.Dense(<span class="number">1</span>, activation=tf.nn.sigmoid)</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">baseline_model.compile(optimizer=<span class="string">'adam'</span>,</span><br><span class="line">                       loss=<span class="string">'binary_crossentropy'</span>,</span><br><span class="line">                       metrics=[<span class="string">'accuracy'</span>, <span class="string">'binary_crossentropy'</span>])</span><br><span class="line"></span><br><span class="line">baseline_history = baseline_model.fit(train_data,</span><br><span class="line">                                      train_labels,</span><br><span class="line">                                      epochs=<span class="number">15</span>,</span><br><span class="line">                                      batch_size=<span class="number">512</span>,</span><br><span class="line">                                      validation_data=(test_data, test_labels),</span><br><span class="line">                                      verbose=<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">l2_model = keras.models.Sequential([</span><br><span class="line">    keras.layers.Dense(<span class="number">16</span>, kernel_regularizer=keras.regularizers.l2(<span class="number">0.001</span>),</span><br><span class="line">                       activation=tf.nn.relu, input_shape=(NUM_WORDS,)),</span><br><span class="line">    keras.layers.Dense(<span class="number">16</span>, kernel_regularizer=keras.regularizers.l2(<span class="number">0.001</span>),</span><br><span class="line">                       activation=tf.nn.relu),</span><br><span class="line">    keras.layers.Dense(<span class="number">1</span>, activation=tf.nn.sigmoid)</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">l2_model.compile(optimizer=<span class="string">'adam'</span>,</span><br><span class="line">                 loss=<span class="string">'binary_crossentropy'</span>,</span><br><span class="line">                 metrics=[<span class="string">'accuracy'</span>, <span class="string">'binary_crossentropy'</span>])</span><br><span class="line"></span><br><span class="line">l2_model_history = l2_model.fit(train_data, train_labels,</span><br><span class="line">                                epochs=<span class="number">15</span>,</span><br><span class="line">                                batch_size=<span class="number">512</span>,</span><br><span class="line">                                validation_data=(test_data, test_labels),</span><br><span class="line">                                verbose=<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">dpt_model = keras.models.Sequential([</span><br><span class="line">    keras.layers.Dense(<span class="number">16</span>, activation=tf.nn.relu, input_shape=(NUM_WORDS,)),</span><br><span class="line">    keras.layers.Dropout(rate=<span class="number">0.5</span>),</span><br><span class="line">    keras.layers.Dense(<span class="number">16</span>, activation=tf.nn.relu),</span><br><span class="line">    keras.layers.Dropout(rate=<span class="number">0.5</span>),</span><br><span class="line">    keras.layers.Dense(<span class="number">1</span>, activation=tf.nn.sigmoid)</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">dpt_model.compile(optimizer=<span class="string">'adam'</span>,</span><br><span class="line">                  loss=<span class="string">'binary_crossentropy'</span>,</span><br><span class="line">                  metrics=[<span class="string">'accuracy'</span>,<span class="string">'binary_crossentropy'</span>])</span><br><span class="line"></span><br><span class="line">dpt_model_history = dpt_model.fit(train_data, train_labels,</span><br><span class="line">                                  epochs=<span class="number">20</span>,</span><br><span class="line">                                  batch_size=<span class="number">512</span>,</span><br><span class="line">                                  validation_data=(test_data, test_labels),</span><br><span class="line">                                  verbose=<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">plot_history</span><span class="params">(histories, key=<span class="string">'binary_crossentropy'</span>)</span>:</span></span><br><span class="line">    plt.figure(figsize=(<span class="number">16</span>, <span class="number">10</span>))</span><br><span class="line">    <span class="keyword">for</span> name, history <span class="keyword">in</span> histories:</span><br><span class="line">        val = plt.plot(history.epoch, history.history[<span class="string">'val_'</span> + key],</span><br><span class="line">                       <span class="string">'--'</span>, label=name.title() + <span class="string">' Val'</span>)</span><br><span class="line">        plt.plot(history.epoch, history.history[key], color=val[<span class="number">0</span>].get_color(),</span><br><span class="line">                 label=name.title() + <span class="string">' Train'</span>)</span><br><span class="line">    plt.xlabel(<span class="string">'Epochs'</span>)</span><br><span class="line">    plt.ylabel(key.replace(<span class="string">'_'</span>, <span class="string">' '</span>).title())</span><br><span class="line">    plt.legend()</span><br><span class="line">    plt.xlim([<span class="number">0</span>, max(history.epoch)])</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">plot_history([(<span class="string">'baseline'</span>, baseline_history),</span><br><span class="line">              (<span class="string">'l2'</span>, l2_model_history)])</span><br></pre></td></tr></table></figure>
+<p><img src="Norm_Regularization_for_DeepLearning-Neural_networks/L2.png" alt="png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">plot_history([(<span class="string">'baseline'</span>, baseline_history),</span><br><span class="line">              (<span class="string">'dropout'</span>, dpt_model_history)])</span><br></pre></td></tr></table></figure>
+<p><img src="Norm_Regularization_for_DeepLearning-Neural_networks/dropout.png" alt="png"></p>
+<p>可以发现加入正则化项的模型相对于baseline的泛化能力更强。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p>Deep Learning</p>
+<p>线性代数-第五版-同济</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Neural-Network/" rel="tag"># Neural Network</a>
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Output_Units_and_Cost_Functions-Neural_networks.html" rel="next" title="输出层激活函数和模型损失函数-神经网络">
+                <i class="fa fa-chevron-left"></i> 输出层激活函数和模型损失函数-神经网络
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/from-Lagrange-Multiplier-to-KKT-Conditions.html" rel="prev" title="从Lagrange multiplier到KKT条件">
+                从Lagrange multiplier到KKT条件 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#0-概述"><span class="nav-number">1.</span> <span class="nav-text">0 概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-L-2-范数正则化"><span class="nav-number">2.</span> <span class="nav-text">1 $L^2$范数正则化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-L-1-范数"><span class="nav-number">3.</span> <span class="nav-text">2 $L^1$范数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-关于近似"><span class="nav-number">4.</span> <span class="nav-text">3 关于近似</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-tensorflow实现代码"><span class="nav-number">5.</span> <span class="nav-text">4 tensorflow实现代码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,3 @@
+http://weirping.coding.me/blog/tensorflow-datasets.html
+http://weirping.coding.me/blog/note-of-relevence-socres.html
+http://weirping.coding.me/blog/Chi-Square-Test.html

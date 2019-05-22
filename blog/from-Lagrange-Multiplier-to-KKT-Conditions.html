@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="最近看书的过程中遇到了几次需要用到KKT条件的地方，每次都要重新翻书。本文单独将这一块的知识点拉出来做一下笔记，备查。 note : 本文中的所有向量默认都是列向量 概述Lagrange multiplier和KKT都是用来解决非线性规划问题的。非线性规划的数学模型如下：$$\left \{\begin {aligned}\min &amp;amp;   f(x) \\s.t. &amp;amp;   h_i(x">
+<meta name="keywords" content="Machine Learning,Math">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从Lagrange multiplier到KKT条件">
+<meta property="og:url" content="http://weirping.coding.me/blog/from-Lagrange-Multiplier-to-KKT-Conditions.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="最近看书的过程中遇到了几次需要用到KKT条件的地方，每次都要重新翻书。本文单独将这一块的知识点拉出来做一下笔记，备查。 note : 本文中的所有向量默认都是列向量 概述Lagrange multiplier和KKT都是用来解决非线性规划问题的。非线性规划的数学模型如下：$$\left \{\begin {aligned}\min &amp;amp;   f(x) \\s.t. &amp;amp;   h_i(x">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/from-Lagrange-Multiplier-to-KKT-Conditions/KKT.png">
+<meta property="og:updated_time" content="2018-11-29T15:31:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="从Lagrange multiplier到KKT条件">
+<meta name="twitter:description" content="最近看书的过程中遇到了几次需要用到KKT条件的地方，每次都要重新翻书。本文单独将这一块的知识点拉出来做一下笔记，备查。 note : 本文中的所有向量默认都是列向量 概述Lagrange multiplier和KKT都是用来解决非线性规划问题的。非线性规划的数学模型如下：$$\left \{\begin {aligned}\min &amp;amp;   f(x) \\s.t. &amp;amp;   h_i(x">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/from-Lagrange-Multiplier-to-KKT-Conditions/KKT.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/from-Lagrange-Multiplier-to-KKT-Conditions.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>从Lagrange multiplier到KKT条件 | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/from-Lagrange-Multiplier-to-KKT-Conditions.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">从Lagrange multiplier到KKT条件
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-29 21:49:00" itemprop="dateCreated datePublished" datetime="2018-01-29T21:49:00+08:00">2018-01-29</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Math/" itemprop="url" rel="index"><span itemprop="name">Math</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近看书的过程中遇到了几次需要用到KKT条件的地方，每次都要重新翻书。本文单独将这一块的知识点拉出来做一下笔记，备查。</p>
+<p><em>note : 本文中的所有向量默认都是列向量</em></p>
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>Lagrange multiplier和KKT都是用来解决非线性规划问题的。非线性规划的数学模型如下：<br>$$<br>\left \{<br>\begin {aligned}<br>\min &amp;   f(x) \\<br>s.t. &amp;   h_i(x) = 0 (i=1,2,\dots ,m) \\<br>     &amp;   g_i(x) \ge 0 (i=1,2,\dots ,l) \\<br>\end {aligned}<br>\right .<br>$$<br>可以看出在这个问题中存在两种约束：等式约束和不等式约束 。把满足所有约束条件的点称做<strong>可行点</strong> ( 可行解 ) , 所有可行点的集合称做<strong>可行域</strong>。</p>
+<ul>
+<li>拉格朗日乘数法(Lagrange multiplier)是用于解决只含等式约束的非线性规划问题的。</li>
+<li>KKT条件是用于解决包含不等式约束问题的。</li>
+</ul>
+<p>其中等式约束可以使用不等式约束等价表示：</p>
+<p>$$<br>h_i(x) = 0 \iff<br>\left \{<br>\begin {aligned}<br>h_i(x) \ge 0 \\<br>-h_i(x) \ge 0 \\<br>\end {aligned}<br>\right .<br>$$</p>
+<p>因而 , 也可将非线性规划的数学模型写成以下形式:</p>
+<p>$$<br>\left \{<br>\begin {aligned}<br>\min &amp;  f(x) \\<br>s.t. &amp;  g_i(x) \ge 0 (i=1,2,\dots ,l) \\<br>\end {aligned}<br>\right .<br>$$</p>
+<h1 id="Lagrange-multiplier"><a href="#Lagrange-multiplier" class="headerlink" title="Lagrange multiplier"></a>Lagrange multiplier</h1><p>拉格朗日算子(Lagrange multiplier)在高等数学中有比较详细的讲解，本文先简要的记录一下。拉格朗日算子是用来解决具有等式约束的极值问题的，如：<br>$$<br>\left \{<br>\begin {aligned}<br>\min &amp;  f(x) \\<br>s.t. &amp;  h_i(x) = 0 (i=1,2,\dots ,m)\\<br>\end {aligned}<br>\right .<br>$$<br>即在$m$个等式约束下寻找能够使$f(x)$最小化的$x$ 。上式也可以写成向量形式：<br>$$<br>\left \{<br>\begin {aligned}<br>\min &amp;  f(x) \\<br>s.t. &amp;  H(x) = 0  \\<br>\end {aligned}<br>\right .<br>$$<br>其中：<br>$$<br>H(x) =<br>\begin{Bmatrix}<br>h_1(x) \\<br>h_2(x) \\<br>\vdots \\<br>h_m(x) \\<br>\end{Bmatrix}<br>=\begin{Bmatrix}<br>0 \\<br>0 \\<br>\vdots \\<br>0 \\<br>\end{Bmatrix}<br>$$<br>求解这个等式约束的最优化问题的步骤如下：</p>
+<p>第一步：构建拉格朗日函数，将求$f(x)$最小值转变为求拉格朗日函数的最小值$L(x, \lambda)$<br>$$<br>L(x, \lambda) = f(x) - \lambda^{\mathrm T} H(x)<br>$$<br>第二步：假设点$\hat x$能够使 f(x) 在满足约束的条件下取的最小值，那么在该点处满足拉格朗日函数的 <strong>一阶必要条件</strong>。即，对$L(x, \lambda)$关于$x$和$\lambda$求偏导数，并令其为0<br>$$<br>\left \{<br>\begin {aligned}<br> \nabla_x f(\hat x) -  J_H (\hat x)  \lambda = 0 \\<br> H(\hat x) = 0 \\<br> \end {aligned}<br>\right .  \tag1<br>$$</p>
+<p>其中$ J_H (x)$是等式约束的雅克比矩阵，它的每一行表示一个等式约束关于$x$的梯度。<br>$$<br>J_H (x) =<br>\begin {Bmatrix}<br>(\nabla_x h_1(x))^{\mathrm{T}} \\<br>(\nabla_x h_2(x))^{\mathrm{T}} \\<br>\vdots \\<br>(\nabla_x h_m(x))^{\mathrm{T}} \\<br>\end {Bmatrix}<br>$$</p>
+<p>通过求解(1)式得到能够使$f(x)$最小化的$\hat x$ ，和$f(x)$的最小值。</p>
+<p><strong>通过上式可以看出在极小值点处 $\nabla_x f(x) =  J_H (x) \lambda$ ，即，该点处函数$f(x)$的梯度可以用所有等式约束的梯度向量线性表示。</strong> （这句话是为了和KKT条件问题的论述相对应。）</p>
+<p>下面以两种情况对该结论做以说明：</p>
+<ul>
+<li>如果等式约束只有一个：如</li>
+</ul>
+<p>$$<br>\left \{<br>\begin {aligned}<br>\min &amp;  f(x) \\<br>s.t. &amp;  h_1(x) = 0 \\<br>\end {aligned}<br>\right .<br>$$</p>
+<p>则可以得到其拉个朗日函数的一阶条件如下：<br>$$<br>\left \{<br>\begin {aligned}<br> \nabla_x f(\hat x) - \lambda  \nabla_x h_1(\hat x) = 0 \\<br> h_1(\hat x) = 0 \\<br> \end {aligned}<br>\right .<br>$$<br>此时极值点处函数$f(x)$的梯度和等式约束$h_1(x)$的梯度方向相同。</p>
+<ul>
+<li>如果等式约束有两个：如</li>
+</ul>
+<p>$$<br>\left \{<br>\begin {aligned}<br>\min &amp;  f(x) \\<br>s.t. &amp;  h_1(x) = 0 \\<br>     &amp;  h_2(x) = 0 \\<br>\end {aligned}<br>\right .<br>$$</p>
+<p>则可以得到其拉个朗日函数的一阶条件如下：<br>$$<br>\left \{<br>\begin {aligned}<br>\nabla_x f(\hat x) - \lambda_1  \nabla_x h_1(\hat x) - \lambda_2  \nabla_x h_2(\hat x) &amp; = 0 \\<br>                                                                           h_1(\hat x) &amp; = 0 \\<br>                                                                           h_2(\hat x) &amp; = 0 \\<br>\end {aligned}<br>\right .<br>$$<br>此时极值点处函数$f(x)$的梯度可以用等式约束$h_1(x)$与$h_2(x)$的梯度向量线性表示。</p>
+<h1 id="KKT"><a href="#KKT" class="headerlink" title="KKT"></a>KKT</h1><p>在数学中，KKT条件是：</p>
+<ul>
+<li>一个非线性规划问题有最优化解的一个<strong>一阶必要条件</strong>。</li>
+<li>一个广义化拉格朗日乘数法。</li>
+<li>用于解决包含不等式约束的最优化问题。</li>
+</ul>
+<p>存在这样一个非线性规划问题：</p>
+<p>$$<br>\left \{<br>\begin {aligned}<br>\min &amp;  f(x) \\<br>s.t. &amp;  g_i(x) \ge 0 (i=1,2,\dots ,l) \\<br>\end {aligned}<br>\right . \tag 2<br>$$</p>
+<p>假定$\hat x$是非线性规划的极小点，该点可能位于可行域的内部，也可能处于可行域的边界上。</p>
+<p>若为前者，这事实上是个无约束优化问题, 最优点 $\hat x$必满足条件 $\nabla_x f(\hat x) = 0$ ；</p>
+<p>若为后者，情况就复杂得多了，现在我们来讨论后一种情形。</p>
+<p><img src="from-Lagrange-Multiplier-to-KKT-Conditions/KKT.png" alt="KKT"></p>
+<p>设最优点为$\hat x$。我们先讨论两个比较简单的特殊情况：$\hat x$落在一个不等式约束的边界上；$\hat x$处在两个不等式约束的共同作用下。</p>
+<ol>
+<li>当$\hat x$落在一个不等式约束的边界上，即$\hat x$只处在一个不等式约束的作用下，假设这个不等式约束就是$g_1(x) \ge 0$ ，此时最优点$\hat x$必定落在函数$g_1(x) = 0$ 上。此时可以将问题转化为等式约束的非线性优化问题。</li>
+</ol>
+<p>$$<br>  \left \{<br>  \begin {aligned}<br>  \min &amp;  f(x) \\<br>  s.t. &amp;  g_1(x) = 0 \\<br>  \end {aligned}<br>  \right .<br>$$</p>
+<p>  则可以得到其拉个朗日函数的 <strong>一阶必要条件</strong> 如下：<br>$$<br>\left \{<br>\begin {aligned}<br>\nabla_x f(\hat x) - \lambda_1  \nabla_x g_1(\hat x) &amp; = 0 \\<br>                                            g_1(\hat x) &amp; = 0 \\<br>\end {aligned}<br>\right .<br>$$<br>  如右图所示，虚线为$f(x)$的等值线，实线为约束函数$g_1(x)=0$ ，可行域在约束函数右侧。由于最优点$\hat x$在可行域的边界上，此时在点$\hat x$处没有可行下降方向，所以$\nabla_x g_1(\hat x)$必与$- \nabla_x f(\hat x)$在一条直线上且方向相反。结合上式可知此时 $\lambda_1 \ge 0$ ，所以：<br>$$<br>\left \{<br>  \begin {aligned}<br>   \nabla_x f(\hat x) - \lambda_1  \nabla_x g_1(\hat x) &amp; = 0 \\<br>                                            g_1(\hat x) &amp; = 0 \\<br>                                              \lambda_1 &amp; \ge 0 \\<br>   \end {aligned}<br>  \right .<br>$$</p>
+<ol start="2">
+<li>若$\hat x$点有两个起作用约束 ，例如有 $g_1 (\hat x) = 0$ 和 $g_2 (\hat x) = 0$。此时可以将问题转化为等式约束的非线性优化问题。</li>
+</ol>
+<p>$$<br>  \left \{<br>  \begin {aligned}<br>  \min &amp;  f(x) \\<br>  s.t. &amp;  g_1(x) = 0 \\<br>       &amp;  g_2(x) = 0 \\<br>  \end {aligned}<br>  \right .<br>$$</p>
+<p>  则可以得到其拉个朗日函数的一阶条件如下：<br>$$<br>  \left \{<br>  \begin {aligned}<br>   \nabla_x f(\hat x) - \lambda_1  \nabla_x h_1(\hat x) - \lambda_2  \nabla_x h_2(\hat x) &amp; = 0 \\<br>                                                                              g_1(\hat x) &amp; = 0 \\<br>                                                                              g_2(\hat x) &amp; = 0 \\<br>  \end {aligned}<br>  \right .<br>$$<br>  如左图所示，虚线为$f(x)$的等值线，实线为约束函数$g_1(x)=0$ 和$g_2(x)=0$，可行域在约束函数右侧。由于最优点$\hat x$在由$g_1(x)=0$ 和$g_2(x)=0$共同围成的边界上，所以$- \nabla_x f(\hat x)$与$\nabla_x g_1(\hat x)$的夹角必定大约90度，也就是说$\nabla_x f(\hat x)$必定处在$\nabla_x g_1(\hat x)$与$\nabla_x g_2(\hat x)$组成的夹角之内。结合上式可知此时 $\lambda_1 \ge 0 ,  \lambda_1 \ge 0$ ，所以：<br>$$<br>  \left \{<br>  \begin {aligned}<br>  \nabla_x f(\hat x) - \lambda_1  \nabla_x h_1(\hat x) - \lambda_2  \nabla_x h_2(\hat x) &amp; = 0 \\<br>                                                                             g_1(\hat x) &amp; = 0 \\<br>                                                                             g_2(\hat x) &amp; = 0 \\<br>                                                            \lambda_1 \ge 0 ,  \lambda_2 &amp; \ge 0 \\<br>  \end {aligned}<br>  \right .<br>$$</p>
+<ol start="3">
+<li><p>若$\hat x$点有K个起作用约束($0 \le K \le l$) ，此时</p>
+<p>$$<br>\left \{<br>\begin {aligned}<br> \nabla_x f(\hat x) - \sum_k^K \lambda_k  \nabla_x g_k(\hat x) &amp;= 0 \\<br> g_k(\hat x) &amp;= 0, (k = 1,2 \dots K)\\<br> \lambda_k &amp; \ge 0, (k = 1,2 \dots K)\\<br> \end {aligned}<br>\right .<br>$$</p>
+</li>
+</ol>
+<p>以上条件只是针对最优点$\hat x$处于可行域的边界上论述的，还有一种情况就是最优点处在可行域内部。将两种情况（最优点处在可行域内部和边界上）合并起来表示如下：<br>$$<br>\left \{\begin {aligned} \nabla_x f(\hat x) - \sum_i^l \lambda_i  \nabla_x g_i(\hat x) &amp;= 0 \\<br>g_i(\hat x) &amp;\ge 0, (i = 1,2 \dots l) \\<br>\lambda_i g_i(\hat x) &amp;= 0, (i = 1,2 \dots l)  \\<br>\lambda_i &amp; \ge 0, (i = 1,2 \dots l) \ <br>\end {aligned}\right .<br>$$<br>可以看出当 $g_i(\hat x) = 0$ 时，它可能是对于最优点$\hat x$起作用的约束 ， $\lambda_i$可以不为零；当$g_i(\hat x) \ne 0$ 时，即$g_i(\hat x) \gt 0$ ，此时它一定不是对最优点$\hat x$起作用的约束，此时必有$\lambda_i = 0$ 。</p>
+<p>现可将库恩 - 塔克条件叙述如下 :设 $\hat x$ 是非线性规划式(2)的极小点 , 而且在 $\hat x$ 点的各起作用约束的梯度线性无关，则存在向量 $\Lambda = (\lambda_1 ,\lambda_2, \dots, \lambda_l)$ ， 使下述条件成立 :<br>$$<br>\left \{<br>\begin {aligned}<br>\nabla_x f(\hat x) - \sum_i^l \lambda_i  \nabla_x g_i(\hat x) &amp;= 0 \\<br>g_i(\hat x) &amp;\ge 0, (i = 1,2 \dots l) \\<br>\lambda_i g_i(\hat x) &amp;= 0, (i = 1,2 \dots l) \\<br>\lambda_i &amp; \ge 0, (i = 1,2 \dots l) \\<br>\end {aligned}<br>\right .<br>$$</p>
+<p>库恩-塔克条件是非线性规划领域中最重要的理论成果之一，是确定某点为最优点的<strong>必要条件</strong>。但一般来说它并不是充分条件，因而满足这个条件的点不一定就是最优点。</p>
+<p><strong>对于凸规划问题，KKT条件既是最优点存在的必要条件，同时也是充分条件。</strong></p>
+<h1 id="KKT条件总结"><a href="#KKT条件总结" class="headerlink" title="KKT条件总结"></a>KKT条件总结</h1><p>如本开头部分所述，含有不等式约束的非线性优化问题可以有多种表述，本节直接列出各种该表述的和其对饮高的KKT条件。<br>$$<br>\left \{<br>\begin {aligned}<br>      &amp; \min f(x) \\<br>s.t. &amp; g_i(x) \ge 0 (i=1,2,\dots ,l) \\<br>\end {aligned}<br>\right .<br>\Rightarrow<br>\left \{<br>\begin {aligned}<br>\nabla_x f(\hat x) - \sum_i^l \lambda_i  \nabla_x g_i(\hat x) &amp;= 0 \\<br>                                                                                     g_i(\hat x) &amp;\ge 0, (i = 1,2 \dots l)  \\<br>                                                                  \lambda_i g_i(\hat x) &amp;= 0, (i = 1,2 \dots l) \\<br>                                                                                    \lambda_i &amp; \ge 0, (i = 1,2 \dots l) \\<br>\end {aligned}<br>\right .<br>$$</p>
+<p>$$<br>\left \{<br>\begin {aligned}<br>      &amp; \min f(x) \\<br>s.t. &amp; g_i(x) \le 0 (i=1,2,\dots ,l) \\<br>\end {aligned}<br>\right .<br>\Rightarrow<br>\left \{<br>\begin {aligned}<br> \nabla_x f(\hat x) + \sum_i^l \lambda_i  \nabla_x g_i(\hat x) &amp;= 0 \\<br>                                                                                      g_i(\hat x) &amp;\le 0, (i = 1,2 \dots l) \\<br>                                                                    \lambda_i g_i(\hat x) &amp;= 0, (i = 1,2 \dots l) \\<br>                                                                                      \lambda_i &amp; \ge 0, (i = 1,2 \dots l) \\<br> \end {aligned}<br>\right .<br>$$</p>
+<p>$$<br>\left \{<br>\begin {aligned}<br>      &amp; \min f(x) \\<br>s.t. &amp; h_j(x) = 0 (j=1,2,\dots ,m) \\<br>      &amp; g_i(x) \ge 0 (i=1,2,\dots ,l) \\<br>\end {aligned}<br>\right .<br>\Rightarrow<br>\left \{<br>\begin {aligned}<br> \nabla_x f(\hat x) - \sum_j^m \gamma_j \nabla_x h_j(\hat x) - \sum_i^l \lambda_i  \nabla_x g_i(\hat x) &amp;= 0 \\<br>                                                                                                                                                                h_j(\hat x) &amp;= 0 (j=1,2,\dots ,m) \\<br>                                                                                                                                                                g_i(\hat x) &amp;\ge 0, (i = 1,2 \dots l) \\<br>                                                                                                                                             \lambda_i g_i(\hat x) &amp;= 0, (i = 1,2 \dots l) \\<br>                                                                                                                                                               \lambda_i &amp; \ge 0, (i = 1,2 \dots l) \\<br> \end {aligned}<br>\right .<br>$$</p>
+<p>$$<br>\left \{<br>\begin {aligned}<br>      &amp; \min f(x) \\<br>s.t. &amp; h_j(x) = 0 (j=1,2,\dots ,m) \\<br>      &amp; g_i(x) \le 0 (i=1,2,\dots ,l) \\<br>\end {aligned}<br>\right .<br>\Rightarrow<br>\left \{<br>\begin {aligned}<br> \nabla_x f(\hat x) + \sum_j^m \gamma_j \nabla_x h_j(\hat x) + \sum_i^l \lambda_i  \nabla_x g_i(\hat x) &amp;= 0 \\<br>                                                                                                                                                                  h_j(\hat x) &amp;= 0 (j=1,2,\dots ,m) \\<br>                                                                                                                                                                  g_i(\hat x) &amp;\le 0, (i = 1,2 \dots l) \\<br>                                                                                                                                               \lambda_i g_i(\hat x) &amp;= 0, (i = 1,2 \dots l) \\<br>                                                                                                                                                                 \lambda_i &amp; \ge 0, (i = 1,2 \dots l) \\<br> \end {aligned}<br>\right .<br>$$</p>
+<p>先列出这四种表述。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p>运筹学-第三版</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+            <a href="/tags/Math/" rel="tag"># Math</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Norm_Regularization_for_DeepLearning-Neural_networks.html" rel="next" title="范数正则化-神经网络">
+                <i class="fa fa-chevron-left"></i> 范数正则化-神经网络
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/machine-connect-github.html" rel="prev" title="将一台机器连接到github">
+                将一台机器连接到github <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lagrange-multiplier"><span class="nav-number">2.</span> <span class="nav-text">Lagrange multiplier</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#KKT"><span class="nav-number">3.</span> <span class="nav-text">KKT</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#KKT条件总结"><span class="nav-number">4.</span> <span class="nav-text">KKT条件总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

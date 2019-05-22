@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="概述符号定义$L$ : 语言, 如 汉语, 英语, 或者一门专门的语言. $T$ : 从语言$L$ 中随机抽样的样本.  $s$ : 语言中的一个句子.  语言模型(language model)根据语言样本估计出的句子的概率分布$P(s)​$称为语言$𝐿​$的语言模型. 语言模型给句子赋以概率，语言$L​$中所有句子的概率之和为1.$$\sum_{s \in L} P(s) = 1$$语言模型">
+<meta name="keywords" content="NLP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="n元模型">
+<meta property="og:url" content="http://weirping.coding.me/blog/n-gram-model.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="概述符号定义$L$ : 语言, 如 汉语, 英语, 或者一门专门的语言. $T$ : 从语言$L$ 中随机抽样的样本.  $s$ : 语言中的一个句子.  语言模型(language model)根据语言样本估计出的句子的概率分布$P(s)​$称为语言$𝐿​$的语言模型. 语言模型给句子赋以概率，语言$L​$中所有句子的概率之和为1.$$\sum_{s \in L} P(s) = 1$$语言模型">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/n-gram-model/add-one-counts.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/n-gram-model/add-one-prob.png">
+<meta property="og:updated_time" content="2018-11-07T09:40:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="n元模型">
+<meta name="twitter:description" content="概述符号定义$L$ : 语言, 如 汉语, 英语, 或者一门专门的语言. $T$ : 从语言$L$ 中随机抽样的样本.  $s$ : 语言中的一个句子.  语言模型(language model)根据语言样本估计出的句子的概率分布$P(s)​$称为语言$𝐿​$的语言模型. 语言模型给句子赋以概率，语言$L​$中所有句子的概率之和为1.$$\sum_{s \in L} P(s) = 1$$语言模型">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/n-gram-model/add-one-counts.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/n-gram-model.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>n元模型 | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/n-gram-model.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">n元模型
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-11-07 22:22:22" itemprop="dateCreated datePublished" datetime="2018-11-07T22:22:22+08:00">2018-11-07</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/NLP/" itemprop="url" rel="index"><span itemprop="name">NLP</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="符号定义"><a href="#符号定义" class="headerlink" title="符号定义"></a>符号定义</h2><p>$L$ : 语言, 如 汉语, 英语, 或者一门专门的语言.</p>
+<p>$T$ : 从语言$L$ 中随机抽样的样本. </p>
+<p>$s$ : 语言中的一个句子. </p>
+<h2 id="语言模型-language-model"><a href="#语言模型-language-model" class="headerlink" title="语言模型(language model)"></a>语言模型(language model)</h2><p>根据语言样本估计出的句子的概率分布$P(s)​$称为语言$𝐿​$的语言模型. 语言模型给句子赋以概率，语言$L​$中所有句子的概率之和为1.<br>$$<br>\sum_{s \in L} P(s) = 1<br>$$<br>语言模型应用举例</p>
+<ul>
+<li>语音识别<ul>
+<li>I have <strong>too</strong> many books. ( √ )</li>
+<li>I have <strong>to</strong> many books. (×)</li>
+<li>I have <strong>two</strong> many books. (×)</li>
+</ul>
+</li>
+<li>汉语分词<ul>
+<li>别 <strong>把</strong> <strong>手</strong> 伸 进 别人 的 口袋 里 ( √ )</li>
+<li>别 <strong>把手</strong> 伸 进 别人 的 口袋 里 (×)</li>
+</ul>
+</li>
+<li>机器翻译<br>我喜欢吃苹果 ⇒<br>I like eating apple ( √ )<br>I eating like apple (×)</li>
+</ul>
+<h1 id="语言建模"><a href="#语言建模" class="headerlink" title="语言建模"></a>语言建模</h1><p>给定自然语言$L​$，$p(𝑠)​$未知,  利用给定的语言样本估计$p(𝑠)​$的过程被称作语言建模. </p>
+<p>给定句子$𝑠 = w_1 w_2 \dots w_𝑙$ ，如何计算该句子的概率: $p(𝑠)$</p>
+<p>直接统计语料库中句子$𝑠​$出现的次数. </p>
+<p>应用链式规则，分解计算$p(𝑠)$<br>$$<br>\begin {aligned}<br>p(𝑠) &amp;= p (w_1)p (w_2|w_1)p (w_3 | w_1w_2) \dots p (w_l | w_1w_2… w_{l−1})  \\<br>\\<br>&amp;=\prod_{i=1} p(w_i|w_1w_2… w_{i−1})<br>\end {aligned}<br>$$</p>
+<p>举例如下：</p>
+<p>$$<br>\begin {aligned}<br>&amp;p(john read a book) \\<br>&amp; = p(john)\times p(read john) \times p(a john read)\times p(book|john read a)<br>\end{aligned}<br>$$</p>
+<p>事实上不能用这种方式计算一个句子的概率，原因有两个：</p>
+<ul>
+<li>直接这样计算会导致参数空间过大. 一个语言模型的参数就是所有的这些条件概率.<br>比如，按上面方式计算$P(w_5 |w_1 ,w_2 ,w_3 ,w_4 )​$，这里每个$w_i​$可能的取值有$|V|​$个, 即一个词典大小. 则该模型的参数个数是$|V|^5​$，而且这还不包含$P(w4 | w1, w2, w3)​$的个数，可以看到这样去计算一个句子的概率会使语言模型参数个数过多而无法实用. </li>
+<li>数据稀疏严重. 存在大量可能的字符串是在语料库中未出现过的. </li>
+</ul>
+<h1 id="n元模型"><a href="#n元模型" class="headerlink" title="n元模型"></a>n元模型</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>为了解决參数空间过大的问题. 引入了马尔科夫假设：<strong>随意一个词出现的概率只与它前面出现的有限的一个或者几个词有关. </strong> </p>
+<p> $w_i​$ 的出现只与其之前的$n−1​$个词有关，即n元组(n-gram).<br>$$<br>p(w_i|w_1w_2… w_{i−1}) = p(w_i|w_{i-n+1}w_{i-n+2}… w_{i−1})<br>$$<br>此时：<br>$$<br>\begin {aligned}<br>p(𝑠) &amp;= p (w_1)p (w_2|w_1)p (w_3 | w_1w_2) \dots p (w_l | w_{i-n+1}w_{i-n+2}\dots w_{l−1})  \\<br>\\<br>&amp;=\prod_{i=1}  p(w_i|w_{i-n+1}w_{i-n+2}\dots w_{i−1})<br>\end {aligned}<br>$$<br>根据$n$ 的不同取值可分为:</p>
+<ul>
+<li>一元模型(n=1, unigram)</li>
+<li>二元模型(n=2, bigram)</li>
+<li>三元模型(n=3, trigram)</li>
+</ul>
+<h3 id="n元模型的参数"><a href="#n元模型的参数" class="headerlink" title="n元模型的参数"></a>n元模型的参数</h3><table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:left">参数形式</th>
+<th style="text-align:left">参数数量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">unigram</td>
+<td style="text-align:left">$p(w_i)$</td>
+<td style="text-align:left">$\mid V\mid$</td>
+</tr>
+<tr>
+<td style="text-align:center">bigram</td>
+<td style="text-align:left">$p(w_i\mid w_{i-1})$</td>
+<td style="text-align:left">$\mid V\mid^2$</td>
+</tr>
+<tr>
+<td style="text-align:center">trigram</td>
+<td style="text-align:left">$p(w_i\mid w_{i-2}w_{i-1})$</td>
+<td style="text-align:left">$\mid V\mid^3$</td>
+</tr>
+<tr>
+<td style="text-align:center">n-gram</td>
+<td style="text-align:left">$p(w_i\mid w_{i-n+1} \dots w_{i-1})$</td>
+<td style="text-align:left">$\mid V\mid^n$</td>
+</tr>
+</tbody>
+</table>
+<p>$w \in V$, $V$只词表，|V|代表词表中词的数量<br>可以发现：</p>
+<ul>
+<li>n越大，模型需要的参数越多</li>
+<li>参数数量指数增长</li>
+</ul>
+<p>小结：</p>
+<p>n元模型认为：句子中前面出现的词对后面可能出现的词有很强的预示作用. </p>
+<p>$n​$越大，历史信息越多，模型越准确. </p>
+<h3 id="n的选择"><a href="#n的选择" class="headerlink" title="n的选择"></a>n的选择</h3><table>
+<thead>
+<tr>
+<th></th>
+<th>n 较大时</th>
+<th>n 较小时</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>语境区别性</td>
+<td>提供了更多的语境信息，语境更具区别性</td>
+<td>境信息少，不具区别性</td>
+</tr>
+<tr>
+<td>参数</td>
+<td>参数个数多、计算代价大</td>
+<td>参数个数少、计算代价小</td>
+</tr>
+<tr>
+<td>训练语料</td>
+<td>需要更多的训练语料</td>
+<td>训练语料无需太多</td>
+</tr>
+<tr>
+<td>结果</td>
+<td>参数估计不可靠</td>
+<td>参数估计可靠</td>
+</tr>
+</tbody>
+</table>
+<h1 id="n元模型构建过程"><a href="#n元模型构建过程" class="headerlink" title="n元模型构建过程"></a>n元模型构建过程</h1><ol>
+<li>数据准备: <ul>
+<li>确定训练语料</li>
+<li>对语料进行词例化(tokenization) 或切分</li>
+<li>句子边界标记，增加两个特殊的词<bos>和<eos><br>I eat . → <bos> I eat . <eos><br>I sleep . → <bos> I sleep . <eos></eos></bos></eos></bos></eos></bos></li>
+</ul>
+</li>
+<li>参数估计<br>利用训练语料，估计模型参数</li>
+<li>模型评价</li>
+</ol>
+<h2 id="参数估计"><a href="#参数估计" class="headerlink" title="参数估计"></a>参数估计</h2><p>如何计算其中的每一项条件概率(即参数)呢? <strong>极大似然估计（Maximum Likelihood Estimation，MLE）</strong></p>
+<p>假设语料库中句子和句子互相独立, 是从服从分布为$p(\Theta) $的总体随机抽取的. $\Theta$ 为模型参数, 即上面的条件概率.</p>
+<p>一个句子的概率为: $p(s \mid \Theta) $ .</p>
+<p>整个语料库的概率(似然函数):<br>$$<br>p(T \mid \theta) = \prod_{s_i \in T} p(s \mid \Theta)<br>$$<br>使训练样本似然值(概率)最大的参数$\Theta$ 为<br>$$<br>\Theta_{ML} = \arg\max p(T \mid \Theta)<br>$$<br>该优化问题具有解析解, 其解表示如下:</p>
+<p>令 $c(w_1w_2… w_n)​$表示$n​$元组 $w_1,w_2… w_n​$ 在训练语料中出现的次数. 则：<br>$$<br>p(w_n \mid w_1… w_{n−1})=\frac{c(w_1w_2 \dots w_n)}{c(w_1w_2 \dots w_{n−1})}<br>$$<br>该方法称为<strong>相对频率法(relative frequency estimation)</strong>.  </p>
+<p>如对于如下训练语料：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bos&gt; John read Moby Dick &lt;eos&gt;</span><br><span class="line">&lt;bos&gt; Mary read a different book &lt;eos&gt;</span><br><span class="line">&lt;bos&gt; She read a book by Cher &lt;eos&gt;</span><br></pre></td></tr></table></figure></p>
+<p>使用相对频率发计算模型参数如下：</p>
+<p>$$<br>\begin {aligned}<br>&amp; p( john \mid bos) =\frac {c( bos, john)}{c( bos )}= \frac 13 \\<br>&amp; p (a \mid read) =\frac {c(read, a)}{c(read)}=\frac 23 \\<br>&amp; p( eos \mid book) =\frac {c (book, eos)}{c (book)}=\frac 12 \\<br>&amp; p( book \mid a) =\frac {c(a, book)}{c(a)}=\frac 12 \\<br>&amp; p( read \mid john) =\frac {c(john, read)}{c (john)}=\frac 11<br>\end {aligned}<br>$$</p>
+<p><strong>note</strong> : 取对数避免下溢</p>
+<h1 id="模型评价"><a href="#模型评价" class="headerlink" title="模型评价"></a>模型评价</h1><p>语言模型常用的评价指标有两个,  交叉熵(Cross-Entropy)和困惑度(Perplexity)).</p>
+<h2 id="Cross-Entropy"><a href="#Cross-Entropy" class="headerlink" title="Cross-Entropy"></a>Cross-Entropy</h2><p>语言$L = (X_i) \sim p(x)$ 与其模型q的交叉熵定义为:<br>$$<br>H(L, q) = - \lim \frac 1n \sum_{x_1^n}p(x_1^n) \log q(x_1^n)<br>$$<br> 其中：$x_1^n = x_1, \dots, x_n$ 为语言$L$ 中的句子， $p(x_1^n)$ 为句子$x_1^n$ 在语言$L$中出现的概率(真实)概率，$q(x_1^n)$ 为模型$q$ 对句子 $x_1^n$ 出的概率估计. </p>
+<p>现在仍然无法计算这个语言的交叉熵，因为我们并不知道真实概率$p(x_1^n)​$，不过可以假设这种语言是理想的，即$n​$趋于无穷大时，其全部 word 的概率之和为1. 也就是说，根据信息论的定理：假定语言$L​$ 是稳态(stationary)遍历的(ergodic)随机过程，$L​$ 与其模型$q​$的交叉熵计算公式就变为:<br>$$<br>H(L, q) = - \lim \frac 1n  \log q(x_1^n)<br>$$</p>
+<p>一般地，在$n$足够大时我们近似地采用如下计算方法：<br>$$<br>H(L, q) \approx -  \frac 1n  \log q(x_1^n)<br>$$</p>
+<p>在测试语料上推导如下:</p>
+<p>令$T=w_1 w_2 \dots w_N$为测试语料, 此处假设$N$ 是测试语料的文本长度, 是一个足够大的值. 此时模型$q$ 在测试语料上的交叉熵定义为:<br>$$<br>H(T, q) = - \frac 1N \log q(T)<br>$$<br>对于n-gram模型来说 </p>
+<p>$$<br>\begin {align}<br>&amp; q(T) = \prod_{w_1^n \in V^n} q(w_n \mid w_{1}^{n-1}) \\<br>&amp; p(w_1^n)= \frac {c(w_1^n)}{N}<br>\end {align}<br>$$</p>
+<p>则其交叉熵定义为:</p>
+<p>$$<br>\begin {align}<br>H_{\mathrm{n-gram}}(T, q) &amp;= - \frac 1N \log q(T)  \ <br>&amp;= - \frac 1N \log  \prod_{w_1^n \in V^n} q(w_n \mid w_{1}^{n-1}) \\<br>&amp;= - \frac 1N \sum_{w_1^n \in V^n} \log   q(w_n \mid w_{1}^{n-1}) \\<br>&amp;= - \sum_{w_1^n \in V^n} \frac 1N  \log   q(w_n \mid w_{1}^{n-1}) \\<br>&amp;= - \sum_{w_1^n \in V^n} p(w_1^n)  \log   q(w_n \mid w_{1}^{n-1}) \\<br>\end {align}<br>$$</p>
+<p>交叉熵越小, 语言模型质量越好. </p>
+<p>例如unigram:<br>$$<br>\left .<br>\begin {align}<br>q(T) =  \prod_{i=1}^{N} q(w_i) \\<br>p(w_i)= \frac {c(w_i)}{N}<br>\end {align}<br>\right \}<br>\Rightarrow H_1(T, q) = -  \sum_{i=1}^{N} p(w_i) \log q(w_i)<br>$$<br>推导过程如下:<br>$$<br>H_1(T, q) = - \frac 1N \log q(T)  = - \frac 1N \log  \prod_{i=1}^{N} q(w_i) =  -  \sum_{i=1}^{N} \frac 1N \log q(w_i) = -  \sum_{i=1}^{N} p(w_i) \log q(w_i)<br>$$</p>
+<h2 id="Perplexity"><a href="#Perplexity" class="headerlink" title="Perplexity"></a>Perplexity</h2><p>给定语言$L$ 的样本$T=w_1 w_2 \dots w_N$, 语言 $L$ 的困惑度定义为:<br>$$<br>\begin {align}<br>PP_q &amp;= 2^{H(L, q)} \approx 2^{-  \frac 1N  \log q(x_1^N)} \\<br>&amp;=q(T) ^{-\frac 1N}<br>\end {align}<br>$$<br>对于n-gram模型来说: $q(T) = \prod_{w_1^n \in V^n} q(w_n \mid w_{1}^{n-1})$<br>$$<br>PP_q = \{\prod_{w_1^n \in V^n} q(w_n \mid w_{1}^{n-1}) \} ^{-\frac 1N}<br>$$</p>
+<ul>
+<li>困惑度越小, 语言模型质量越好. </li>
+<li>从以上推导可以看出 交叉熵 和 困惑度 本质是一致的. </li>
+<li>在设计语言模型时，我们通常用困惑度来代替交叉熵衡量语言模型的好坏.<br>比如你对模型进行了一版改进:<br>使用交叉熵评价时, 交叉熵减小了 9.9 - 9.1 =0.8<br>使用困惑度评价时, 困惑度减小了 950 - 540 = 410<br>给老板汇报时你会选用哪个? 反正主流的论文都是用的困惑度作为评价指标. </li>
+</ul>
+<h1 id="数据稀疏问题"><a href="#数据稀疏问题" class="headerlink" title="数据稀疏问题"></a>数据稀疏问题</h1><p>由于训练样本不足而导致所估计的分布不可靠的问题，称为数据稀疏问题</p>
+<p>举例如下: 有如下训练语料：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bos&gt; John read Moby Dick &lt;eos&gt;</span><br><span class="line">&lt;bos&gt; Mary read a different book &lt;eos&gt;</span><br><span class="line">&lt;bos&gt; She read a book by Cher &lt;eos&gt;</span><br></pre></td></tr></table></figure>
+<p>对于一个新的句子Cher read a book. 由于c(Cher read) = 0. 所以$p(Cher read a book)=0$ 这个结论是不合理的. 问题出在现有语料没有覆盖所有情况.</p>
+<p>NLP数据稀疏问题汇总如下:</p>
+<ul>
+<li>zipf定律: 在自然语言的语料库里，一个单词出现的次数与它在频率表里的排名成反比.</li>
+<li>语言中只有很少的常用词, 大部分词都是低频词, 大多数词( n元组)在语料中的出现是稀疏的.</li>
+<li>词的分布是长尾分布，n元组分布亦是如此.</li>
+<li>语料库可以提供少量常用词( n元组)的可靠样本.</li>
+<li>语料库无论怎么扩大, 总是会出现未覆盖的词或( n元组).</li>
+<li><strong>语料库规模扩大，主要是高频词词例的增加, 扩大语料规模不能从根本上解决稀疏问题.</strong></li>
+</ul>
+<p><strong>由于数据稀疏，MLE估计值不是理想的参数估计值</strong></p>
+<h2 id="平滑技术"><a href="#平滑技术" class="headerlink" title="平滑技术"></a>平滑技术</h2><p>解决数据稀疏问题的方法为平滑技术(smoothing), 它的基本思想为: 把在训练样本中出现过的事件(句子)的概率适当减小, 把减小得到的概率值分配给训练语料中没有出现过的事件(句子). </p>
+<p>根据概率的重新分配方法的不同, 平滑技术分为不同的方法. </p>
+<h2 id="简单平滑"><a href="#简单平滑" class="headerlink" title="简单平滑"></a>简单平滑</h2><p>简单平滑 认为未出现的n元组是等概率分布</p>
+<p>这些方法包括 加法平滑、留存平滑、Good-Turing平滑</p>
+<h3 id="加法平滑"><a href="#加法平滑" class="headerlink" title="加法平滑"></a>加法平滑</h3><h4 id="Add-one"><a href="#Add-one" class="headerlink" title="Add-one"></a>Add-one</h4><p>Add-one平滑规定n元组比真实出现次数多一次.</p>
+<p>$$<br>\begin {aligned}<br>&amp; new_count(n-gram)  = count(n-gram) +1 \\<br>\\<br>&amp; p_{ML}(w_n \mid w_1… w_{n−1})=\frac{c(w_1w_2 \dots w_n)}{c(w_1w_2 \dots w_{n−1})} \\<br>\\<br>&amp; p_{+1}(w_n \mid w_1… w_{n−1})=\frac{c(w_1w_2 \dots w_n)+1}{c(w_1w_2 \dots w_{n−1})+ \mid V\mid} \\<br>\end {aligned}<br>$$</p>
+<p>$ \mid V\mid$ 为语料库中词的数量. </p>
+<p>此时:</p>
+<ul>
+<li>没有出现的n元组的频率是1, 具有一个较小的概率.</li>
+<li>出现过的n元组的频率+1, 但是其<strong>概率减小了</strong>.</li>
+</ul>
+<p>下面举例说明Add-one平滑存在的问题.</p>
+<p>bi-gram平滑前后二元组的频率计数</p>
+<p><img src="n-gram-model/add-one-counts.png" alt></p>
+<p>bi-gram平滑前后二元组的概率统计:</p>
+<p><img src="n-gram-model/add-one-prob.png" alt></p>
+<ul>
+<li>由于训练语料中未出现n元组数量太多, 平滑后, 所有未出现的n元组占据了整个概率分布中的一个很大的比例(所有蓝色概率的和). 因此, 在NLP中, Add-one给训练语料中没有出现过的n元组分配了太多的概率空间.  同时大幅减小了出现过的n元组的概率.  这样做显然是不合理的. </li>
+</ul>
+<ul>
+<li>add-one 将出现在训练语料中的那些n元组, 都增加同样的频度值, 这是否公平? 不合理</li>
+<li>add-one 认为所有未出现的n元组概率相等, 这是否合理? 不合理</li>
+</ul>
+<p>优点: Very simple to implement<br>缺点: Takes away too much probability mass from seen events. Assigns too much total probability mass to unseen events.  实际实验中发现未出现的n-gram占的概率和==99.96% .</p>
+<h4 id="Add-K"><a href="#Add-K" class="headerlink" title="Add-K"></a>Add-K</h4><p>在Add-one的基础上做了一点小改动, 原本是加一, 现在加上一个小于1的常数$K$.<br>$$<br>p_{+K}(w_n \mid w_1… w_{n−1})=\frac{c(w_1w_2 \dots w_n)+K}{c(w_1w_2 \dots w_{n−1})+ K\mid V\mid}<br>$$</p>
+<ul>
+<li>Add-K 效果比Add-one好, 仍不理想.</li>
+<li>缺点是这个常数K仍然需要人工确定, 对于不同的语料库$K$可能不同.</li>
+</ul>
+<p>简单平滑方法还有 留存平滑, <a href="https://en.wikipedia.org/wiki/Good%E2%80%93Turing_frequency_estimation" target="_blank" rel="noopener">Good-Turing平滑</a> 等.</p>
+<h2 id="组合平滑-插值和回退"><a href="#组合平滑-插值和回退" class="headerlink" title="组合平滑(插值和回退)"></a>组合平滑(插值和回退)</h2><p>简单平滑认为未出现的n元组等概率分布. 组合平滑.</p>
+<p>那么未出现的n元组概率均匀分布，是否合理？其实是不合理的.<br>例如，假设下面三个bigram均未在训练预料中出现</p>
+<blockquote>
+<p>journal of<br>journal from<br>journal never </p>
+</blockquote>
+<p>但是根据经验  journal of  应该更常见，概率应该更大.  </p>
+<p>同时我们发现越是高阶n元组, 稀疏问题越严重. </p>
+<p>组合平滑的思想就是参考低阶n元组估算高阶n元组的概率分布. 比如: 通过统计发现unigram 中 </p>
+<ul>
+<li>“of”  频率高于“from” 和 “never” </li>
+<li>概率p (of) &gt;p (from) &gt;p(never)</li>
+</ul>
+<p>所以  journal of 的概率大与另外两个. </p>
+<p>组合平滑分为 插值和回退 两类.</p>
+<h3 id="插值平滑"><a href="#插值平滑" class="headerlink" title="插值平滑"></a>插值平滑</h3><h4 id="简单线性插值平滑"><a href="#简单线性插值平滑" class="headerlink" title="简单线性插值平滑"></a>简单线性插值平滑</h4><p>它的核心思想是，既然高阶组合可能出现次数为0，那稍微低阶一点的组合总有不为0的. 如下是一个三阶组合，假设$p(w_n|w_{n−1}w_{n−2})=0​$，而$p(w_n|w_{n−1})&gt;0​$且$p(w_n)&gt;0​$，则加权平均后的概率不为$0​$，从而达到平滑的效果.<br>$$<br>\hat p(w_n|w_{n−1}w_{n−2})=\lambda_3 p(w_n|w_{n−1}w_{n−2})+\lambda_2 p(w_n|w_{n−1})+\lambda_1 p(w_n)<br>$$<br>其中: $\sum_i\lambda_i = 1$ ,  $\lambda_i$ 根据经验取值,  也可以基于开发集自动学习</p>
+<p>简单线性插值平滑可以表示为如下递归式:<br>$$<br>p_{interp} (w_i \mid w_{i-n+1}^{i-1}) = \lambda_i p_{MLE} (w_i \mid  w_{i-n+1}^{i-1}) + (1- \lambda_i) p_{interp}(w_i \mid  w_{i-n+2}^{i-1})<br>$$</p>
+<h4 id="Jelinek-Mercer平滑"><a href="#Jelinek-Mercer平滑" class="headerlink" title="Jelinek-Mercer平滑"></a>Jelinek-Mercer平滑</h4><p>简单线形插值平滑中，权值 $\lambda_i$ 一旦确定就固定不变了.</p>
+<p> Jelinek-Mercer平滑认为若高阶n元组可靠，$\lambda$应该大;  若高阶n元组不可靠，$\lambda$应该小. n元组的可靠程度与 n 元组$w_{i-n+1}^{i}$具体的历史$w_{i-n+1}^{i-1}$出现的频次正相关. 即: $\lambda$应该和 n 元组$w_{i-n+1}^{i}$具体的历史$w_{i-n+1}^{i-1}$的频次关联起来.</p>
+<p>Jelinek-Mercer平滑可以表示为递归的插值模型<br>$$<br>p_{JM} (w_i \mid w_{i-n+1}^{i-1}) = \lambda_{w_{i-n+1}^{i-1}} p_{MLE} (w_i \mid  w_{i-n+1}^{i-1}) + (1- \lambda_{w_{i-n+1}^{i-1}}) p_{JM}(w_i \mid  w_{i-n+2}^{i-1})<br>$$<br>递归的终止条件: </p>
+<ol>
+<li>终止于平滑后的一元模型 $p_{smooth}(w_i)$. </li>
+</ol>
+<ol start="2">
+<li>终止于0元模型. 0元模型定义为均匀分布: $\frac {1}{\mid V \mid}$. </li>
+</ol>
+<p>$\lambda_{w_{i-n+1}^{i-1}}$的估计方法</p>
+<ol>
+<li>统计频次$c(w_{i-n+1}^{i-1})$, 按照频次将$c(w_{i-n+1}^{i-1})$分为若干(k)个区间.</li>
+<li>每个区间对应一个 $\lambda_{w_{i-n+1}^{i-1}}$ 值, 共$k$个.</li>
+<li>通过海量训练数据训练确定 $k$个 $\lambda$ 值.</li>
+</ol>
+<h3 id="回退平滑"><a href="#回退平滑" class="headerlink" title="回退平滑"></a>回退平滑</h3><p>回退平滑认为在高阶模型可靠时，尽可能使用高阶模型,  否则, 才使用低阶模型.</p>
+<p>回退模型的一般形式如下:<br>$$<br>p_{smooth} (w_i \mid w_{i-n+1}^{i-1}) =<br>\left \{<br>    \begin {aligned}<br>        &amp;p_{MLE} (w_i \mid  w_{i-n+1}^{i-1})    &amp; c( w_{i-n+1}^{i-1}) &gt; 0 \\<br>               &amp;\alpha_{w_{i-n+1}^{i-1}} p_{smooth}(w_i \mid  w_{i-n+2}^{i-1})  &amp;  otherwise\\<br>    \end {aligned}<br>\right .<br>$$<br>其中: $\alpha_{w_{i-n+1}^{i-1}}$ 是为了保证 $\sum_i p_{smooth} (w_i \mid w_{i-n+1}^{i-1}) = 1$ 的归一化参数.</p>
+<p>常见的回退平滑模型如下:</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Katz%27s_back-off_model" target="_blank" rel="noopener">Katz平滑</a></li>
+</ul>
+<ul>
+<li>绝对减值法</li>
+</ul>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Kneser%E2%80%93Ney_smoothing" target="_blank" rel="noopener">Kneser–Ney平滑</a> :绝对减值法的改进</li>
+</ul>
+<p>回退模型和插值模型是两种比较相似的平滑方法, 先总结其异同如下:</p>
+<ul>
+<li>在回退模型和插值模型中，当高阶n 元组未出现时，使用低阶n元组估算高阶n元组的概率分布</li>
+<li>在回退模型中，高阶n元组一旦出现，就不再使用低阶n元组进行估计</li>
+<li>在插值模型中，无论高阶n元组是否出现，低阶n元组都会被用来估计高阶n元组的概率估值</li>
+</ul>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>语言模型 : 语言中每个句子的概率</p>
+<p>语言建模</p>
+<p>n-gram &lt;- 马尔科夫假设</p>
+<p>​    n的选择</p>
+<p>​    参数估计(相对频率法) &lt;- MLE</p>
+<p>​    平滑</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://courses.engr.illinois.edu/cs447/fa2017/Slides/Lecture04.pdf" target="_blank" rel="noopener">https://courses.engr.illinois.edu/cs447/fa2017/Slides/Lecture04.pdf</a></p>
+<p><a href="https://blog.csdn.net/songbinxu/article/details/80209197" target="_blank" rel="noopener">自然语言处理NLP中的N-gram模型</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/NLP/" rel="tag"># NLP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Simhash.html" rel="next" title="Simhash">
+                <i class="fa fa-chevron-left"></i> Simhash
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/Maximum-Entropy-Model.html" rel="prev" title="最大熵模型">
+                最大熵模型 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#符号定义"><span class="nav-number">1.1.</span> <span class="nav-text">符号定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#语言模型-language-model"><span class="nav-number">1.2.</span> <span class="nav-text">语言模型(language model)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#语言建模"><span class="nav-number">2.</span> <span class="nav-text">语言建模</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#n元模型"><span class="nav-number">3.</span> <span class="nav-text">n元模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#定义"><span class="nav-number">3.1.</span> <span class="nav-text">定义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#n元模型的参数"><span class="nav-number">3.1.1.</span> <span class="nav-text">n元模型的参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#n的选择"><span class="nav-number">3.1.2.</span> <span class="nav-text">n的选择</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#n元模型构建过程"><span class="nav-number">4.</span> <span class="nav-text">n元模型构建过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#参数估计"><span class="nav-number">4.1.</span> <span class="nav-text">参数估计</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#模型评价"><span class="nav-number">5.</span> <span class="nav-text">模型评价</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Cross-Entropy"><span class="nav-number">5.1.</span> <span class="nav-text">Cross-Entropy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Perplexity"><span class="nav-number">5.2.</span> <span class="nav-text">Perplexity</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据稀疏问题"><span class="nav-number">6.</span> <span class="nav-text">数据稀疏问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#平滑技术"><span class="nav-number">6.1.</span> <span class="nav-text">平滑技术</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简单平滑"><span class="nav-number">6.2.</span> <span class="nav-text">简单平滑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#加法平滑"><span class="nav-number">6.2.1.</span> <span class="nav-text">加法平滑</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Add-one"><span class="nav-number">6.2.1.1.</span> <span class="nav-text">Add-one</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Add-K"><span class="nav-number">6.2.1.2.</span> <span class="nav-text">Add-K</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组合平滑-插值和回退"><span class="nav-number">6.3.</span> <span class="nav-text">组合平滑(插值和回退)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#插值平滑"><span class="nav-number">6.3.1.</span> <span class="nav-text">插值平滑</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#简单线性插值平滑"><span class="nav-number">6.3.1.1.</span> <span class="nav-text">简单线性插值平滑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Jelinek-Mercer平滑"><span class="nav-number">6.3.1.2.</span> <span class="nav-text">Jelinek-Mercer平滑</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#回退平滑"><span class="nav-number">6.3.2.</span> <span class="nav-text">回退平滑</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">8.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

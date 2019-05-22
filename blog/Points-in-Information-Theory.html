@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="信息量(自信息)信息奠基人香农(Shannon)认为“信息是用来消除随机不确定性的东西”. 一个事件蕴含的信息量与这条信息能够消除的不确定性是正相关的.  信息量应该满足如下条件:  事件发生的概率越低, 信息量越大;  事件发生的概率越高, 信息量越低;  多个对立事件同时发生, 总信息量是多个事件信息量相加.   由此确定的信息量表示为:$$I(x)=-\log_{2}p(x)$$ 其中, $">
+<meta name="keywords" content="Math,Information Theory">
+<meta property="og:type" content="article">
+<meta property="og:title" content="信息论中的一些知识点">
+<meta property="og:url" content="http://weirping.coding.me/blog/Points-in-Information-Theory.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="信息量(自信息)信息奠基人香农(Shannon)认为“信息是用来消除随机不确定性的东西”. 一个事件蕴含的信息量与这条信息能够消除的不确定性是正相关的.  信息量应该满足如下条件:  事件发生的概率越低, 信息量越大;  事件发生的概率越高, 信息量越低;  多个对立事件同时发生, 总信息量是多个事件信息量相加.   由此确定的信息量表示为:$$I(x)=-\log_{2}p(x)$$ 其中, $">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/Points-in-Information-Theory/cond-joint-entropy.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Points-in-Information-Theory/cond-joint-entropy.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Points-in-Information-Theory/cond-joint-entropy-info.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Points-in-Information-Theory/mic01.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Points-in-Information-Theory/Machine-Learning-A-Probabilistic-Perspective.jpg">
+<meta property="og:updated_time" content="2018-11-14T11:19:40.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="信息论中的一些知识点">
+<meta name="twitter:description" content="信息量(自信息)信息奠基人香农(Shannon)认为“信息是用来消除随机不确定性的东西”. 一个事件蕴含的信息量与这条信息能够消除的不确定性是正相关的.  信息量应该满足如下条件:  事件发生的概率越低, 信息量越大;  事件发生的概率越高, 信息量越低;  多个对立事件同时发生, 总信息量是多个事件信息量相加.   由此确定的信息量表示为:$$I(x)=-\log_{2}p(x)$$ 其中, $">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/Points-in-Information-Theory/cond-joint-entropy.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/Points-in-Information-Theory.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>信息论中的一些知识点 | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/Points-in-Information-Theory.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">信息论中的一些知识点
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-15 23:45:17" itemprop="dateCreated datePublished" datetime="2018-01-15T23:45:17+08:00">2018-01-15</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Information-Theory/" itemprop="url" rel="index"><span itemprop="name">Information Theory</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="信息量-自信息"><a href="#信息量-自信息" class="headerlink" title="信息量(自信息)"></a>信息量(自信息)</h1><p>信息奠基人香农(Shannon)认为“信息是用来消除随机不确定性的东西”. 一个事件蕴含的信息量与这条信息能够消除的不确定性是正相关的.  信息量应该满足如下条件:</p>
+<ol>
+<li>事件发生的概率越低, 信息量越大; </li>
+<li>事件发生的概率越高, 信息量越低; </li>
+<li>多个对立事件同时发生, 总信息量是多个事件信息量相加. </li>
+</ol>
+<p>由此确定的信息量表示为:<br>$$<br>I(x)=-\log_{2}p(x)<br>$$</p>
+<p>其中, $p(x)$表示随机事件发生的概率. 可以看出, 自信息的计算和随机变量本身数值没有关系, 只和其概率有关. </p>
+<h1 id="熵-entropy"><a href="#熵-entropy" class="headerlink" title="熵(entropy)"></a>熵(entropy)</h1><p>对于一个变量$X \sim p$($X$服从$p$分布), 该变量的熵是描述其不确定性的量, 表示该变量蕴含的信息量的期望(平均信息量).</p>
+<p>eg:对于一个有k个状态的离散随机变量$X$, 有<br>$$<br>H(X)=-\sum_{k=1}^Kp(X=k) \log p(X=k)<br>$$<br>a.当$\log$以2为底的时候称之为bits,结果可以视为多少个二进制位可以表示该变量</p>
+<p>b.当\log以e为底的时侯称之为 nats</p>
+<p>熵只依赖于随机变量的分布, 与随机变量取值无关, 所以也可以将 $X$ 的熵记作$ H(p)$. </p>
+<p>$0log0=0$.  </p>
+<p>熵的基本性质:</p>
+<ul>
+<li>非负性: $𝐻(𝑋) ≥ 0$, 等号表明确定场(无随机性)的熵最小;</li>
+<li>基质性: $𝐻(𝑋) ≤ \log |X|$, 其中等号成立当且仅当$p(x)=\frac 1{\mid x \mid}$, 这里$\mid X \mid$表示集合$X$中的元素个数. 该性质表明等概场具有的最大熵;</li>
+<li>熵描述了随机变量的不确定性, 熵越大，随机变量的不确定性就越大，分布越混乱;</li>
+<li>熵描述了随机变量的平均信息量;</li>
+</ul>
+<h1 id="联合熵和条件熵"><a href="#联合熵和条件熵" class="headerlink" title="联合熵和条件熵"></a>联合熵和条件熵</h1><p>设$X$、$Y$是两个离散型随机变量, 它们的联合分布为$𝑝(𝑥, 𝑦)$, 则$X$ 、$Y$的联合熵定义为<br>$$<br>H(X,Y)=-\sum_{x \in X} \sum_{y \in Y} p(x, y) \log p(x, y)<br>$$<br>设$X$、$Y$是两个离散型随机变量, 它们的联合分布为$𝑝(𝑥, 𝑦)$, 则给定𝑋时𝑌的条件熵定义为<br>$$<br>\begin {align}<br>H(Y|X) &amp; =\sum_{x \in X} p(x)H(y|X=x)                        \\<br>       &amp; =-\sum_{x \in X} \sum_{y \in Y} p(x, y) \log p(y|x) \\<br>       &amp; =E[-\log (y \mid x)]                                \\<br>\end {align}<br>$$<br>联合熵和条件熵的直观含义见下图:</p>
+<p><img src="Points-in-Information-Theory/cond-joint-entropy.png" alt></p>
+<p>链式规则:<br>$$<br>H(X, Y) = H(Y|X) + 𝐻(X)<br>$$</p>
+<p>$$<br>\begin {align}<br>H(X_1, X_2, X_3) &amp;= H(X_1) + 𝐻(X_2, X_3 \mid X_1) \\<br>                 &amp;= H(X_1) + 𝐻(X_2 \mid X_1) + 𝐻(X_3 \mid X_1, X_2) \\<br>\end {align}<br>$$</p>
+<p>定理:<br>$$<br>\begin {align}<br>&amp; H(X \mid Y) \le H(X) \\<br>&amp; H(X, Y) \le H(X) + H(Y)<br>\end {align}<br>$$</p>
+<h1 id="交叉熵-cross-entropy"><a href="#交叉熵-cross-entropy" class="headerlink" title="交叉熵 (cross entropy)"></a>交叉熵 (cross entropy)</h1><p>设随机变量$X$的分布密度为$𝑝(𝑥)$, $𝑞(𝑥)$是通过统计手段得到的$X$的近似分布, 则随机变量$X$的交叉熵定义为<br>$$<br>H(X,q)=-\sum_{x \in X}p(x) \log q(x)<br>$$</p>
+<p> note: 有的文章中交叉熵表示为 $H(p, q)$ . 该表示方法与联合熵相似, 需按照上下文确定.</p>
+<p>交叉熵可以看作是当我们用模型 $q$编码来自模型$p$的变量时所需的平均bits(如果$\log$以2为底的话)</p>
+<p>所以, 有$H(p)=H(p,p)$,所以KL距离就可以看做是：用模型q来编码来自模型p的变量所需的额外bits！</p>
+<p>若存在$X$的真实分布为$p(x)$, 它的两个近似分布为$𝑞_1(𝑥)$ , $𝑞_2(𝑥)$ ,  并且$𝐻(p, q_1)&lt; 𝐻(p, q_2)$ , 则$𝑞_1$是更好的近似分布. </p>
+<h2 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h2><ul>
+<li>损失函数</li>
+<li>语言模型评价方法(实际上是熵率)</li>
+</ul>
+<h1 id="熵率"><a href="#熵率" class="headerlink" title="熵率"></a>熵率</h1><p>熵率可以直观的理解为一个长度为$n$的随机变量序列，该序列的熵随$n$增长的增长率.</p>
+<p>定义: 当如下极限存在时, 随机过程$\{X_i\}$ 的熵率定义为:<br>$$<br>H(\chi) = \lim_{n \to \infty} \frac 1nH(x_1, x_2, \dots, x_n)<br>$$<br>同时定义一个与熵率相关的量<br>$$<br>H’(\chi)= \lim_{n \to \infty}H(X_n|X_1,X_2,….X_{n-1})<br>$$</p>
+<p>性质: <strong>对于平稳随机过程，以上两者极限均存在，且有 $H(\chi)= H’(\chi)$</strong><br>该性质非常常用, 为了证明这个性质, 引入如下两个定理:</p>
+<p>定理一: 对于平稳随机过程, $H(X_n|X_1,X_2,….X_{n-1})$ 随 $n$ 递减, 且存在极限 $H’(\chi)$.</p>
+<p>证明 如下:<br>$$<br>\begin {align}<br>H(X_{n+1} \mid X_1,X_2,….X_n) &amp; \le H(X_{n+1} \mid X_2,….X_n) \\<br>                                &amp; = H(X_n|X_1,X_2,….X_{n-1})<br> \end {align}<br>$$<br>不等式由条件作用使熵减小这个性质得到, 等式由平稳随机过程的性质得到.<br>所以, $H’(\chi)$ 是非负且递减的, 即:  $H’(\chi)$ 存在.</p>
+<p>定理二: (Cesaro 均值): 若 $a_n \to a$, 且 $b_n = \frac 1n \sum_{i=1}^n a_i$, 则 $b_n \to a$<br>证明略</p>
+<p>下面证明熵率的性质: 对于平稳随机过程，以上两者极限均存在，且有 $H(\chi)= H’(\chi)$ .</p>
+<p>有联合熵的链式法则知:<br>$$<br>\frac 1n H(x_1, x_2, \dots, x_n) =  \frac 1n \sum_{i=1}^n H(X_n|X_1,X_2,….X_{n-1})<br>$$<br>即: 熵率为条件熵的时间平均.  由定理一知 条件上趋于极限 $H’(\chi)$.<br>又 由Cesaro 均值可知:<br>$$<br>\begin {align}<br>H(\chi) &amp; = \lim_{n \to \infty} \frac 1nH(x_1, x_2, \dots, x_n) \\<br>        &amp; = \lim_{n \to \infty}H(X_n|X_1,X_2, \dots, X_{n-1})   \\<br>        &amp; = H’(\chi)                                            \\<br>\end {align}<br>$$</p>
+<p><strong>平稳马尔可夫链的熵率</strong></p>
+<p>设 $ \{X_i\}$为平稳马尔可夫链，且其平稳分布为 $\mu$ , 转移矩阵为 $P$  , 则熵率为:</p>
+<p>$$<br>\begin {align}<br>H(\chi) &amp;= H’(\chi) \\<br>        &amp;= \lim_{n \to \infty}H(X_n|X_1,X_2,\dots, X_{n-1}) \\<br>        &amp;= \lim_{n \to \infty} H(X_n \mid X_{n-1}) \\<br>        &amp;= H(X_2 \mid X_1) \\<br>        &amp;= -\sum_{ij} p(X_1 = \mu_i, X_2 = \mu_j) \log p(X_2 = \mu_j \mid X_1 = \mu_i) \ <br>        &amp;= -\sum_{ij} p(X_1 = \mu_i) p(X_2 = \mu_j \mid X_1 = \mu_i) \log p(X_2 = \mu_j \mid X_1 = \mu_i) \ <br>        &amp;= -\sum_{ij} \mu_i P_{ij}\log{P_{ij}} \\<br>\end {align}<br>$$</p>
+<p>note: <strong>熵率</strong> 可以理解为 <strong>随机过程的 “熵” </strong>. </p>
+<p>应用:</p>
+<ul>
+<li>语言模型评价方法</li>
+</ul>
+<h1 id="相对熵"><a href="#相对熵" class="headerlink" title="相对熵"></a>相对熵</h1><p>这个值是用来衡量两个分布之间相异度的, </p>
+<p>设$𝑝(𝑥)$ 是随机变量𝑋的真实分布密度, $𝑞(𝑥)$是通过统计手段得到的𝑋 的近似分布, 则二者间相对熵定义为:<br>$$<br>D_{KL}(p||q)=-\sum_{k=1}^Kp_k \log \frac{p_k}{q_k}<br>$$<br>如果是连续的随机变量, 把$\sum$用积分 符号替换就好了</p>
+<p>对上式进行转化：<br>$$<br>D_{KL}(p||q)=\sum_{k}{p_k} \log{p_k} -\sum_kp_k \log q_k=-H(p)+H(p,q)<br>$$<br>其中$H(p,q)$为交叉熵, $p$ 为真是分布, $q$为近似分布.</p>
+<p>相对熵也称作<br>– Kullback-Leibler 发散度、KL发散度<br>– Kullback-Leibler 距离、KL距离</p>
+<p>KL距离就可以看做是：</p>
+<ul>
+<li>相对熵描述同一个随机变量的不同分布的差异</li>
+<li>相对熵描述了因为错用分布密度而增加的信息量</li>
+<li>用模型$q$来编码来自模型$p$的变量所需的额外bits！</li>
+<li>因为是“额外的”, 所以 KL的距离的值一定大于$0$, $D_{KL}=0$当且仅当$p=q$. </li>
+</ul>
+<p>应用于推荐系统的一个例子</p>
+<p>在使用LDA(Latent Dirichlet Allocation)计算物品的内容相似度时, 我们可以先计算出物品在话题上的分布, 然后利用两个物品的话题分布计算物品的相似度. 比如, 如果两个物品的话题分布相似, 则认为两个物品具有较高的相似度, 反之则认为两个物品的相似度较低. </p>
+<p><em>note:</em> 交叉熵和相对熵其实是等价的, 那么在实际问题中该怎么选择呢?<br>交叉熵大量应用在sigmoid函数和softmax函数中，最典型的算法应该就是神经网络和逻辑回归吧，而相对熵大量应用在生成模型中，例如GAN、EM、贝叶斯学习和变分推导中。从这里我们可以看出:</p>
+<ul>
+<li>如果想通过算法对样本数据进行概率分布建模，那么通常都是使用相对熵，因为我们需要明确的知道生成的分布和真实分布的差距，最好的KL散度值应该是0；</li>
+<li>而在判别模型中，仅仅只需要评估损失函数的下降值即可，交叉熵可以满足要求，其计算量比KL散度小。</li>
+</ul>
+<h1 id="互信息-Mutual-Information"><a href="#互信息-Mutual-Information" class="headerlink" title="互信息(Mutual Information)"></a>互信息(Mutual Information)</h1><p>互信息可以评价两个分布之间的距离，这主要归因于其对称性，假设互信息不具备对称性，那么就不能作为距离度量，例如相对熵，由于不满足对称性，故通常说相对熵是评价分布的相似程度，而不会说距离。</p>
+<p>互信息的定义为：<strong>一个随机变量由于已知另一个随机变量而减少的不确定性.</strong><br>$$<br>\begin {align}<br>I(X; Y) &amp; = H(X) - H(X \mid Y)=H(Y) - H(Y \mid X) \\<br>        &amp; = H(X) + H(Y) - H(X, Y) \\<br>        &amp; = H(X, Y) - H(X \mid Y) - H(Y \mid X) \\<br>\end {align}<br>$$<br>再来看一下这张图理解一下:</p>
+<p><img src="Points-in-Information-Theory/cond-joint-entropy.png" alt></p>
+<p>对于三个变量的 联合熵, 条件熵, 互信息 的直观含义见下图:</p>
+<p><img src="Points-in-Information-Theory/cond-joint-entropy-info.png" alt></p>
+<p>互信息用于衡量两个随机变量分布之间的<strong>距离, 相关性, 独立性</strong>。</p>
+<p>我们知道如果$p(x,y)=p(x)p(y)$, 则X和Y互相独立(不相关), 基于这个前提我们也可以使用$p(x,y)$ 与 $p(x)p(y)$ 的关系 来定义 两个随机变量$x$和$y$ 的相关性(相互独立的程度). </p>
+<p>互信息使用相对熵度量$ p(x,y)$与$p(x)p(y)$之间的关系：<br>$$<br>I(X; Y) = D_{KL}(p(X,Y)||p(X)p(Y))= - \sum_{x \in X}\sum_{y \in Y}p(x,y)\log \frac{p(x,y)}{p(x)p(y)}<br>$$<br>如: X和Y互相独立, $p(x,y)=p(x)p(y)$, 对数项为0  则 $I(X, Y) = 0$. 反之 两个变量相关性越强, 则$I(X, Y)$ 越大.</p>
+<p>互信息是大于等于0的，当且仅当X与Y相互独立时候等号成立。</p>
+<h2 id="PMI"><a href="#PMI" class="headerlink" title="PMI"></a>PMI</h2><p>另一个与MI有关的的定义是<strong>pointwise mutual information(PMI),</strong><br>$$<br>PMI(x,y)=\log \frac{p(x,y)}{p(x)p(y)}=\log \frac{p(x|y)}{p(x)}=\log \frac{p(y|x)}{p(y)}<br>$$<br>可以得知 MI值其实就是PMI值的<strong>期望</strong>, 该数值衡量了${p(x,y)}$ 和 ${p(x)p(y)}$ 的差异性, 即:  the discrepancy between these events occuring together compared to what would be expected by chance.</p>
+<h2 id="最大互信息系数-maximal-information-coefficient"><a href="#最大互信息系数-maximal-information-coefficient" class="headerlink" title="最大互信息系数(maximal information coefficient)"></a>最大互信息系数(maximal information coefficient)</h2><p>上面介绍的互信息都是针对离散随机变量计算的, 对于连续随机变量互信息定义为:<br>$$<br>I(X, Y) = D_{KL}(p(X,Y)||p(X)p(Y))= - \int_x \int_y p(x,y)\log \frac{p(x,y)}{p(x)p(y)} dx dy<br>$$<br>$p（x，y）$是联合概率密度分布函数. </p>
+<p>在生产环境下, 我们经常会遇到这样的情况, 数据特征是连续型特征, 但是我们是基于有限个样本进行分析的. 为了获得这些连续型特征(随机变量)的概率密度函数通常比较麻烦(如 核密度估计), 对于两个变量的联合概率密度分布的计算就更加的复杂了. 即: 连续随机变量 的联合概率计算相对来说比较麻烦. 所以我们就要找一个办法来解决这个问题.</p>
+<p>MIC 就是解决这个问题的. MIC 的思想是将两个变量离散化. 方法是 将当前二维空间在 x,y 方向分别划分为一定的区间数，然后查看当前的数据点(样本)在各个方格中落入的情况，并且使用散点图来表示，这样就解决了在互信息中的联合概率难求的问题。具体流程如下:</p>
+<ol>
+<li><p>给定网格化的列数 $c$ 和行数 $r$, 对XY构成的二维坐标空间进行$c$列$r$行网格化(即对连续空间离散化), 此时可能有若干种网格化方案. 求出每种网格化方案对应的互信息值, 并找出其中的最大值 $ \max_{G \in \mathcal G (c, r)} I(x_G ; y_G)$<br>假设$c=2$, $r=2$. 则可能有以下红、蓝两种网格化方案（实际上会更多），分别计算每个网格化方案对应的互信息值，找出使互信息值最大的网格化方案。</p>
+<p><img src="Points-in-Information-Theory/mic01.png" alt></p>
+</li>
+<li><p>对互信息值进行归一化: $\frac {\max_{G \in \mathcal G(c, r)} I(x_G ; y_G)} {\log \min(c, r)}$ .</p>
+</li>
+<li><p>选取所有离散化方案中互信息的最大值作为MIC值: $c$, $r$ 有多种选取方案, 在所有的备选方案中选取一个使归一化的互信息最大的值 即:<br>$$<br>MIC = \max_{c \times r \lt B} \frac {\max_{G \in \mathcal G (c, r)} I(x_G ; y_G)} {\log \min(c, r)}<br>$$<br>​</p>
+</li>
+</ol>
+<p>其中: </p>
+<ul>
+<li>$c$, $r$ 是在 x,y 方向上的划分格子的个数，本质上就是网格分布;</li>
+<li>$B$ 是变量，在原作者的论文当中提到 B 的大小设置是数据量的 0.6 次方. 具体为甚么用这个值, 猜测应该是经验吧;</li>
+<li>$\mathcal G (c, r)$ 是在给定$c$, $r$ 后, 所有的网格化方案的集合, $G \in \mathcal G(c, r)$;</li>
+<li>$x_G$, $ y_G$ 分别表示在网格化方案 $G$ 中 变量 $x$ 和 $y$ 对应的离散序列.</li>
+</ul>
+<p>MIC总结</p>
+<p><strong>目的</strong>: 用于衡量两个变量X和Y的线性或非线性的强度。</p>
+<p>特点: </p>
+<ul>
+<li><strong>普适性</strong>。不仅可以发现变量间的线性函数关系，还能发现<strong>非线性</strong>关系(如指数的，周期的)；</li>
+<li><strong>均衡性</strong>。MIC度量不仅可以用来纵向比较同一相关关系的强度，还可以用来横向比较不同关系的强度。比如: 对于相同噪声水平的两个函数关系(如一个指数的，另一个是周期的)，MIC度量具有近似的值。</li>
+</ul>
+<p><strong>缺点:</strong> MIC的统计能力遭到了一些质疑，当零假设不成立时，MIC的统计就会受到影响。在有的数据集上不存在这个问题，但有的数据集上就存在这个问题. </p>
+<p>针对MIC的两个特点, 在《Machine Learning - A Probabilistic Perspective》一书中使用了如下图解释</p>
+<p><img src="Points-in-Information-Theory/Machine-Learning-A-Probabilistic-Perspective.jpg" alt="IMG_265"></p>
+<p>该图使用的数据源是具有357个变量(特征)的数据集, 左图中的每个点是这些特征的一个两个组合(共63566个), 横坐标表示两个特征 的MIC, 纵轴是相关系数. 右边选取了六对特征组合, 并刻画出了其关系图. </p>
+<ul>
+<li>从右图可以看出C表示的两个特征的分布是没有规律的, 不具有相关性, 其相关系数接近0, MIC接近0. </li>
+<li>H或者D 表示的随机变量具有近似的线性关系, 其相关系数和MIC都很高.</li>
+<li>EFG表示的随机变量基本没有线性关系, 所以相关系数接近于0, 但是从右图可以看出其都具有非线性关系. 所有MIC值比较大. </li>
+</ul>
+<p>开源工具: <a href="https://minepy.readthedocs.io/en/latest/" target="_blank" rel="noopener">minepy - Maximal Information-based Nonparametric Exploration</a><br>其python api 地址:<a href="http://minepy.sourceforge.net/docs/1.0.0/python.html" target="_blank" rel="noopener">http://minepy.sourceforge.net/docs/1.0.0/python.html</a></p>
+<h1 id="信息增益"><a href="#信息增益" class="headerlink" title="信息增益"></a>信息增益</h1><p>信息增益是决策树ID3算法在进行特征切割时使用的划分准则，其物理意义和互信息完全相同，并且公式也是完全相同。其公式如下：</p>
+<p>$$<br>g(D, A) = H(D) - H(D \mid A)<br>$$</p>
+<p>其中D表示数据集，A表示特征，信息增益表示得到A的信息而使得类X的不确定度下降的程度，在ID3中，需要选择一个A使得信息增益最大，这样可以使得分类系统进行快速决策。 </p>
+<p>需要注意的是：在数值上，信息增益和互信息完全相同，但意义不一样，需要区分，当我们说互信息时候，两个随机变量的地位是相同的，可以认为是纯数学工具，不考虑物理意义，当我们说信息增益时候，是把一个变量看成是减少另一个变量不确定度的手段。</p>
+<h1 id="信息增益率"><a href="#信息增益率" class="headerlink" title="信息增益率"></a>信息增益率</h1><p>信息增益率是决策树C4.5算法引入的划分特征准则，其主要是克服信息增益存在的在某种特征取无意义值的时候导致的决策树划分特征失误的问题。例如假设有一列特征是身份证ID，每个人的都不一样，其信息增益肯定是最大的，但是对于一个情感分类系统来说，这个特征是没有意义的，此时如果采用ID3算法就会出现失误，而C4.5正好克服了该问题。其公式如下：<br>$$<br>g_r(D, A) = \frac {g(D, A)} {H(A)}<br>$$</p>
+<h1 id="基尼系数"><a href="#基尼系数" class="headerlink" title="基尼系数"></a>基尼系数</h1><p>基尼系数是决策树CART算法引入的划分特征准则，其提出的目的不是为了克服上面算法存在的问题，而主要考虑的是计算快速性、高效性，这种性质使得CART二叉树的生成非常高效。其公式如下：<br>$$<br>\begin {align}<br>Gini(p) &amp; = \sum_{i=1}^m p_i (1-p_i) \\<br>        &amp; = 1 -   \sum_{i=1}^m p_i^2 \\<br>        &amp; = 1 -  \sum_{i=1}^m (\frac {| C_k |}{|D|})^2<br>\end {align}<br>$$<br>可以看出，基尼系数越小，表示选择该特征后熵下降最快，对分类模型效果更好，其和信息增益和信息增益率的选择指标是相反的。基尼系数主要是度量数据划分对训练数据集D的不纯度大小，基尼系数越小，表明样本的纯度越高。 </p>
+<p>这里还存在一个问题，这个公式显得非常突兀，感觉突然就出来了，没有那种从前人算法中改进而来的感觉？其实为啥说基尼系数计算速度快呢，因为基尼系数实际上是信息熵的一阶进似，作用等价于信息熵，只不过是简化版本。根据泰勒级数公式，将$f(x) = - \ln (x)$ 在 $x=1$ 处展开，忽略高阶无穷小，其可以等价为 $f(x) = 1 - x$ , 所以可以很容易得到上述定义。</p>
+<p>参考资料：</p>
+<p><a href="https://blog.csdn.net/dog250/article/details/78944526" target="_blank" rel="noopener">不知为不知–信息论和最大熵原则</a></p>
+<p><a href="https://mp.weixin.qq.com/s/LGyNq3fRlsRSatu1lpFnnw##" target="_blank" rel="noopener">机器学习各种熵：从入门到全面掌握</a></p>
+<p><a href="http://blog.csdn.net/dark_scope/article/details/8459576" target="_blank" rel="noopener">信息论(Information theory)的一些point</a> </p>
+<p>Machine Learning - A Probabilistic Perspective</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Math/" rel="tag"># Math</a>
+          
+            <a href="/tags/Information-Theory/" rel="tag"># Information Theory</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/HMM.html" rel="next" title="Hidden Markov Models">
+                <i class="fa fa-chevron-left"></i> Hidden Markov Models
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/Output_Units_and_Cost_Functions-Neural_networks.html" rel="prev" title="输出层激活函数和模型损失函数-神经网络">
+                输出层激活函数和模型损失函数-神经网络 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#信息量-自信息"><span class="nav-number">1.</span> <span class="nav-text">信息量(自信息)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#熵-entropy"><span class="nav-number">2.</span> <span class="nav-text">熵(entropy)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#联合熵和条件熵"><span class="nav-number">3.</span> <span class="nav-text">联合熵和条件熵</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#交叉熵-cross-entropy"><span class="nav-number">4.</span> <span class="nav-text">交叉熵 (cross entropy)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#应用"><span class="nav-number">4.1.</span> <span class="nav-text">应用</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#熵率"><span class="nav-number">5.</span> <span class="nav-text">熵率</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#相对熵"><span class="nav-number">6.</span> <span class="nav-text">相对熵</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#互信息-Mutual-Information"><span class="nav-number">7.</span> <span class="nav-text">互信息(Mutual Information)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#PMI"><span class="nav-number">7.1.</span> <span class="nav-text">PMI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最大互信息系数-maximal-information-coefficient"><span class="nav-number">7.2.</span> <span class="nav-text">最大互信息系数(maximal information coefficient)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#信息增益"><span class="nav-number">8.</span> <span class="nav-text">信息增益</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#信息增益率"><span class="nav-number">9.</span> <span class="nav-text">信息增益率</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基尼系数"><span class="nav-number">10.</span> <span class="nav-text">基尼系数</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

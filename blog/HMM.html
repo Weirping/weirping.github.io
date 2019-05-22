@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="在之前学习过多次隐马模型，但是长时间不用再加上也没回头复习，回头看的时候感觉什么都忘了，所以本次重新拾起来。记得之前看过一篇英文文章讲的不错（现在无法访问了），随做了一个备份。现在以这篇文章为基础重新学习一下。目前网络上该文章的翻译版本有很多，我也会参考一些。 1 概述个人觉得学习一个新模型，首先了解这个模型能干什么，然后在深入了解模型细节才能事半功倍。隐马模型是用来干什么的？举一个预测天气的例子">
+<meta name="keywords" content="Machine Learning">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hidden Markov Models">
+<meta property="og:url" content="http://weirping.coding.me/blog/HMM.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="在之前学习过多次隐马模型，但是长时间不用再加上也没回头复习，回头看的时候感觉什么都忘了，所以本次重新拾起来。记得之前看过一篇英文文章讲的不错（现在无法访问了），随做了一个备份。现在以这篇文章为基础重新学习一下。目前网络上该文章的翻译版本有很多，我也会参考一些。 1 概述个人觉得学习一个新模型，首先了解这个模型能干什么，然后在深入了解模型细节才能事半功倍。隐马模型是用来干什么的？举一个预测天气的例子">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/HMM/first_order_markov_process.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/HMM/hidden_markov_model.png">
+<meta property="og:updated_time" content="2018-01-15T15:56:06.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hidden Markov Models">
+<meta name="twitter:description" content="在之前学习过多次隐马模型，但是长时间不用再加上也没回头复习，回头看的时候感觉什么都忘了，所以本次重新拾起来。记得之前看过一篇英文文章讲的不错（现在无法访问了），随做了一个备份。现在以这篇文章为基础重新学习一下。目前网络上该文章的翻译版本有很多，我也会参考一些。 1 概述个人觉得学习一个新模型，首先了解这个模型能干什么，然后在深入了解模型细节才能事半功倍。隐马模型是用来干什么的？举一个预测天气的例子">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/HMM/first_order_markov_process.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/HMM.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Hidden Markov Models | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/HMM.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Hidden Markov Models
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-15 23:11:03" itemprop="dateCreated datePublished" datetime="2018-01-15T23:11:03+08:00">2018-01-15</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Machine-Learning/" itemprop="url" rel="index"><span itemprop="name">Machine Learning</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在之前学习过多次隐马模型，但是长时间不用再加上也没回头复习，回头看的时候感觉什么都忘了，所以本次重新拾起来。记得之前看过一篇<a href="http://www.comp.leeds.ac.uk/roger/HiddenMarkovModels/html_dev/main.html" target="_blank" rel="noopener">英文文章</a>讲的不错（现在无法访问了），随做了一个备份。现在以这篇文章为基础重新学习一下。目前网络上该<a href="http://www.comp.leeds.ac.uk/roger/HiddenMarkovModels/html_dev/main.html" target="_blank" rel="noopener">文章</a>的翻译版本有很多，我也会参考一些。</p>
+<h1 id="1-概述"><a href="#1-概述" class="headerlink" title="1 概述"></a>1 概述</h1><p>个人觉得学习一个新模型，首先了解这个模型能干什么，然后在深入了解模型细节才能事半功倍。隐马模型是用来干什么的？举一个预测天气的例子：</p>
+<p>在几百年前，英国人为了预测今天的天气(sun, cloud, rain)，可以通过观察海藻的潮湿程度（dry, dryish, damp, soggy）：如果海藻是干燥的(dry)，则今天将是一晴天(sun)；如果海藻是潮湿的(soggy)，则今天将是一雨天(rain)。也就是说海藻的潮湿程度与天气是相关的。</p>
+<p>假设小明刚从中国来到英国，想知道上周从周一到周日的天气，由于一些原因他只能拿到上周海藻的潮湿程度的记录。那么他可以通过上面的规律推测出上周的天气。(例子不恰当，将就着用吧)。</p>
+<p>在这个例子中，小明观察到的是海草的状态，但是要预测的天气是隐藏的。而隐马模型就是使用显性的可观察到的状态序列（一周海藻潮湿程度的记录），对隐藏的未知的状态序列（一周的天气）进行预测的模型。</p>
+<h1 id="2-马尔科过程-Markov-Process"><a href="#2-马尔科过程-Markov-Process" class="headerlink" title="2 马尔科过程(Markov Process)"></a>2 马尔科过程(Markov Process)</h1><p>交通信号灯的变化是有规律可寻的：红灯-&gt; 绿灯-&gt;黄灯 循环转换。如果当前是红灯，那么下一个一定就是绿灯。当前状态只依赖于前一个状态，状态之间的转化是确定的。这种确定性的状态转化规律是非常容易建模模拟的。</p>
+<p>天气的状态在三种天气(sun, cloud, rain)之间转换，但是晴天(sun)之后可能是多云(cloud)也可能是雨天(rain)。状态转化是不确定的。假设我们有一个过去100天的天气观察序列记录了过去100天的天气，那么明天的天气是什么呀。为了解决这个问题，首先需要使用100天的观察序列建立模型，然后根据模型对明天的天气进行预测。</p>
+<p>对非确定性的状态转化序列建模就涉及到了随机过程的建模了。对一个长度为$N$的随机过程建模如下： 即这个序列中每一个时间点的状态的联合概率<br>$$<br>P(X_N,X_{N-1} \dots X_1)<br>$$<br>使用product rule进行改写：<br>$$<br>P(X_N,X_{N-1} \dots X_1)=\prod_{n=1}^NP(X_n|X_{n-1} \dots X_1)<br>$$<br>可以看到公式右边是相当复杂的，$P(X_n|X_{n-1} \dots X_1)$说明系列中时间点$n$时刻的状态是由该时刻之前的所有状态决定的。如果$N=1000$ ，那么为了求出序列中最后一个时刻所处状态的概率就需要考虑其之前的999个时刻。</p>
+<p>所以为了对非确定性的状态转化序列建模模拟，需要进行一些假设使问题简化。此处需要引入马尔科夫性和马尔科夫过程。</p>
+<blockquote>
+<p>马尔科夫性: 在一个随机过程$\{X_t, t\in T\}$中，如果随机过程在$t_0$时刻所处的状态已知时，它在$t=0$时刻以后的状态与其在$t=0$时刻之前的状态无关。这种性质称为马尔科夫性。    即：过程中“将来”的情况与“过去”的情况是无关的。</p>
+<p>马尔科夫过程：具有马尔可夫性的随机过程称为马尔可夫过程。在一个随机过程中，一个状态仅取决于其之前的k个状态，这个过程称为k阶马尔科夫过程。$k=1$时为一阶马尔科夫过程。</p>
+<p>一阶马尔科夫过程：设随机过程$\{X_t, t\in T\}$的状态空间为S，如果<br>$$<br>P (X_n=x_{n}\mid X_{n-1}=x_{n-1},\dots ,X_0=x_{0})=P(X_{t_n}=x_{n}\mid X_{t_{n-1}}=x_{n-1})<br>$$<br>其中$n&gt;2$，$x_i \in S$，则成该随机规称为一阶马尔科夫过程。即当前状态只取决于前面的一个状态。</p>
+</blockquote>
+<p><img src="HMM/first_order_markov_process.png" alt></p>
+<p>在上面的天气变化问题中，将三种天气(sun, cloud, rain)状态组成状态空间$S$，将一周的天气变化的过程抽象为一阶马尔科夫过程（今天的天气只与昨天有关，与前天无关），从而简化问题处理。对这样一个一阶马尔科夫过程建模如下：<br>$$<br>\begin {aligned}<br>P(X_N,X_{N-1} \dots X_1)&amp;=\prod_{n=1}^NP(X_n|X_{n-1} \dots X_1) \\<br>                                           &amp;=P(x_1)\prod_{n=2}^NP(X_n|X_{n-1})<br>\end {aligned}<br>$$<br>一阶马尔科夫过程中，当前状态只取决于前面的一个状态，也就是说该过程只考虑状态之间的两两关系。如果状态空间中有M个状态，那么需要考虑的关系就有$M \times M$ 种。使用状态转移矩阵(state transition matrix) A表示状态之间的两两关系，矩阵中的元素$a_{ij}=P(S_j \mid S_i)$，其中$S_i$表示状态空间$S$中的第$i$个状态，$S_j$表示状态空间$S$中的第$j$个状态，$0 \le i \le |S|, 0 \le j \le |S|$。在天气变化这么一个马尔科夫过程中，状态转移概率是这样一个矩阵：</p>
+<p>$$<br>\begin{bmatrix}<br>            &amp; sun   &amp;cloud  &amp; rain    \\<br> sun     &amp;0.50   &amp; 0.375 &amp; 0.125 \\<br> cloud  &amp; 0.25  &amp; 0.125 &amp; 0.625 \\<br> rain     &amp; 0.25  &amp; 0.375 &amp; 0.375<br>  \end{bmatrix}<br>$$</p>
+<p>第二行的三个数表示，昨天是多云(cloud)的情况下，今天是晴天(sun)、多云(cloud)、下雨(rain)的概率分别为 0.25 、 0.125 、 0.625。</p>
+<p>在一个序列中的第一个状态是没有前一个状态的，并且状态空间中的所有状态都有可能是第一个状态，所以需要一个向量来描述状态空间$S$中的值是第一个的概率，即初始状态向量($\pi$)。在天气变化这么一个马尔科夫过程中，第一天是晴天(sun)、多云(cloud)、下雨(rain)的概率分别为 0.35 、 0.05 、 0.6。即:<br>$$<br>\pi = (0.35 、 0.05 、 0.6)^T<br>$$<br>按照生成模型的观点理解一阶马尔科夫过程：</p>
+<ul>
+<li>按照初始状态向量($\pi$)从状态空间$S$中选择一个状态$S_i$，生成过程中的第一个状态$x_1$;</li>
+<li>按照转移状态矩阵$A$从状态空间$S$中选择一个状态$S_j$，生成过程中的第二个状态$x_2$, 生成的概率为$a_{ij}$ ;</li>
+<li>按照该过程一次生成 $x_3 ,x_4 \dots x_n$ 。</li>
+</ul>
+<p>一阶马尔科夫过程中有三个基本概念：</p>
+<p>1 <strong>状态空间</strong>：在随机过程中可选的状态的集合。如三种天气(sun, cloud, rain)状态。<br>2 <strong>初始状态向量($\pi$)</strong>： 描述状态空间$S$中的值是第一个状态的概率。<br>3 <strong>状态转移矩阵(A)</strong>：描述每个状态之间相互转换的概率。</p>
+<h1 id="3-隐马尔可夫模型-Hidden-Markov-Models"><a href="#3-隐马尔可夫模型-Hidden-Markov-Models" class="headerlink" title="3 隐马尔可夫模型(Hidden Markov Models)"></a>3 隐马尔可夫模型(Hidden Markov Models)</h1><p>马尔科夫过程是对一个观察到的序列进行建模，在文章开始的例子中，“小明刚从中国来到英国，想知道上周从周一到周日的天气，由于一些原因他只能拿到上周海藻的潮湿程度的记录。”小明知道的是海藻湿度一周的状态变化序列，他不知道上周从周一到周日的天气状态，海藻的状态和天气的状态是存在紧密关系的。这里例子中存在两个状态序列：观察到的状态序列(海藻的潮湿状态)，隐藏的状态序列(一周的天气状态)。</p>
+<p>这种存在一个隐藏状态序列一个观察状态序列且隐藏状态序列和观察状态序列存在关系的问题，可以使用隐马尔可夫模型进行建模。在隐马模型中，假定隐藏状态序列是一个一阶马尔科夫过程，观察状态序列中的每一个节点都和隐藏状态序列中的节点一一对应，这个对应关系就反应了观察状态和隐藏状态的对应关系。如下雨天(隐藏状态)会使海藻潮湿(观察状态)。隐马模型使用状态发射矩阵（emission probability matrix）$\phi$来表示隐藏状态和观察状态的对应关系</p>
+<p><img src="HMM/hidden_markov_model.png" alt></p>
+<p>可观察状态的集合为$O$，和隐藏状态的的集合为$S$。$O_i$表示可观察状态集合中的第$i$个状态，$S_j$表示隐藏状态集合中的第$j$个状态。状态发射矩阵$\phi$中的元素:</p>
+<p>$$<br>\phi_{ji}=P(O_i|S_j)<br>$$</p>
+<p>文章开头的天气问题的状态发着矩阵可以表示如下：<br>$$<br>\begin{bmatrix}<br>           &amp; dry   &amp;dryish&amp; damp &amp; soggy \\<br> sun    &amp;0.60  &amp; 0.20  &amp; 0.15    &amp;0.05     \\<br> cloud &amp; 0.25 &amp; 0.25  &amp; 0.25    &amp;0.25     \\<br> rain    &amp; 0.05 &amp; 0.10  &amp; 0.35    &amp;0.50<br>  \end{bmatrix}<br>$$<br>第一行表示，如果今天是晴天(sun)，那么今天的海藻处于四中状态(dry、dryish、damp、soggy)的概率分别为0.60、 0.20、 0.15、0.05。</p>
+<p>note: 状态发着矩阵中每一行的和必须是1。</p>
+<p>相对于马尔科夫过程，隐马模型多了一个观察状态序列，和一个发射状态矩阵。隐马模型包含如下五个概念：</p>
+<ol>
+<li><strong>隐藏状态空间</strong>：如三种天气(sun, cloud, rain)状态。</li>
+<li><strong>观察状态空间</strong>：如海藻的四中状态(dry、dryish、damp、soggy)</li>
+<li><strong>初始状态向量($\pi​$)</strong>： 描述状态空间$S​$中的值是第一个状态的概率。</li>
+<li><strong>状态转移矩阵(A)</strong>：描述每个隐藏状态之间相互转换的概率。</li>
+<li><strong>发射状态矩阵($\phi$)</strong>：给定一个隐藏状态时，一个观察状态出现的概率。</li>
+</ol>
+<p>一个隐马模型是一个标准的马尔科夫过程加上一个观察状态集合和从隐藏状态到观察状态的关系矩阵。</p>
+<p>隐马模型可以表示为初始状态向量($\pi$)、状态转移矩阵(A)、发射状态矩阵($\phi$)的三元组$\{\pi, A, \phi \}$ 。</p>
+<h1 id="4-隐马模型的应用"><a href="#4-隐马模型的应用" class="headerlink" title="4 隐马模型的应用"></a>4 隐马模型的应用</h1><p>隐马模型可以用于解决三类问题，针对不同的问题使用不同的求解算法：</p>
+<ol>
+<li>leaning：当知道一个观察序列时，使用适当的算法训练一个HMM，求得参数$\{\pi, A, \phi \}$ 。使用 forward-backward algorithm求解。</li>
+<li>evaluation: 已知一个的HMM($\{\pi, A, B\}$ 已知)，和一个观察序列时，求观察序列出现的概率。使用forward algorithm 求解。</li>
+<li>decoding: 已知一个观察序列和其对应的HMM时，求一个与之对应的隐藏状态序列。使用Viterbi algorithm求解。</li>
+</ol>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="http://blog.csdn.net/matrix_space/article/details/45582017" target="_blank" rel="noopener">机器学习 Hidden Markov Models</a></p>
+<p>Pattern Recognition and Machine Learning</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Activation_Function.html" rel="next" title="激活函数-神经网络">
+                <i class="fa fa-chevron-left"></i> 激活函数-神经网络
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/Points-in-Information-Theory.html" rel="prev" title="信息论中的一些知识点">
+                信息论中的一些知识点 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-概述"><span class="nav-number">1.</span> <span class="nav-text">1 概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-马尔科过程-Markov-Process"><span class="nav-number">2.</span> <span class="nav-text">2 马尔科过程(Markov Process)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-隐马尔可夫模型-Hidden-Markov-Models"><span class="nav-number">3.</span> <span class="nav-text">3 隐马尔可夫模型(Hidden Markov Models)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-隐马模型的应用"><span class="nav-number">4.</span> <span class="nav-text">4 隐马模型的应用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

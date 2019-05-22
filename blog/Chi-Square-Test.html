@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="卡方检验是一种用途广泛的假设检验方法，它属于非参数检验方法。用于比较两个及两个以上样本率( 构成比）以及两个分类变量的关联性分析。思想是比较理论频数和实际频数的吻合程度。 卡方分布设 $X_1, X_2, \dots ,X_n$ 是来自总体$N(0,1)$的样本,则称统计量$$\mathcal X^2=X_1^2 + X_2^2+ \dots +X_n^2$$服从自由度为$n$的$\chi^2$分">
+<meta name="keywords" content="Machine Learning,Math,EDA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="卡方检验">
+<meta property="og:url" content="http://weirping.coding.me/blog/Chi-Square-Test.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="卡方检验是一种用途广泛的假设检验方法，它属于非参数检验方法。用于比较两个及两个以上样本率( 构成比）以及两个分类变量的关联性分析。思想是比较理论频数和实际频数的吻合程度。 卡方分布设 $X_1, X_2, \dots ,X_n$ 是来自总体$N(0,1)$的样本,则称统计量$$\mathcal X^2=X_1^2 + X_2^2+ \dots +X_n^2$$服从自由度为$n$的$\chi^2$分">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/Chi-Square-Test/Chi-square_pdf.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Chi-Square-Test/Chi-square-test.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Chi-Square-Test/sample01.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Chi-Square-Test/sample02.png">
+<meta property="og:updated_time" content="2018-12-21T07:03:02.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="卡方检验">
+<meta name="twitter:description" content="卡方检验是一种用途广泛的假设检验方法，它属于非参数检验方法。用于比较两个及两个以上样本率( 构成比）以及两个分类变量的关联性分析。思想是比较理论频数和实际频数的吻合程度。 卡方分布设 $X_1, X_2, \dots ,X_n$ 是来自总体$N(0,1)$的样本,则称统计量$$\mathcal X^2=X_1^2 + X_2^2+ \dots +X_n^2$$服从自由度为$n$的$\chi^2$分">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/Chi-Square-Test/Chi-square_pdf.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/Chi-Square-Test.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>卡方检验 | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/Chi-Square-Test.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">卡方检验
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-12-10 22:22:22" itemprop="dateCreated datePublished" datetime="2018-12-10T22:22:22+08:00">2018-12-10</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Math/" itemprop="url" rel="index"><span itemprop="name">Math</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>卡方检验是一种用途广泛的假设检验方法，它属于非参数检验方法。用于比较两个及两个以上样本率( 构成比）以及两个分类变量的关联性分析。思想是比较理论频数和实际频数的吻合程度。</p>
+<h1 id="卡方分布"><a href="#卡方分布" class="headerlink" title="卡方分布"></a>卡方分布</h1><p>设 $X_1, X_2, \dots ,X_n$ 是来自总体$N(0,1)$的样本,则称统计量<br>$$<br>\mathcal X^2=X_1^2 + X_2^2+ \dots +X_n^2<br>$$<br>服从自由度为$n$的$\chi^2$分布,记为$\mathcal X^2 \sim \chi^2(n)$ . 此处,自由度是指上式右端包含的<strong>独立变量</strong>的个数。</p>
+<p>卡方分布的概率密度函数为：</p>
+<p>$$<br>f(x;n)=<br> \begin{cases}<br> \dfrac {x^{\frac {n}{2}-1}e^{-\frac {x}{2}}}{2^{\frac {n}{2}}   \Gamma (\frac {n}{2})},&amp;x&gt;0;\\<br> 0,&amp;{\text{otherwise}}.<br> \end{cases}<br>$$</p>
+<p><img src="Chi-Square-Test/Chi-square_pdf.png" alt></p>
+<p>卡方分布是由正态分布构造而成的一个新的分布，当自由度$n$很大时，$\chi^2$分布近似为正态分布。此时：<br>均值：$E(\chi^2)=n$<br>方差：$D(\chi^2)=2n$</p>
+<p>分布的可加性： 若$\chi^2(n_1)$  $\chi^2(n_2)$ 互相独立，则：服从$\chi^2(n_1) + \chi^2(n_2)$ 自由度为$n1+n2$ 的 $\chi^2$ 分布。</p>
+<h1 id="假设检验"><a href="#假设检验" class="headerlink" title="假设检验"></a>假设检验</h1><p>可以复习这篇文章<a href="https://weirping.github.io/blog/hypothesis-testing.html" target="_blank" rel="noopener">假设检验</a>。</p>
+<h1 id="卡方检验"><a href="#卡方检验" class="headerlink" title="卡方检验"></a>卡方检验</h1><p>卡方检验是专用于解决计数数据统计分析的假设检验法。卡方检验的两个应用：拟合性检验和独立性检验。</p>
+<h2 id="拟合性检验"><a href="#拟合性检验" class="headerlink" title="拟合性检验"></a>拟合性检验</h2><p>拟合优度检验是为检验观察到的一批数据是否与某种理论分布符合，而采用的计算方法就是卡方检验法。</p>
+<p>假设一总体$X$服从分布：</p>
+<p>$$<br>H_0:P(X=a_i)=p_i;    (i=1,\dots,k) \\<br>$$</p>
+<p>其中: $a_i,p_i$都是已知的，且$a_1,\dots,a_k$两两各不相同，$p_i&gt;0$.</p>
+<p>先设想总体$X$的样本数量$n$足够大，按大数定理，若以$v_i$记$X_1,\dots,X_n$中等于$a_i$的个数，应有$v_i/n≈p_i$。我们把$np_i$称为$a_i$这个“类”的理论值，而把$v_i$称为其经验值或者观察值。如下表：</p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>$a_1$</th>
+<th>$a_2$</th>
+<th>$\dots$</th>
+<th>$a_i$</th>
+<th>$\dots$</th>
+<th>$a_k$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>理论值</td>
+<td>$np_1$</td>
+<td>$np_2$</td>
+<td>$\dots$</td>
+<td>$np_i$</td>
+<td>$\dots$</td>
+<td>$np_k$</td>
+</tr>
+<tr>
+<td>经验值</td>
+<td>$v_1$</td>
+<td>$v_2$</td>
+<td>$\dots$</td>
+<td>$v_i$</td>
+<td>$\dots$</td>
+<td>$v_k$</td>
+</tr>
+</tbody>
+</table>
+<p>表中最后两行的差异越小，则$H_0$越可能是对的. 为了反映这种差异,皮尔逊采用 z统计量：<br>$$<br>\begin {align}<br>Z &amp;=∑\frac{(理论值−经验值)^2}{理论值} \\<br>&amp;=∑_{i=1}^k \frac{(np_i−v_i)^2}{(np_i)} \sim \chi_{k-1}^2<br>\end {align}<br>$$</p>
+<p>对公式解释分三部分：</p>
+<ol>
+<li>理论值−经验值：反映差异;</li>
+<li>(理论值−经验值)^2：排除1中存在正负抵消的情况;</li>
+<li>(理论值−经验值)^2/理论值：针对不同“类”下值域差异过大问题，将差异转换到同种尺度内。</li>
+</ol>
+<p><strong>如果原假设$H_0$成立，则在样本大小$n \to \infty$时，$Z$的分布趋向于自由度为$k-1$的$\chi^2$分布，即$\chi_{k−1}^2$。</strong> </p>
+<p><img src="Chi-Square-Test/Chi-square-test.png" alt></p>
+<p>scipy 中提供了 chisquare 进行卡方拟合优度检查，其函数签名如下：</p>
+<blockquote>
+<p>chisquare(f_obs, f_exp=None, ddof=0, axis=0)</p>
+<p>f_obs : array_like<br>  各类别的观察频率</p>
+<p>f_exp : array_like, optional<br>  各类别的期望频率. 默认为频率相等 </p>
+<p>ddof : int, optional<br>  “Delta degrees of freedom”: adjustment to the degrees of freedom<br>  for the p-value.  The p-value is computed using a chi-squared<br>  distribution with <strong>k - 1 - ddof</strong> degrees of freedom, where k<br>  is the number of observed frequencies.  The default value of ddof<br>  is 0.</p>
+<p>axis : int or None, optional<br>  The axis of the broadcast result of f_obs and f_exp along which to<br>  apply the test.  If axis is None, all values in f_obs are treated<br>  as a single data set.  Default is 0.</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> scipy.stats <span class="keyword">import</span> chisquare</span><br><span class="line"></span><br><span class="line">chisquare([<span class="number">16</span>, <span class="number">18</span>, <span class="number">16</span>, <span class="number">14</span>, <span class="number">12</span>, <span class="number">12</span>]) <span class="comment"># 默认的期望频数时均匀分布的</span></span><br><span class="line"><span class="comment"># Power_divergenceResult(statistic=2.0, pvalue=0.8491450360846096)</span></span><br><span class="line"></span><br><span class="line">chisquare([<span class="number">16</span>, <span class="number">18</span>, <span class="number">16</span>, <span class="number">14</span>, <span class="number">12</span>, <span class="number">12</span>], f_exp=[<span class="number">16</span>, <span class="number">16</span>, <span class="number">16</span>, <span class="number">16</span>, <span class="number">16</span>, <span class="number">8</span>])</span><br><span class="line"><span class="comment">#Power_divergenceResult(statistic=3.5, pvalue=0.6233876277495822)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ddof "Delta degrees of freedom" ，计算pvalue时使用的自由度为  k - 1 - ddof</span></span><br><span class="line">chisquare([<span class="number">16</span>, <span class="number">18</span>, <span class="number">16</span>, <span class="number">14</span>, <span class="number">12</span>, <span class="number">12</span>], f_exp=[<span class="number">16</span>, <span class="number">16</span>, <span class="number">16</span>, <span class="number">16</span>, <span class="number">16</span>, <span class="number">8</span>], ddof=<span class="number">1</span>)</span><br><span class="line"><span class="comment"># Power_divergenceResult(statistic=3.5, pvalue=0.477878344488724)</span></span><br></pre></td></tr></table></figure>
+<h2 id="独立性检验"><a href="#独立性检验" class="headerlink" title="独立性检验"></a>独立性检验</h2><p>卡方检验还可以用于检验两个或两个以上因素（各有两项或以上的分类）之间是否相互影响的问题，这种检验称为独立性检验。例如要讨论血型与性格的关系，血型有A、B、AB、O四类，性格采用心理学上的A型性格来划分，即有A型和B型两种，每个人可能是它们之间交叉所形成的8种类型中的一种，那么倒底它们之间有不有关系，就可以用卡方独立性检验。</p>
+<p>卡方独立性检验的零假设是各因素之间相互独立。因此理论次数的计算也是基于这一假设，具体计算时，采用列联表的方式，后面将举例说明。</p>
+<p>两组大白鼠在不同致癌剂作用下的发癌率如下表，问两组发癌率有无差别（致癌剂对大白鼠的发癌数是否会有影响）？</p>
+<p><img src="Chi-Square-Test/sample01.png" alt></p>
+<p>表中只有 52, 19, 39,  3  这四个数据是整个表中的基本资料，其余数据均由此推算出来；这四格资料表就称<strong>四格表</strong>（fourfold table），或称2行2列表（2×2 contingency table）。从该资料算出的两组发癌率分别为73.24%和92.86%，两者的差别可能是 <strong>抽样误差</strong> 所致，亦可能是 <strong>两组发癌率确有不同</strong> 。这里可通过卡方检验来验证其差异有无统计学意义（即，是否为抽样误差所致），检验的基本公式为：<br>$$<br>\chi^2 = \sum \frac {(A-T)^2}{T}<br>$$<br>其中：</p>
+<ul>
+<li>$A$ 为实际数，四格表的四个基本数据就是实际数；</li>
+<li>$T$ 为理论数，是根据检验假设推断出来的；理论数的计算方式如下：<ol>
+<li>假设这两组的发癌率相同，差别仅是由抽样误差所致</li>
+<li>那么理论发癌率为两组合计发癌率，即 $91 \div 113=80.3 \% $ </li>
+<li>以此为依据便可推算出四格表中相应的四格的理论数</li>
+</ol>
+</li>
+</ul>
+<p>卡方独立性检验的步骤如下：</p>
+<ol>
+<li><p>建立假设，确定显著性水平 $\alpha$：</p>
+<blockquote>
+<p>H0: 两组的发癌率相同</p>
+<p>H1:两组的发癌率不同</p>
+<p>$\alpha = 0.05$</p>
+</blockquote>
+</li>
+<li><p>计算理论数，计算公式为：<br>根据 H0 假设，理论发癌率为 $91 \div 113=80.3 \% $ .<br>则 四格表中的真实发癌数 分别为：<br>第1行1列： $71 \times 80.3 \%=57.18$<br>第1行2列： $71 \times (1-80.3 \%)=13.82$<br>第2行1列： $42 \times 80.3 \%=33.82$<br>第2行2列： $42 \times (1-80.3 \%)=8.18$<br>即得到如下四格表，其中括号里面为理论发癌数。</p>
+</li>
+</ol>
+<p><img src="Chi-Square-Test/sample02.png" alt></p>
+<ol start="3">
+<li><p>计算卡方值按公式代入<br>$$<br>\begin {align}<br>\chi^2 &amp;=  \sum \frac {(A-T)^2}{T} \\<br>&amp;= \frac {(52-57.18)^2}{57.18} + \frac {(19-13.82)^2}{13.82} + \frac {(39-33.82)^2}{33.82} + \frac {(3-8.18)^2}{8.18} \\<br>&amp;=0.47+1.94+0.79+3.28 \\<br>&amp;=6.48<br>\end {align}<br>$$</p>
+</li>
+<li><p>查卡方值表求$P$值<br>本例中卡方检验的自由度为 n=（行数-1）（列数-1）<br>查卡方界值表，找到 $\chi_{0.05}^2(1) = 3.84$<br>由于 $6.48 \gt \chi_{0.05}^2(1) = 3.84  $ 所以 $P &lt; 0.05$<br>所以拒绝原假设 H0，接受备择假设 H1。差异有显著统计学意义， 即，两组的发癌率不同。（不明白的话，可以去复习假设检验的相关知识）</p>
+</li>
+</ol>
+<p>scipy 中提供了 基于 contingency table （四格表）进行$chi^2$独立性检验的函数，</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> scipy.stats <span class="keyword">import</span> chi2_contingency</span><br><span class="line">contingency_table = np.array([[<span class="number">442</span>, <span class="number">514</span>], [<span class="number">38</span>, <span class="number">6</span>]])   <span class="comment"># 共建四格表</span></span><br><span class="line">chi2, pval, dof, expctd = chi2_contingency(contingency_table) <span class="comment"># chi2统计量, p-value, 自由度, 期望值</span></span><br></pre></td></tr></table></figure>
+<h1 id="卡方检验用于特征选择"><a href="#卡方检验用于特征选择" class="headerlink" title="卡方检验用于特征选择"></a>卡方检验用于特征选择</h1><p>用卡方检验做特征选择更好的是应用于分类问题。 特征选择的假设为：如果一个特征与个类别相互独立，则认为这个特征不好，反之，如果一个特征与类别相关，则认为这个特征比较好。在这种场景下，我们的检验检验问题可以定义为：<br>$$<br>\begin {align}<br>&amp; H_0: \text{变量与类别相互独立} \\<br>&amp; H_1: \text{变量与类别相关}<br>\end {align}<br>$$<br>可以将该方法理解为拟合性检验问题。如对于一个特征来说，其中观察值为各类别中该特征的值之和（分类数量=观察值数量=理论值数量），理论值为各类别在总样本量中所占的比例 乘以 该特征值只和。可以参考sklearn中<strong>函数chi2</strong>的代码chi2</p>
+<p>那么 $\chi^2$ 统计量越大 或者 p-value 越小 则变量与类别越相关，越时一个应该被选用的特征。</p>
+<p>此处我们可以不定义显著性水平，因为我们的目标一般时从若干个变量中 k 个相关性好的特征，我们只需要按照 $\chi^2$ 统计量或者 p-value 的大小关系选择最好的 k 个变量即可。</p>
+<p>在 sklearn 中提供了这个功能：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.feature_selection <span class="keyword">import</span> chi2</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_iris</span><br><span class="line">chi2(iris.data, iris.target)</span><br><span class="line"><span class="comment"># (array([ 10.81782088,   3.59449902, 116.16984746,  67.24482759]),</span></span><br><span class="line"><span class="comment">#  array([4.47651499e-03, 1.65754167e-01, 5.94344354e-26, 2.50017968e-15]))</span></span><br></pre></td></tr></table></figure>
+<p>上面的结果中 第一行 为4个特征对应的  $\chi^2$ 统计量, 第二行为 p-value。</p>
+<p>还可以和 SelectKBest 一起使用，直接选择 k个最好的特征。 下面的例子是从64个特征中选择20个特征</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from sklearn.datasets import load_digits</span><br><span class="line">from sklearn.feature_selection import SelectKBest, chi2</span><br><span class="line">X, y = load_digits(return_X_y=True)</span><br><span class="line">X.shape</span><br><span class="line"># (1797, 64)</span><br><span class="line">model = SelectKBest(chi2, k=20)</span><br><span class="line">X_new = model.fit_transform(X, y)</span><br><span class="line">X_new.shape</span><br><span class="line"># (1797, 20)</span><br><span class="line"></span><br><span class="line">model.scores_ # 可以得到每个特征chi2 统计量</span><br><span class="line"></span><br><span class="line">model.pvalues_ # 可以得到每个特征pvalue</span><br></pre></td></tr></table></figure>
+<h1 id="卡方检验用于特征离散化"><a href="#卡方检验用于特征离散化" class="headerlink" title="卡方检验用于特征离散化"></a>卡方检验用于特征离散化</h1><p>在评分卡模型中需要对连续特征进行分箱/离散化，就可以采用卡方检验方法进行离散化。</p>
+<p>具体方法见我的代码和blog(目前不公开)。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p> <a href="http://www.cnblogs.com/liyongzhao/articles/3369117.html" target="_blank" rel="noopener">卡方检验综述</a></p>
+<p><a href="https://blog.csdn.net/ldcadai/article/details/72854462" target="_blank" rel="noopener">特征选择-卡方检验用于特征选择</a></p>
+<p> <a href="https://www.cnblogs.com/Yuanjing-Liu/p/9252844.html" target="_blank" rel="noopener">卡方分布、卡方独立性检验和拟合性检验理论及其python实现</a></p>
+<p><a href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectKBest.html" target="_blank" rel="noopener">SelectKBest</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+            <a href="/tags/Math/" rel="tag"># Math</a>
+          
+            <a href="/tags/EDA/" rel="tag"># EDA</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Maximum-Entropy-Model.html" rel="next" title="最大熵模型">
+                <i class="fa fa-chevron-left"></i> 最大熵模型
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/note-of-relevence-socres.html" rel="prev" title="相关性打分公式">
+                相关性打分公式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#卡方分布"><span class="nav-number">1.</span> <span class="nav-text">卡方分布</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#假设检验"><span class="nav-number">2.</span> <span class="nav-text">假设检验</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#卡方检验"><span class="nav-number">3.</span> <span class="nav-text">卡方检验</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#拟合性检验"><span class="nav-number">3.1.</span> <span class="nav-text">拟合性检验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#独立性检验"><span class="nav-number">3.2.</span> <span class="nav-text">独立性检验</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#卡方检验用于特征选择"><span class="nav-number">4.</span> <span class="nav-text">卡方检验用于特征选择</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#卡方检验用于特征离散化"><span class="nav-number">5.</span> <span class="nav-text">卡方检验用于特征离散化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

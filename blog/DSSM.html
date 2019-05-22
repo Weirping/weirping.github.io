@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="DSSM是在2013年提出的，应用场景是IR中的Rank问题，即，给定一个query后，计算doc(url)与这个query的语义相关性。 DSSM模型结构先上DSSM的模型结构图  可以将模型分为两步理解：  第一步是feature representation过程，使用DNN神经网络将文本的高维稀疏向量 投影到文本的低维语义特征向量。DNN网络接收query或者doc的term vector(">
+<meta name="keywords" content="Machine Learning,NLP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DSSM相关论文阅读">
+<meta property="og:url" content="http://weirping.coding.me/blog/DSSM.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="DSSM是在2013年提出的，应用场景是IR中的Rank问题，即，给定一个query后，计算doc(url)与这个query的语义相关性。 DSSM模型结构先上DSSM的模型结构图  可以将模型分为两步理解：  第一步是feature representation过程，使用DNN神经网络将文本的高维稀疏向量 投影到文本的低维语义特征向量。DNN网络接收query或者doc的term vector(">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/DSSM/DSSM-model.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/DSSM/CLSM-model.png">
+<meta property="og:updated_time" content="2018-03-30T12:42:10.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DSSM相关论文阅读">
+<meta name="twitter:description" content="DSSM是在2013年提出的，应用场景是IR中的Rank问题，即，给定一个query后，计算doc(url)与这个query的语义相关性。 DSSM模型结构先上DSSM的模型结构图  可以将模型分为两步理解：  第一步是feature representation过程，使用DNN神经网络将文本的高维稀疏向量 投影到文本的低维语义特征向量。DNN网络接收query或者doc的term vector(">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/DSSM/DSSM-model.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/DSSM.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>DSSM相关论文阅读 | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/DSSM.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">DSSM相关论文阅读
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-02-11 22:22:22" itemprop="dateCreated datePublished" datetime="2018-02-11T22:22:22+08:00">2018-02-11</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/NLP/" itemprop="url" rel="index"><span itemprop="name">NLP</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>DSSM是在2013年提出的，应用场景是IR中的Rank问题，即，给定一个query后，计算doc(url)与这个query的语义相关性。</p>
+<h1 id="DSSM"><a href="#DSSM" class="headerlink" title="DSSM"></a>DSSM</h1><h2 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h2><p>先上DSSM的模型结构图</p>
+<p><img src="DSSM/DSSM-model.png" alt="DSSM"></p>
+<p>可以将模型分为两步理解：</p>
+<ol>
+<li><p>第一步是feature representation过程，使用DNN神经网络将文本的高维稀疏向量 投影到文本的低维语义特征向量。DNN网络接收query或者doc的term vector(如one-hot编码)，为了使one-hot编码这种高维特征能够在模型中计算，文章使用了一个小技巧(Word Hashing)将高维稀疏特征表示为低维稀疏特征 得到 $l_1$层。从$l_1$到$y$是标准的三层DNN神经网络。$y$是一个具有128维的特征的向量，它是原始的query或者doc的低维语义向量表示。<br>将query或者doc的原始Term Vector表示为$x$ ，$y$作为DNN网络的输出，$l_i$作为DNN网络的隐藏层节点值，$W_i$是DNN网络的第$i$层的权重矩阵，DNN网络的层数记为$N$。那么从$x$到$y$的前馈计算过程如下：</p>
+<p>$$<br>\begin {aligned}<br>l_1 &amp;= W_1x \\<br>\\<br>l_i &amp;=f(W_i l_{i-1}+b_i) , i =2,\dots,N-1 \\<br>\\<br>y &amp;=f(W_N l_{N-1}+b_N) \\<br>\end {aligned}<br>$$</p>
+<p>其中$f$为神经网络中隐藏层和输出层的激活函数，论文中使用的是$\tanh$:<br>$$<br>f(x) = \frac {1-e^{-2x}}{1+e^{-2x}}<br>$$</p>
+</li>
+<li><p>第二步是语义相关性的计算过程，使用第一步得到的query和doc的语义向量表示$y$计算query和doc的相关系数。论文中使用的是余弦相似度：<br>$$<br>R(Q,D)=\cos(y_Q,y_D) = \frac{y_Q^{\mathrm{T}}y_D}{\Arrowvert y_Q\Arrowvert \Arrowvert y_D\Arrowvert}<br>$$<br>其中 $y_Q$ 和 $y_D$ 分别表示query和doc的语义向量表示(第一步的输出)。当给定一个query和候选doc后，就可以按照上面的方法计算其相关性得分，并按照相关性大小排序(个人感觉生产环境下不会这样干，因为生产环境中面临的情况更加多样。将DSSM的相关性得分作为最终ltr模型的输入特征还是更加可行的)。</p>
+</li>
+</ol>
+<h2 id="损失函数"><a href="#损失函数" class="headerlink" title="损失函数"></a>损失函数</h2><p>上面介绍的是DSSM模型的前馈网络结构。DSSM做为一种监督学习方法，还需要有一个损失函数作为训练的目标。</p>
+<p>DSSM模型的输入是一个query列表和每个query对应的用户点击的doc序列。论文奖给定一个query $Q$ ,用户点击一个特定doc $D$ 的概率定义为：<br>$$<br>p(D|Q) = \frac{\exp(\gamma R(Q,D))}{\sum_{D^{‘} \in \boldsymbol {D} } \exp(\gamma R(Q,D^{‘} ))}<br>$$</p>
+<p>其中$\gamma$是一个softmax函数的平滑系数，是一个经验参数。</p>
+<p>注意: 分母中有一个粗体的$\boldsymbol{D}$ 表示与$Q$对应的的所有doc的集合, 该集合包含如下内容：</p>
+<ol>
+<li>在训练样本中与 $Q$ 相关的所有doc的集合(正例)，下文中用$D^+$表示与 $Q$ 相关的doc</li>
+<li>在训练样本中，相对于每个 $Q$ ,还随机从数据库中选择了4个负例(与 $Q$ 不相关的doc)，下文中用 $D^-$表示 。</li>
+</ol>
+<p>集合 $\boldsymbol{D}$包含与$Q$对应的所有$D^+$ 和$D^-$ ，即：</p>
+<p>$$<br>D^+ \in \boldsymbol{D} \\<br>D^- \in \boldsymbol{D}<br>$$</p>
+<p>模型的目标函数就是给定$Q$时所有正例的最大似然。损失函数取其负对数：<br>$$<br>\begin {aligned}<br>L(\Lambda) &amp;= - \log \prod_{(Q,D^+)} p(D^+ | Q) \\<br>                     &amp;= - \sum_{(Q,D^+)} log p(D^+ | Q)<br>\end {aligned}<br>$$</p>
+<h2 id="Word-Hashing"><a href="#Word-Hashing" class="headerlink" title="Word Hashing"></a>Word Hashing</h2><p>由于DSSM的输入数据是 one-hot 编码，如果直接将其放入圣经网络中计算将会带来两个问题:</p>
+<ol>
+<li>vocabulary太大，输入层的稀疏向量将会具有非常高的维度。</li>
+<li>会出现 oov (out of vocabulary)的问题</li>
+</ol>
+<p>Word Hashing的设计就是为了解决以上问题的。他是基于字母级别的n-gram设计的。如单词 good：</p>
+<ol>
+<li>在单词两端加入临界符号   #good# 。</li>
+<li>按照n-gram将其分割为多个部分，如trigrams  将得到[#go, goo, ood, od#]四个部分。</li>
+<li>单词good 将用[#go, goo, ood, od#] 的向量表示。</li>
+</ol>
+<p>这种方式可以非常有效的解决 vocabulary 太大的问题，因此英文单词才26个，3个字母的组合都是有限的)。另外也不会出现 oov 问题， 举个例子：discriminative，discriminate，discrimination 三个单词的意思很像，他们的Word Hashing中也有大部分是相同的。</p>
+<p>这样两个不同的单词也有可能具有相同的tri-grams，针对这个问题paper里面做了统计，这个冲突的概率非常的低，500K个word可以降到30k维，冲突的概率为0.0044%。</p>
+<p>Word Hashing在英文场景下很有效，但是中文场景估计就没有这样的效果了吧。</p>
+<h1 id="CLSM"><a href="#CLSM" class="headerlink" title="CLSM"></a>CLSM</h1><p>CSSM的一个重要不足是它将整个query/doc作为一个bag处理，没有考虑到term的上下文信息，文本的上下文信息丢失。如. “我爱你”和“你爱我”将会映射到同一个y(特征向量)。</p>
+<p>CLSM(Convolutional latent semantic model)于2014年提出，又称CDSSM。它是解决了CSSM的文本上下文丢失问题。在模型结构上，它将DSSM的DNN换成了CNN，这也是其名称中Convolutional 的由来。</p>
+<h2 id="模型结构-1"><a href="#模型结构-1" class="headerlink" title="模型结构"></a>模型结构</h2><p><img src="DSSM/CLSM-model.png" alt></p>
+<p>入上图所示，对于一个query/doc的语义向量$y$ 的训练过程可以分为如下5个步骤：</p>
+<p>(0)  预处理阶段：将句子的开头和结尾加上pading符， 上图中的<code>&lt;s&gt;</code></p>
+<p>(1)  a word-n-gram layer obtained by running a contextual sliding  window  over  the  input  word  sequence  (i.e.,  a query  or  a document),<br>按照固定大小(上图中是3)的滑动窗口从输入句子中提取word-n-gram层</p>
+<p>(2)  $l_t$ :a  letter-trigram  layer  that  transforms  each  word-tri-gram  into  a  letter-trigram  representation  vector,<br>将word-n-gram层的每个word用3-gram的word hashing表示(每个word可以表示为30K维的向量)，word-n-gram层($n=3$)中的每个bag可以表示成$30K \times 3 = 90K$维度的向量</p>
+<p>(3)  $h_t$ :a convolutional layer that extracts contextual features for each word with  its neighboring words  defined by  a window<br>以固定大小的窗口对letter-trigram  layer每个bag的90K维度的向量做卷积，每个bag映射到300维的向量上得到convolutional layer。卷几层的激活函数使用$tanh$<br>$$<br>tanh(x) = \frac {1-e^{-2x}}{1+e^{-2x}}<br>$$<br>到此时为止word-n-gram layer、letter-trigram  layer和convolutional layer三层，每一层包含bag的数量是和句子的长度有关的，句子越长bag数量越多</p>
+<p>(4)  $v$ :a max-pooling layer that discovers and combines salient word-n-gram  features  to  form  a  fixed-length  sentence-level feature vector,<br>$$<br>v(i) = \max_{t=1,\dots,T} \{h_t(i)\} , i=1,\dots,K<br>$$<br>其中$v(i)$为$v$的第$i$个维度，$T$为卷几层包含的向量的个数，K为卷积层每个向量的维度(都是一样的)，K也是$v$的维度</p>
+<p>(5)  a semantic layer that extracts  a  high-level semantic  feature  vector  for  the  input  word  sequence<br>最后通过一个非线性映射得到语义向量$y$ ：<br>$$<br>y=\tanh(W_s \cdot v)<br>$$</p>
+<h2 id="损失函数-1"><a href="#损失函数-1" class="headerlink" title="损失函数"></a>损失函数</h2><p>与DSSM相同</p>
+<hr>
+<p>分割线，coding工作繁忙，先写这些，回头在补！</p>
+<h1 id="DSSM-LSTM"><a href="#DSSM-LSTM" class="headerlink" title="DSSM-LSTM"></a>DSSM-LSTM</h1><p>如上文所述，DSSM不能够很好的捕捉上下文信息，所有使用LSTM替换DSSM的DNN使其能够捕捉到文本的上下文信息。</p>
+<h1 id="MV-DSSM"><a href="#MV-DSSM" class="headerlink" title="MV-DSSM"></a>MV-DSSM</h1><p>该模型主要是用于推荐系统。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p>DSSM: <a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/cikm2013_DSSM_fullversion.pdf" target="_blank" rel="noopener">Learning Deep Structured Semantic Models for Web Search using Clickthrough Data</a></p>
+<p>CLSM: <a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/cikm2014_cdssm_final.pdf" target="_blank" rel="noopener">A Latent Semantic Model with Convolutional-Pooling Structure for Information Retrieval</a></p>
+<p>DSSM-LSTM:<a href="https://arxiv.org/pdf/1412.6629.pdf" target="_blank" rel="noopener">Semantic Modelling with Long-Short-Term Memory for Information Retrieval</a></p>
+<p>MV-DSSM:<a href="http://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/frp1159-songA.pdf" target="_blank" rel="noopener">A Multi-View Deep Learning Approach for Cross Domain User Modeling in Recommendation Systems</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+            <a href="/tags/NLP/" rel="tag"># NLP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/MRO-in-python.html" rel="next" title="关于python中的MRO问题">
+                <i class="fa fa-chevron-left"></i> 关于python中的MRO问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/git-illustration.html" rel="prev" title="【转】git图解">
+                【转】git图解 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#DSSM"><span class="nav-number">1.</span> <span class="nav-text">DSSM</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#模型结构"><span class="nav-number">1.1.</span> <span class="nav-text">模型结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#损失函数"><span class="nav-number">1.2.</span> <span class="nav-text">损失函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Word-Hashing"><span class="nav-number">1.3.</span> <span class="nav-text">Word Hashing</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CLSM"><span class="nav-number">2.</span> <span class="nav-text">CLSM</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#模型结构-1"><span class="nav-number">2.1.</span> <span class="nav-text">模型结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#损失函数-1"><span class="nav-number">2.2.</span> <span class="nav-text">损失函数</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DSSM-LSTM"><span class="nav-number">3.</span> <span class="nav-text">DSSM-LSTM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MV-DSSM"><span class="nav-number">4.</span> <span class="nav-text">MV-DSSM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

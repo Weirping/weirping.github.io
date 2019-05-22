@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="在文章GBDT中介绍了 Gradient、Booster、Gradient Booster 等一些基本理论推导，和一种Tree boosting算法-GBDT算法。 sklearn 也提供了 GBDT 的实现，我们可以方便的使用。 但是在生产环境中我们通常使用的是 Xgboost 这个工具提供的Tree boosting算法。在本文记录一下Xgboost中实现的Tree boosting的原理和其">
+<meta name="keywords" content="Machine Learning,LTR">
+<meta property="og:type" content="article">
+<meta property="og:title" content="xgboost">
+<meta property="og:url" content="http://weirping.coding.me/blog/xgboost.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="在文章GBDT中介绍了 Gradient、Booster、Gradient Booster 等一些基本理论推导，和一种Tree boosting算法-GBDT算法。 sklearn 也提供了 GBDT 的实现，我们可以方便的使用。 但是在生产环境中我们通常使用的是 Xgboost 这个工具提供的Tree boosting算法。在本文记录一下Xgboost中实现的Tree boosting的原理和其">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/xgboost/structure-score.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/xgboost/greedy-algorithm.png">
+<meta property="og:updated_time" content="2019-01-27T11:41:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="xgboost">
+<meta name="twitter:description" content="在文章GBDT中介绍了 Gradient、Booster、Gradient Booster 等一些基本理论推导，和一种Tree boosting算法-GBDT算法。 sklearn 也提供了 GBDT 的实现，我们可以方便的使用。 但是在生产环境中我们通常使用的是 Xgboost 这个工具提供的Tree boosting算法。在本文记录一下Xgboost中实现的Tree boosting的原理和其">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/xgboost/structure-score.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/xgboost.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>xgboost | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/xgboost.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">xgboost
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2017-12-11 22:22:22" itemprop="dateCreated datePublished" datetime="2017-12-11T22:22:22+08:00">2017-12-11</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Machine-Learning/" itemprop="url" rel="index"><span itemprop="name">Machine Learning</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在文章<a href="https://weirping.github.io/blog/GBDT.html" target="_blank" rel="noopener">GBDT</a>中介绍了 Gradient、Booster、Gradient Booster 等一些基本理论推导，和一种Tree boosting算法-GBDT算法。 sklearn 也提供了 GBDT 的实现，我们可以方便的使用。 但是在生产环境中我们通常使用的是 <a href="https://xgboost.readthedocs.io/en/latest/" target="_blank" rel="noopener">Xgboost</a> 这个工具提供的Tree boosting算法。在本文记录一下Xgboost中实现的Tree boosting的原理和其主要的应用， 如分类，回归，ranking。</p>
+<h1 id="Regression-Tree-Ensemble"><a href="#Regression-Tree-Ensemble" class="headerlink" title="Regression Tree Ensemble"></a>Regression Tree Ensemble</h1><p>Tree Ensemble 实际上可以理解为将 Gradient Booster(参考文章 <a href="https://weirping.github.io/blog/GBDT.html" target="_blank" rel="noopener">GBDT</a>) 中将每一步的模型(如弱分类器)换成回归树的一类模型。</p>
+<p>Xgboost 中实现的 Tree Ensemble 算法和 GBDT 非常相似， 但也有所不同。我觉得在原理上是有所升级的。我们先从 Tree Ensemble 的目标函数出发，沿着其推导过程来看其改进之处。</p>
+<p>Tree Ensemble 模型定义为 由 $K$ 个回归树相加组成的模型 ：<br>$$<br>\hat y_i= \sum_{i=1}^K f_k(x_i), f_k \in \mathcal F \tag 1<br>$$<br>其中: $\mathcal F$ 表示回归树的集合, 定义为:<br>$$<br>\mathcal F = \{ f(x) = w_{q(x)}\} (q: R^m \to T, w \in R^T) \tag 2<br>$$<br>简单解释一下上面的公式：</p>
+<ul>
+<li>$q$ 表示一个树的结构，其作用就是将一个具有 $m$ 维特征的 sample 映射到$T$个叶子节点上。即，$q: R^m \to T$ 。 $q(x)$ 表示叶子节点的序号。</li>
+<li>$w$ 是一个 $T$ 维向量，其每个维度对应树的一个叶子节点，表示回归树中每个叶子节点的取值。 $w_{q(x)}$ 表示样本 $x$ 在回归树上的预测值。</li>
+</ul>
+<p>Tree Ensemble 的目标函数如下：<br>$$<br>\begin {align}<br>&amp; obj = \sum_{i=1}^N l(y_i, \hat y_i)  + \sum_{k=1}^K \Omega (f_k) \\<br>&amp; where \Omega (f) = \gamma T + \frac 12 \lambda||w||^2<br>\end {align} \tag 3<br>$$<br>其中： </p>
+<ul>
+<li>第一项 为 训练集上的损失函数(需要是可微的凸函数)。根据任务目标的不同，损失函数的定义也不同。如：<br>回归任务可以使用平方和损失函数 (Square loss) $ l(y_i, \hat y_i) = (y- \hat y_i)^2 $ ；<br>分类任务可以使用交叉熵损失函数；<br>rank任务使用 ……  这一个说来话长，后面再说吧。</li>
+<li><p>第二项 为 模型正则项，它从树的结构和树的预测值两个方面对目标函数进行正则化</p>
+<ol>
+<li>$\gamma T$ 倾向于选择叶子节点少的回归树（结构简单）；</li>
+<li>$\frac 12 \lambda||w||^2$倾向于预测值稳定的树（预测值）。</li>
+</ol>
+<p>即论文中所说的 <em>Intuitively, the regularized objective will tend to select a model employing simple and predictive functions.</em> </p>
+</li>
+</ul>
+<h1 id="Gradient-Boosting"><a href="#Gradient-Boosting" class="headerlink" title="Gradient Boosting"></a>Gradient Boosting</h1><p>如文章<a href="https://weirping.github.io/blog/GBDT.html" target="_blank" rel="noopener">GBDT</a>中所述 在 Gradient Boosting 中进行若干轮迭代计算，每一轮产生一个新的决策树和其对应的预测值。且，每一个新的决策树都是上一轮预测值的残差。那么怎么确定这颗新的决策树呢？本节推导第 $t$ 颗决策树的确定方法。</p>
+<p>如下所示：<br>$$<br>\begin {align}<br>\hat y_i^{(0)} &amp;= 0 \\<br>\hat y_i^{(1)} &amp;= f_1(x_i) = \hat y_i^{(0)} +  f_1(x_i)   \\<br>\hat y_i^{(2)} &amp;= f_1(x_i) + f_2(x_i) = \hat y_i^{(1)} +  f_2(x_i)   \\<br>\dots \\<br>\hat y_i^{(t)} &amp;= \sum_{k=1}^t f_k(x_i)  = \hat y_i^{(t-1)} +  f_t(x_i)   \\<br>\end {align}<br>$$</p>
+<p>可以看出第 $t$ 轮的预测值是第 $t-1$ 轮的预测值 加上 一个新的决策树的预测值。那么这颗新的决策树怎么确定呢？虽然此处借鉴了梯度下降法的原理，可是我们却不能直接使用梯度下降法(如SGD)求解这颗新的决策树( since they are<br>trees, instead of just numerical vectors)。</p>
+<p>我们的解决方法称为 <strong>Additive Training</strong> 即(Boosting)。回到我们的目标函数和第 $t$ 轮迭代时的预测值表达式 $\hat y_i^{(t)} = \sum_{k=1}^t f_k(x_i)  = \hat y_i^{(t-1)} +  f_t(x_i) $, 我们可以将目标函数表达如下:<br>$$<br>obj^{(t)} = \sum_{i=1}^N l(y_i, \hat y_i^{(t-1)} +  f_t(x_i))  + \Omega (f_t) + constant \tag 4<br>$$<br>其中: $\sum_{i=1}^t \Omega (f_i) = \Omega (f_t) +  \sum_{i=1}^{t-1} \Omega (f_i)= \Omega (f_t) + constant$, 对于第 $t$ 轮来说 前 $t-1$ 个决策树都是确定的，所以 $ \sum_{i=1}^{t-1} \Omega (f_i)$ 是一个常数。</p>
+<p>所以第 $t$ 轮迭代时我们的目标函数中只有一个未知参数 $f_t(x_i)$ 即我们需要的决策树。 所以第 $t$ 个决策树只要能够使得上面的目标函数最小化就好了。</p>
+<p>但是上面的目标函数还是有点复杂，能不能简化一点呢？ 当然，借助损失函数的二级泰勒展开式来近似损失函数。</p>
+<p>回忆一下 二阶泰勒展开式：<br>$$<br>f(x + \Delta x) \approx f(x) + f’(x) \Delta x + \frac 12 f’’(x) \Delta x^2 \tag 5<br>$$<br>为了简化表示 定义如下两个符号:<br>$$<br>g_i = \frac {\partial l(y_i, \hat y_i )} {\partial \hat y_i }|_{\hat y_i^{(t-1)}} \\<br>h_i= \frac {\partial ^2 l(y_i, \hat y_i )} {\partial \hat y_i^2 }|_{\hat y_i^{(t-1)}}  \tag 6<br>$$<br>note: 对于确定的损失函数(由任务目标决定) , 第 $t$ 轮迭代时以上两个值是确定值(常数)。</p>
+<p>使用损失函数的二阶泰勒展开式近似的目标函数可以表示为：<br>$$<br>obj^{(t)} \approx \sum_{i=1}^N [l(y_i, \hat y_i^{(t-1)}) +  g_i f_t(x_i) + \frac 12 h_i f^2_t(x_i)]  + \Omega (f_t) + constant \tag 7<br>$$</p>
+<p>对于第 $t$ 轮迭代, 上式中 $l(y_i, \hat y_i^{(t-1)})$ 也是常数项目，去掉常数项， 所以对于第 $t$ 轮迭代的目标函数可以进一步简化成下式：<br>$$<br>\tilde{\mathcal L}^{(t)} = \sum_{i=1}^N [ g_i f_t(x_i) + \frac 12 h_i f^2_t(x_i)]  + \Omega (f_t) \tag 8<br>$$</p>
+<p>通过上式对第 $t$ 步可能的候选决策树$f_t$进行打分，能够使 $\tilde{\mathcal L}^{(t)}$ 最小的一个 $f_t$ 就是这一步需要的决策树。</p>
+<hr>
+<h1 id="确定回归树预测值"><a href="#确定回归树预测值" class="headerlink" title="确定回归树预测值"></a>确定回归树预测值</h1><p>本节先假设回归树的结构 $q$ 是确定的，推导回归树中每个叶子节点预测值 $\hat w$。</p>
+<p>对于一个决策树 $q: R^m \to T, w \in R^T$ 来说，令 $I_j = \{ i | q(x_i) = j \}$ 表示所有映射到第 $j$ 个叶子节点的样本的集合。联合公式3 对正则化项的定义，公式 7 可以表示如下：<br>$$<br>\begin {aligned}<br>\tilde{\mathcal L}^{(t)} &amp;= \sum_{i=1}^N [ g_i f_t(x_i) + \frac 12 h_i f^2_t(x_i)]  + \Omega (f_t) \\<br>&amp;= \sum_{i=1}^N [ g_i f_t(x_i) + \frac 12 h_i f^2_t(x_i)]  + \gamma T + \frac 12 \lambda||w||^2 \\<br>&amp;= \sum_{i=1}^N [ g_i f_t(x_i) + \frac 12 h_i f^2_t(x_i)]  + \gamma T + \frac 12 \lambda \sum_{j=1}^Tw_j^2 \\<br>&amp;=  \sum_{j=1}^T [(\sum_{i \in I_j} g_i) w_j + \frac 12 (\sum_{i \in I_j} h_i) w_j^2 ]  + \gamma T + \frac 12 \lambda \sum_{j=1}^Tw_j^2 \\<br>&amp;=  \sum_{j=1}^T [(\sum_{i \in I_j} g_i) w_j + \frac 12 (\sum_{i \in I_j} h_i + \lambda) w_j^2 ]  + \gamma T \\<br>\end {aligned}<br>$$</p>
+<p>令$G_j = \sum_{i \in I_j} g_i; H_j = \sum_{i \in I_j} h_i $ 上式可以表示为:<br>$$<br>\tilde{\mathcal L}^{(t)} =  \sum_{j=1}^T [G_j w_j + \frac 12 (H_j + \lambda) w_j^2 ]  + \gamma T \tag 9<br>$$<br>结合公式6 可以发现 $G_j, H_j$ 只与树结构 $q$ 有关。</p>
+<p>回想上面我们对回归树的定义： $q$ 表示树的结构， $w$ 表示每个叶子节点上的预测值。打分公式 $\tilde{\mathcal L}^{(t)}$ 只与 $q$ 和 $w$ 有关。那么对于一个确定的树结构 $q$ ， 最优的叶子节点预测值 $w$ 可以表示为 ：<br>$$<br>\hat w_j = - \frac {G_j}{H_j + \lambda}<br>$$</p>
+<p>$$<br>\begin {aligned}<br>\tilde{\mathcal L}^{(t)} &amp;= - \frac 12 \sum_{j=1}^T \frac {G_j^2}{H_j + \lambda}  + \gamma T \\<br>&amp;= - \frac 12 \sum_{j=1}^T \frac {(\sum_{i \in I_j} g_i)^2}{(\sum_{i \in I_j} h_i) + \lambda}  + \gamma T<br>\end {aligned} \tag {10}<br>$$</p>
+<p>note: $ \hat w_j = - \frac {G_j}{H_j + \lambda}$ 是使公式8 取最小值的 $w$。</p>
+<p><img src="xgboost/structure-score.png" alt></p>
+<p>由公式 10 可以发现 对于一个结构确定的回归树 $q$，$\tilde{\mathcal L}^{(t)}$ 的取值与$w$ 是无关的。即，$\tilde{\mathcal L}^{(t)}$ 值与回归树的结构 q 有关, 所以论文中称公式10 为 <strong>structure score</strong>。即 <em>a scoring function to measure the quality of a tree structure q.</em></p>
+<p>所以只需要穷举所有可能的树结构 q ，求能够使的$\tilde{\mathcal L}^{(t)}$最小的一个 $q$ 即可。</p>
+<p>但是，$q$ 有无穷个可能的取值。</p>
+<hr>
+<h1 id="确定的回归树结构"><a href="#确定的回归树结构" class="headerlink" title="确定的回归树结构"></a>确定的回归树结构</h1><p>无论是决策树，回归森林还是GBDT，xgboost中的Tree boosting算法 都需要以超参的形式决策树的最大深度。在最大深度的限制下如果能确定每个节点的分裂条件，就能够确定一颗唯一的回归树结构 $q$。选取方法为：</p>
+<blockquote>
+<ol>
+<li>Start from tree with depth 0</li>
+<li>For each leaf node of the tree, try to add a split. </li>
+<li>重复第二步，知道达到最大深度</li>
+</ol>
+</blockquote>
+<p>完成以上三步，其实就枚举了所有可能的树结构，并选择一个能够使公式10取最小值的结构。其中关键问题在于第二步中怎么确定分割点。</p>
+<p>公式10 其实就是类似与决策树中不纯度的定义。在xgboost确定回归树的结构的过程中，就是使用公式10来对树的叶子节点进行打分的。</p>
+<p>令 $I_L$ 和$I_R$ 分别表示一个叶子节点分类后左边和右边节点的样本集合， $I = I_L \cup I_R$, 那么这一个分割点的打分公式表示如下：<br>$$<br>\begin {aligned}<br>gain &amp;=  \mathcal L -  (\mathcal L_L + \mathcal L_R) \\<br>&amp;= \frac 12 [\frac {(\sum_{i \in I_L} g_i)^2}{(\sum_{i \in I_L} h_i)} + \frac {(\sum_{i \in I_R} g_i)^2}{(\sum_{i \in I_R} h_i)} - [\frac {(\sum_{i \in I} g_i)^2}{(\sum_{i \in I} h_i)} ] - \gamma<br>\end {aligned} \tag {11}<br>$$<br>结合公式10 可以发现，$gain$越大，损失函数越小，跟个点选取的越好。所有我们只需要选取一个能使$gain$最大的一个分割点即可。xgboost中是穷举所有可能的分割点，即样本数据中每一维度的每一个样本值都作为候选分割点，选取gain最大的一个。</p>
+<p><img src="xgboost/greedy-algorithm.png" alt></p>
+<p>xgboost 提供了多种方法来求解分割点，上述方法称为 exact 方法，针对内存能够一次载入的数据集。其次还有approx方法(一种近似方法)， 和 hist方法(基于直方图的方法)。还有GPU版本。</p>
+<p>其他方法参见原始论文。</p>
+<h1 id="Shrinkage-and-Column-Subsampling"><a href="#Shrinkage-and-Column-Subsampling" class="headerlink" title="Shrinkage and Column Subsampling"></a>Shrinkage and Column Subsampling</h1><p>Shrinkage 和 Column Subsampling 是又一种处理过拟合问题的技术。</p>
+<h2 id="Shrinkage"><a href="#Shrinkage" class="headerlink" title="Shrinkage"></a>Shrinkage</h2><p>shrinkage reduces the inuence of each individual tree and leaves space for future trees to improve the model.</p>
+<p>即经过标准的tree boosting流程确定完一颗回归树以后，第 $t$ 步的预测值使用下式计算:<br>$$<br>\hat y_i^{(t)} = \hat y_i^{(t-1)} +  \eta f_t(x_i)<br>$$</p>
+<p>原理和梯度下降法中的学习率类似。</p>
+<p>##　Column Subsampling</p>
+<p>如上文所述在确定决策树分割点时使用了所以特征的所有样本值计算 gain, 从中选取一个最好的。从计算量和过拟合问题的角度看，其实我们可以从所有特征中随机的抽取固定比例的特征(如 30%)作为候选特征。</p>
+<p>包括如下三个参数： <code>colsample_bytree</code>, <code>colsample_bylevel</code>, <code>colsample_bynode</code></p>
+<h1 id="与-GBDT-的不同点"><a href="#与-GBDT-的不同点" class="headerlink" title="与 GBDT 的不同点"></a>与 GBDT 的不同点</h1><p>我并没有看 原始 GBDT的实现细节，以下是我直接根 xgboost 的据论文和 文章 GBDT 的参考资料整理的 xgboost 和 原始 GBDT 的不同点，如果以后又机会了解更细节的内容再回来修改：</p>
+<ol>
+<li>增加了模型正则项，GBDT算法中并没有使用正则化项；</li>
+<li>除了正则化以外还使用了多种技术解决过拟合问题，如subsample，Shrinkage，Column Subsampling；</li>
+<li>使用了二阶泰勒展开式近似目标函数，GBDT中使用的是直接使用的一阶梯度。</li>
+</ol>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://xgboost.readthedocs.io/en/latest/tutorials/model.html" target="_blank" rel="noopener">Introduction to Boosted Trees</a></p>
+<p><a href="https://arxiv.org/pdf/1603.02754.pdf" target="_blank" rel="noopener">XGBoost: A Scalable Tree Boosting System</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+            <a href="/tags/LTR/" rel="tag"># LTR</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/GBDT.html" rel="next" title="GBDT">
+                <i class="fa fa-chevron-left"></i> GBDT
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/GloVe.html" rel="prev" title="GloVe">
+                GloVe <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Regression-Tree-Ensemble"><span class="nav-number">1.</span> <span class="nav-text">Regression Tree Ensemble</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Gradient-Boosting"><span class="nav-number">2.</span> <span class="nav-text">Gradient Boosting</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#确定回归树预测值"><span class="nav-number">3.</span> <span class="nav-text">确定回归树预测值</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#确定的回归树结构"><span class="nav-number">4.</span> <span class="nav-text">确定的回归树结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Shrinkage-and-Column-Subsampling"><span class="nav-number">5.</span> <span class="nav-text">Shrinkage and Column Subsampling</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Shrinkage"><span class="nav-number">5.1.</span> <span class="nav-text">Shrinkage</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#与-GBDT-的不同点"><span class="nav-number">6.</span> <span class="nav-text">与 GBDT 的不同点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">7.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

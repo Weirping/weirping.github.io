@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="从一开始接触Python就被它的编码问题困扰，遇到问题就从网上找一个解决方案，能解决问题就用，但是也不明白其中的原理，用完就忘了，下次遇到问题的时候再去找。最近我话时间阅读了一些博客和代码，将相关的问题整理下来。 1 编码(Encode)与解码(Decode) 世界上只有两种编码：Unicode和other(ASCII,GBK,BIG5,UTF-8) other中的所有编码都可以与unicode编">
+<meta name="keywords" content="Python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python编码问题">
+<meta property="og:url" content="http://weirping.coding.me/blog/Python_Encode.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="从一开始接触Python就被它的编码问题困扰，遇到问题就从网上找一个解决方案，能解决问题就用，但是也不明白其中的原理，用完就忘了，下次遇到问题的时候再去找。最近我话时间阅读了一些博客和代码，将相关的问题整理下来。 1 编码(Encode)与解码(Decode) 世界上只有两种编码：Unicode和other(ASCII,GBK,BIG5,UTF-8) other中的所有编码都可以与unicode编">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/Python_Encode/char_codes.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Python_Encode/3_encoding_settings.png">
+<meta property="og:updated_time" content="2018-01-15T15:29:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python编码问题">
+<meta name="twitter:description" content="从一开始接触Python就被它的编码问题困扰，遇到问题就从网上找一个解决方案，能解决问题就用，但是也不明白其中的原理，用完就忘了，下次遇到问题的时候再去找。最近我话时间阅读了一些博客和代码，将相关的问题整理下来。 1 编码(Encode)与解码(Decode) 世界上只有两种编码：Unicode和other(ASCII,GBK,BIG5,UTF-8) other中的所有编码都可以与unicode编">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/Python_Encode/char_codes.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/Python_Encode.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Python编码问题 | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/Python_Encode.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Python编码问题
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2017-12-24 21:34:06" itemprop="dateCreated datePublished" datetime="2017-12-24T21:34:06+08:00">2017-12-24</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>从一开始接触Python就被它的编码问题困扰，遇到问题就从网上找一个解决方案，能解决问题就用，但是也不明白其中的原理，用完就忘了，下次遇到问题的时候再去找。最近我话时间阅读了一些博客和代码，将相关的问题整理下来。</p>
+<h1 id="1-编码-Encode-与解码-Decode"><a href="#1-编码-Encode-与解码-Decode" class="headerlink" title="1 编码(Encode)与解码(Decode)"></a>1 编码(Encode)与解码(Decode)</h1><ul>
+<li>世界上只有两种编码：Unicode和other(ASCII,GBK,BIG5,UTF-8)</li>
+<li>other中的所有编码都可以与unicode编码相互转化。Unicode是各种编码之间转换的媒介，other中的编码不能直接相互转化</li>
+<li>ASCII码是单字节编码，GBK,BIG5,UTF-8等是多字节编码。这一点很重要</li>
+<li>操作系统和大多数编程语言都直接支持Unicode。在计算机内存中处理字符时(如使用Notepad++编辑一个txt文件)，统一使用Unicode编码，当需要保存到硬盘或者需要传输的时候，就转换为other中编码(如UTF-8)对应的字节流。</li>
+<li>Encode: 将 Unicode字符流 转换为 other中编码(如UTF-8)对应的字节流 的过程</li>
+<li>Decode: 将 other中编码(如UTF-8)对应的字节流 转换为 Unicode字符流 的过程</li>
+</ul>
+<p><img src="Python_Encode/char_codes.png" alt></p>
+<h1 id="2-常见编码问题"><a href="#2-常见编码问题" class="headerlink" title="2 常见编码问题"></a>2 常见编码问题</h1><p>我常遇到的与Python相关的编码问题有两个。为了能够详细的说明问题，我Python源文件的编辑到执行分为了三个阶段：1. 源文件的编辑；2. 解释器读取源文件; 3. 解释器执行源文件。</p>
+<p><img src="Python_Encode/3_encoding_settings.png" alt></p>
+<h2 id="2-1-源文件编辑"><a href="#2-1-源文件编辑" class="headerlink" title="2.1 源文件编辑"></a>2.1 源文件编辑</h2><p>我们使用的编辑器都是有文件编码设置的，如Windows系统自带的记事本在国内默认是GBK，Vim通过配置文件设置为utf-8。磁盘上的文件都是以二进制格式存放的，其中文本文件都是以某种特定编码(如GBK)的字节形式存放的。当使用编辑器打开文本文件Src.py时，编辑器首先在磁盘上读取文件的二进制字节流，然后编辑器会按照其设置的编码方式将字节流解码(Decode)成为我们能够认识的Unicode字符串。注意，当打开某个特定文件时，编辑器设置的编码方式要和文件实际使用的编码一样，即，如果文件使用的是GBK编码，文本编辑器设置的编码方式为GBK才能正确打开这个文件（当我们使用记事本、Notepad++时，这些软件可以自动检查文件的编码方式，然后以这个编码打开文件）。</p>
+<p>当文本编辑完成以后，需要保存文件，编辑器首先将其操作的Unicode字符串转换为二进制的字节流(Encode)，然后写入磁盘。</p>
+<h2 id="2-2-Python解释器读取源文件"><a href="#2-2-Python解释器读取源文件" class="headerlink" title="2.2 Python解释器读取源文件"></a>2.2 Python解释器读取源文件</h2><p>当调用python Src.py执行原文件的时候，Python解释器首先需要读取这个文本文件，但是它不知道这个Src.py是以什么编码方式存储的。如果不告诉它，他就会以ASCII码的来解码(Decode)这个文本文件，所以如果Src.py文件中只有ASCII码字符，一般是能够正确解码的。但是如果这个文件中包含汉字，这个解码过程就会失败，我们需要告诉python解释器，这个文件使用的是何种编码。这就是我们需要在源文件中写入 如下字符串的原因。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding:utf-8</span></span><br></pre></td></tr></table></figure>
+<p>这行代码告诉解释器，该文件是以utf-8编码的。note: 此处设置的编码要与源文件实际使用的编码方式一致。</p>
+<p>关于源文件中声明字符串的两种方式如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding:utf-8</span></span><br><span class="line">u = <span class="string">u'太阳'</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'type(u):'</span>, type(u)  <span class="comment"># type(u): &lt;type 'unicode'&gt;</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'repr(u):'</span>, repr(u)  <span class="comment"># repr(u): u'\u592a\u9633'</span></span><br><span class="line">str_byte = <span class="string">'太阳'</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'type(str_byte):'</span>, type(str_byte)  <span class="comment"># type(str_byte): &lt;type 'str'&gt;</span></span><br><span class="line">str_u = str_byte.decode(<span class="string">'utf-8'</span>)</span><br><span class="line"><span class="keyword">print</span> <span class="string">'type(str_u):'</span>, type(str_u)  <span class="comment"># type(str_u): &lt;type 'unicode'&gt;</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'repr(str_u):'</span>, repr(str_u)  <span class="comment"># repr(str_u): u'\u592a\u9633'</span></span><br><span class="line">str_u = str_byte.decode(<span class="string">'gbk'</span>)  <span class="comment"># 解码失败 UnicodeDecodeError</span></span><br></pre></td></tr></table></figure>
+<p>在源文件读取阶段，解释器都会以utf-8解码 u’太阳’ 和 ‘太阳’</p>
+<p>在程序执行阶段， </p>
+<ul>
+<li>u’太阳’  会转化为unicode对象， u开头的字符串会 声明这个字符串是 unicode对象；</li>
+<li>‘太阳’  会转化为 utf-8编码的字节串（str对象），此种定义方法实际上声明命了一个str对象。为什么是utf-8，是  “# coding:utf-8”  声明的，所以可以用utf-8解码该字节串，而用gbk解码则失败了。</li>
+</ul>
+<h2 id="2-3-Python程序的执行"><a href="#2-3-Python程序的执行" class="headerlink" title="2.3 Python程序的执行"></a>2.3 Python程序的执行</h2><p>我常使用的是python2，但是由于ptyhon2产生的时间比较早，所以设计上出现了存在一些问题。以下内容只针对Python 2.x ，Python 3.x 没有以下问题。</p>
+<h3 id="2-3-1-字符串与字节串"><a href="#2-3-1-字符串与字节串" class="headerlink" title="2.3.1 字符串与字节串"></a>2.3.1 字符串与字节串</h3><p>上面已经讲过，在计算机内存中，字符串中的字符都是Unicode编码的。但是在python刚出现时，还没有Unicode编码，它处理的都是ASCII码这样的单字节字符，所以它将单字的序列定义为字符串，即 类str。以现在的眼光来看，类str的对象实际上是字节串，而不是真正意义上的字符串。还好，后来Python又添加了unicode类，这才是真正意义上的字符串。</p>
+<p>类str对象是除unicode以外的所有编码(如GBK,UTF-8)的字符串对应的字节串</p>
+<p>note：在python中类str和类unicode都是basestring的子类。</p>
+<p>同时，由于以上所述原因，python2的默认编码是ASCII码，对于一个给定的str对象，它就默认这个对象每个字节都代表一个ASCII码字符。</p>
+<p>所以对于非ASCII码字符串，如果想得到字符串的长度，需要在unicode对象上使用len函数，在str对象上使用len函数会得到其编码的字节长度，而不是字符长度。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding:utf-8</span></span><br><span class="line"></span><br><span class="line">u = <span class="string">u'太阳'</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'type(u):'</span>, type(u)  <span class="comment"># len(str_byte): 6</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'repr(u):'</span>, repr(u)  <span class="comment"># repr(u): u'\u592a\u9633'</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'len(u):'</span>, len(u)  <span class="comment"># len(u): 2</span></span><br><span class="line">str_byte = <span class="string">'太阳'</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'type(str_byte):'</span>, type(str_byte)  <span class="comment"># type(str_byte): &lt;type 'str'&gt;</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'repr(str_byte):'</span>, repr(str_byte)  <span class="comment"># repr(str_byte): '\xe5\xa4\xaa\xe9\x98\xb3'</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'len(str_byte):'</span>, len(str_byte)  <span class="comment"># len(str_byte): 6</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-3-2-字节串之间的转换"><a href="#2-3-2-字节串之间的转换" class="headerlink" title="2.3.2 字节串之间的转换"></a>2.3.2 字节串之间的转换</h3><p>在python程序执行过程中有一个str对象(字节串) str_utf8 ，它是以UTF-8编码的字节串，如果我想把它转换为以GBK编码的字节串str_gbk应该怎么办呢。根据上面描述首先需要将str_utf8解码(decode)为unicode编码的字符串u，然后将其编码(encode)为GBK编码的字节串。</p>
+<blockquote>
+<p>UTF-8=&gt;Unicode=&gt;GBK</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding:utf-8</span></span><br><span class="line"></span><br><span class="line">u = <span class="string">u'太阳'</span></span><br><span class="line">str_utf8 = u.encode(<span class="string">'utf-8'</span>)  </span><br><span class="line"><span class="keyword">print</span> repr(str_utf8)    <span class="comment"># '\xe5\xa4\xaa\xe9\x98\xb3'</span></span><br><span class="line">str_unicode = str_utf8.decode(<span class="string">'utf-8'</span>)</span><br><span class="line">str_gbk1 = str_unicode.encode(<span class="string">'gbk'</span>)</span><br><span class="line"><span class="keyword">print</span> repr(str_gbk1)   <span class="comment"># '\xcc\xab\xd1\xf4'</span></span><br><span class="line"></span><br><span class="line">str_gbk2 =  str_utf8.decode(<span class="string">'utf-8'</span>).encode(<span class="string">'gbk'</span>)  <span class="comment">#也可以这样</span></span><br><span class="line"><span class="keyword">print</span> repr(str_gbk2)  <span class="comment"># '\xcc\xab\xd1\xf4'</span></span><br></pre></td></tr></table></figure>
+<p>但是有时候可以直接做到从UTF-8到GBK的转化：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding:utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">print</span> sys.getdefaultencoding() <span class="comment"># ascii</span></span><br><span class="line">reload(sys)</span><br><span class="line">sys.setdefaultencoding(<span class="string">'utf-8'</span>) <span class="comment"># 将python解释器的默认解码设置为utf-8</span></span><br><span class="line"></span><br><span class="line">u = <span class="string">u'太阳'</span></span><br><span class="line">str_utf8 = u.encode(<span class="string">'utf-8'</span>)  </span><br><span class="line"><span class="keyword">print</span> repr(str_utf8)    <span class="comment"># '\xe5\xa4\xaa\xe9\x98\xb3'</span></span><br><span class="line">str_gbk3 =  str_utf8.encode(<span class="string">'gbk'</span>)  <span class="comment">#也可以这样</span></span><br><span class="line"><span class="keyword">print</span> repr(str_gbk3)  <span class="comment"># '\xcc\xab\xd1\xf4'</span></span><br></pre></td></tr></table></figure>
+<p>从代码上看，utf-8的字节串直接转化为了gbk编码的字节串。实际上的转化过程还是</p>
+<blockquote>
+<p>UTF-8=&gt;Unicode=&gt;GBK </p>
+</blockquote>
+<p>对于这种代码，python解释器的做法实际上是 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">str_gbk3 =  str_utf8.decode(defaultencoding).encode(&apos;gbk&apos;)</span><br></pre></td></tr></table></figure>
+<p>这就是为什么我们需要定义defaultencoding的的原因。</p>
+<p>此处需要注意：python中默认的defaultencoding 是ascii。</p>
+<h3 id="2-3-4-python读写文件"><a href="#2-3-4-python读写文件" class="headerlink" title="2.3.4 python读写文件"></a>2.3.4 python读写文件</h3><p>读写的文件内容可以当做一个python程序变量来处理。</p>
+<p>内置的open()方法打开文件时，read()读取的是字节流(str)，读取后需要使用正确的编码格式(由实际读取的文件决定)进行解码(decode)。write()写入时，如果参数是unicode，则需要使用你希望写入的编码进行编码(encode)，如果是其他编码格式的字节串(str)，则需要先用该str的编码进行decode，转成unicode后再使用写入的编码进行encode。如果直接将unicode作为参数传入write()方法，Python将先使用源代码文件声明的字符编码进行编码然后写入。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: UTF-8 </span></span><br><span class="line">f = open(<span class="string">'test.txt'</span>)  <span class="comment"># 已知是GBK编码</span></span><br><span class="line">s = f.read()</span><br><span class="line">f.close()</span><br><span class="line"><span class="keyword">print</span> type(s)         <span class="comment"># &lt;type 'str'&gt;</span></span><br><span class="line">u = s.decode(<span class="string">'GBK'</span>)   <span class="comment"># 解码成unicode </span></span><br><span class="line">f = open(<span class="string">'test2.txt'</span>, <span class="string">'w'</span>)   <span class="comment"># 已知是UTF-8编码</span></span><br><span class="line">s = u.encode(<span class="string">'UTF-8'</span>)   <span class="comment"># 编码为UTF-8</span></span><br><span class="line">f.write(s)</span><br><span class="line">f.close()</span><br></pre></td></tr></table></figure>
+<h1 id="3-字符编码简介"><a href="#3-字符编码简介" class="headerlink" title="3 字符编码简介"></a>3 字符编码简介</h1><p>在第一节已经对字符编码进行了一个简单的概括，本节进行稍微详细的说明。本节内容主要参考自<a href="http://www.cnblogs.com/huxi/archive/2010/12/05/1897271.html" target="_blank" rel="noopener">Python字符编码详解</a></p>
+<p>字符编码的作用就是将字符与计算机的数值相对应。如字符”A”对应65(\x41)，字符”1”对应49(\x31)。字符的数量和编码的长度是相关的，如中国人使用的汉字有几万个，而美国人使用的英文加上特殊符号也就那么几十个。正式由于不同环境中字符和字符数量的不同才产生了各种令人头疼的编码。</p>
+<h2 id="3-1-ASCII"><a href="#3-1-ASCII" class="headerlink" title="3.1 ASCII"></a>3.1 ASCII</h2><p>ASCII(American Standard Code for Information Interchange)，是一种单字节的编码。计算机世界里一开始只有英文，而单字节可以表示256个不同的字符，可以表示所有的英文字符和许多的控制 符号。不过ASCII只用到了其中的一半（\x80以下），共128个字符，这也是MBCS得以实现的基础。</p>
+<h2 id="3-2-MBCS"><a href="#3-2-MBCS" class="headerlink" title="3.2 MBCS"></a>3.2 MBCS</h2><p>然而计算机世界里很快就有了其他语言，单字节的ASCII已无法满足需求。后来每个语言就制定了一套自己的编码，由于单字节能表示的字符太少，而且同时也需要与ASCII编码保持兼容，所以这些编码纷纷使用了多字节来表示字符，如GBK、、GB2312、BIG5等，他们的规则是，如果第一个字节是\x80以下，则仍然表示ASCII字符；而如果是\x80以上，则跟下一个字节一起（共两个字节）表示一个字符。</p>
+<p>MBCS(Multi-Byte Character Set)是这些编码的统称。目前为止大家都是用双字节，所以有时候也叫做DBCS(Double-Byte Character Set)。必须明确的是，MBCS并不是某一种特定的编码，Windows里根据你设定的区域不同，MBCS指代不同的编码，而Linux里无法使用 MBCS作为编码。在Windows中你看不到MBCS这几个字符，因为微软为了更加洋气，使用了ANSI来吓唬人，记事本的另存为对话框里编码ANSI就是MBCS。同时，在简体中文Windows默认的区域设定里，指代GBK。</p>
+<h2 id="3-3-Unicode"><a href="#3-3-Unicode" class="headerlink" title="3.3 Unicode"></a>3.3 Unicode</h2><p>后来，有人开始觉得太多编码导致世界变得过于复杂了，于是大家坐在一起拍脑袋想出来一个方法：所有语言的字符都用同一种字符集来表示，这就是Unicode。</p>
+<p>最初的Unicode标准UCS-2使用两个字节表示一个字符，所以你常常可以听到Unicode使用两个字节表示一个字符的说法。但过了不久有人觉得256$\times$256太少了，还是不够用，于是出现了UCS-4标准，它使用4个字节表示一个字符，不过我们用的最多的仍然是UCS-2。</p>
+<p><strong>此处需要注意，ASII和MBCS即保存了字符和码位的对应关系，传输和存储的时候也是使用了字符对应的码位。与ASII和MBCS不同，UCS(Unicode Character Set)还仅仅是字符对应码位的一张表而已，比如”汉”这个字的码位是6C49。字符具体如何传输和储存则是由UTF(UCS Transformation Format)来负责。</strong></p>
+<p><strong>现代操作系统和大多数编程语言都直接支持Unicode。在计算机内存中，统一使用Unicode编码，当需要保存到硬盘或者需要传输的时候，就转换为UTF-8编码。</strong></p>
+<p>一开始这事很简单，直接使用UCS的码位来保存，这就是UTF-16，比如，”汉”直接使用\x6C\x49保存(UTF-16-BE)，或是倒过来使用\x49\x6C保存(UTF-16-LE)。但用着用着美国人觉得自己吃了大亏，以前英文字母只需要一个字节就能保存了，现在大锅饭一吃变成了两个字节，空间消耗大了一倍……于是UTF-8横空出世。</p>
+<p>UTF-8编码把一个Unicode字符根据不同的数字大小编码成1-6个字节，ASCII字符使用1字节表示，汉字通常是3个字节，只有很生僻的字符才会被编码成4-6个字节。</p>
+<p>另外值得一提的是BOM(Byte Order Mark)。我们在储存文件时，文件使用的编码并没有保存，打开时则需要我们记住原先保存时使用的编码并使用这个编码打开，这样一来就产生了许多麻烦。而UTF则引入了BOM来表示自身编码，如果一开始读入的几个字节是其中之一，则代表接下来要读取的文字使用的编码是相应的编码：</p>
+<blockquote>
+<p>BOM_UTF8 ‘\xef\xbb\xbf’<br>BOM_UTF16_LE ‘\xff\xfe’<br>BOM_UTF16_BE ‘\xfe\xff’</p>
+</blockquote>
+<p>并不是所有的编辑器都会写入BOM，但即使没有BOM，Unicode还是可以读取的，只是像MBCS的编码一样，需要另行指定具体的编码，否则解码将会失败。</p>
+<p>你可能听说过UTF-8不需要BOM，这种说法是不对的，只是绝大多数编辑器在没有BOM时都是以UTF-8作为默认编码读取。即使是保存时默认使 用ANSI(MBCS)的记事本，在读取文件时也是先使用UTF-8测试编码，如果可以成功解码，则使用UTF-8解码。记事本这个别扭的做法造成了一个 BUG：如果你新建文本文件并输入”姹塧”然后使用ANSI(MBCS)保存，再打开就会变成”汉a”，你不妨试试 ：）</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="http://www.cnblogs.com/huxi/archive/2010/12/05/1897271.html" target="_blank" rel="noopener">Python字符编码详解</a></p>
+<p><a href="http://www.cnblogs.com/yyds/p/6171340.html" target="_blank" rel="noopener">Python中的字符串与字符编码</a></p>
+<p><a href="http://blog.csdn.net/pipisorry/article/details/44136297" target="_blank" rel="noopener">python字符串编码及乱码解决方案</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/GloVe.html" rel="next" title="GloVe">
+                <i class="fa fa-chevron-left"></i> GloVe
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/Parameters_of_Function_in_Python.html" rel="prev" title="Python函数的参数">
+                Python函数的参数 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-编码-Encode-与解码-Decode"><span class="nav-number">1.</span> <span class="nav-text">1 编码(Encode)与解码(Decode)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-常见编码问题"><span class="nav-number">2.</span> <span class="nav-text">2 常见编码问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-源文件编辑"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 源文件编辑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-Python解释器读取源文件"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 Python解释器读取源文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-Python程序的执行"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 Python程序的执行</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-1-字符串与字节串"><span class="nav-number">2.3.1.</span> <span class="nav-text">2.3.1 字符串与字节串</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-2-字节串之间的转换"><span class="nav-number">2.3.2.</span> <span class="nav-text">2.3.2 字节串之间的转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-4-python读写文件"><span class="nav-number">2.3.3.</span> <span class="nav-text">2.3.4 python读写文件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-字符编码简介"><span class="nav-number">3.</span> <span class="nav-text">3 字符编码简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-ASCII"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 ASCII</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-MBCS"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 MBCS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-Unicode"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 Unicode</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
