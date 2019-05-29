@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Dropout简介Dropout 解决过拟合先介绍dropout是干什么的。 在机器学习的模型中，如果模型的参数太多，而训练样本又太少，训练出来的模型很容易产生过拟合的现象。在训练神经网络的时候经常会遇到过拟合的问题，过拟合具表现在：模型在训练数据上损失函数值较小，预测准确率较高；但是在验证数据集上损失函数值比较大，预测准确率较低。如下图中 baseline的交叉熵损失函数在训练集和验证集上的曲线">
+<meta name="keywords" content="Machine Learning,NN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="dropout">
+<meta property="og:url" content="http://weirping.coding.me/blog/dropout.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="Dropout简介Dropout 解决过拟合先介绍dropout是干什么的。 在机器学习的模型中，如果模型的参数太多，而训练样本又太少，训练出来的模型很容易产生过拟合的现象。在训练神经网络的时候经常会遇到过拟合的问题，过拟合具表现在：模型在训练数据上损失函数值较小，预测准确率较高；但是在验证数据集上损失函数值比较大，预测准确率较低。如下图中 baseline的交叉熵损失函数在训练集和验证集上的曲线">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/dropout/dropout.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/dropout/dropout-prin-0.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/dropout/dropout-prin-1.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/dropout/dropout-prin-2.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/dropout/standard-nn.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/dropout/dropout-nn.png">
+<meta property="og:updated_time" content="2019-05-05T11:47:58.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="dropout">
+<meta name="twitter:description" content="Dropout简介Dropout 解决过拟合先介绍dropout是干什么的。 在机器学习的模型中，如果模型的参数太多，而训练样本又太少，训练出来的模型很容易产生过拟合的现象。在训练神经网络的时候经常会遇到过拟合的问题，过拟合具表现在：模型在训练数据上损失函数值较小，预测准确率较高；但是在验证数据集上损失函数值比较大，预测准确率较低。如下图中 baseline的交叉熵损失函数在训练集和验证集上的曲线">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/dropout/dropout.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/dropout.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>dropout | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/dropout.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">dropout
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-10-03 22:22:22" itemprop="dateCreated datePublished" datetime="2018-10-03T22:22:22+08:00">2018-10-03</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/NN/" itemprop="url" rel="index"><span itemprop="name">NN</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Dropout简介"><a href="#Dropout简介" class="headerlink" title="Dropout简介"></a>Dropout简介</h1><h2 id="Dropout-解决过拟合"><a href="#Dropout-解决过拟合" class="headerlink" title="Dropout 解决过拟合"></a>Dropout 解决过拟合</h2><p>先介绍dropout是干什么的。</p>
+<p>在机器学习的模型中，如果模型的参数太多，而训练样本又太少，训练出来的模型很容易产生过拟合的现象。在训练神经网络的时候经常会遇到过拟合的问题，过拟合具表现在：模型在训练数据上损失函数值较小，预测准确率较高；但是在验证数据集上损失函数值比较大，预测准确率较低。如下图中 baseline的交叉熵损失函数在训练集和验证集上的曲线所示：随着训练迭代次数的增加，训练集和验证集的gap越来越大。<br><img src="dropout/dropout.png" alt></p>
+<p>Dropout可以比较有效的缓解过拟合的发生，在一定程度上达到正则化的效果。</p>
+<h2 id="1-2-Dropout-相关的几篇论文"><a href="#1-2-Dropout-相关的几篇论文" class="headerlink" title="1.2 Dropout 相关的几篇论文"></a>1.2 Dropout 相关的几篇论文</h2><p>在2012年，Hinton在其论文《Improving neural networks by preventing co-adaptation of feature detectors》中提出Dropout。当一个复杂的前馈神经网络被训练在小的数据集时，容易造成过拟合。为了防止过拟合，可以通过阻止特征检测器(神经网络中的节点)的共同作用来提高神经网络的性能。</p>
+<p>在2012年，Alex、Hinton在其论文《ImageNet Classification with Deep Convolutional Neural Networks》中用到了Dropout算法，用于防止过拟合。并且，这篇论文提到的AlexNet网络模型引爆了神经网络应用热潮，并赢得了2012年图像识别大赛冠军，使得CNN成为图像分类上的核心算法模型。</p>
+<p>随后，又有一些关于Dropout的文章《Dropout:A Simple Way to Prevent Neural Networks from Overfitting》、《Improving Neural Networks with Dropout》、《Dropout as data augmentation》。</p>
+<p>Dropout可以作为训练深度神经网络的一种trick供选择。在每个训练批次中，通过忽略一半的特征检测器（让一半的隐层节点值为0），可以明显地减少过拟合现象。这种方式可以减少特征检测器（隐层节点）间的相互作用，检测器相互作用是指某些检测器依赖其他检测器才能发挥作用。</p>
+<p>Dropout说的简单一点就是：我们在前向传播的时候，让某个神经元的激活值以一定的概率p停止工作，这样可以使模型泛化性更强，因为它不会太依赖某些局部的特征，如下图所示：</p>
+<p><img src="dropout/dropout-prin-0.png" alt></p>
+<h1 id="神经网络中dropout的工作原理"><a href="#神经网络中dropout的工作原理" class="headerlink" title="神经网络中dropout的工作原理"></a>神经网络中dropout的工作原理</h1><p>假设我们要训练这样一个神经网络，如图所示。</p>
+<p><img src="dropout/dropout-prin-1.png" alt></p>
+<p>输入是x输出是y，正常的流程是：我们首先把x通过网络前向传播，然后把误差反向传播以决定如何更新参数让网络进行学习。使用Dropout之后，过程变成如下：</p>
+<p>（1）首先随机（临时）删掉网络中一半的隐藏神经元，输入输出神经元保持不变（图3中虚线为部分临时被删除的神经元）</p>
+<p><img src="dropout/dropout-prin-2.png" alt></p>
+<p>（2） 然后把输入x通过修改后的网络前向传播，然后把得到的损失通过修改的网络反向传播，在没有被删除的神经元上按照随机梯度下降法更新对应的参数（w，b）。</p>
+<p>（3）继续重复 1、 2 两步：最终训练处一个完整的神经网络。</p>
+<p>后续则可以使用这个NN模型用于预测了。</p>
+<h1 id="Dropout-更深入探讨"><a href="#Dropout-更深入探讨" class="headerlink" title="Dropout 更深入探讨"></a>Dropout 更深入探讨</h1><p>上文简单描述了 Dropout 的工作原理，下面我们深入到代码和数学原理层面了解一下。</p>
+<p>对于一个神经网络，变量定义如下：</p>
+<ul>
+<li>$L$： hidden layer的数量， $l \in \{1, \dots, L\}$；</li>
+<li>$z^{(l)}$: 第 $l$ 层的激活因子；</li>
+<li>$y^{(l)}$: 第 $l$ 层的输出向量，也是第 $l+1$ 等的输入向量。</li>
+<li>$W^{(l)}$ 和 $b^{(l)}$: 第 $l$ 层的 weights 和 biases</li>
+</ul>
+<p>在标准的神经网络的前向过程中， 第 $l$ 和 $l+1$层可以用下图和公式所示：</p>
+<p><img src="dropout/standard-nn.png" alt><br>$$<br>\begin {align}<br>z_i^{(l+1)} &amp;= w_i^{(l+1)} y^{(l)} + b_i^{(l+1)} \\<br>y_i^{(l+1)} &amp;= f(z_i^{(l+1)})<br>\end {align}<br>$$<br>其中 $f$ 为神经网络的激活函数。</p>
+<p>当使用dropout以后 前向传播可以用下图和公式表示：</p>
+<p><img src="dropout/dropout-nn.png" alt></p>
+<p>$$<br>\begin {align}<br>r_j^{(l)} &amp;= \mathrm{Bernoulli}(p) \\<br>\tilde{y}^{(l)} &amp;= r_j^{(l)} \times   y^{(l)} \\<br>z_i^{(l+1)} &amp;= w_i^{(l+1)} \tilde{y}^{(l)} + b_i^{(l+1)} \\<br>y_i^{(l+1)} &amp;= f(z_i^{(l+1)})<br>\end {align}<br>$$<br>其中 $r^{(l)}$ 是一个向量，大小与其对应的隐藏层的节点数相同，其每个值相互独立，并且有概率 $p$ 的可能性是1，$1-p$ 的概率是0。 即上述公式中 Bernoulli 分布的含义。</p>
+<p>代码层面实现让某个神经元以概率$p$停止工作(输出值为0)，其实就是让它的激活函数值以概率$p$变为0。比如我们某一层网络神经元的个数为1000个，其激活函数输出值为$y_1, y_2, y_3, \dots , y_{1000}$，我们dropout rate选择0.4，那么这一层神经元经过dropout后，1000个神经元中会有大约400个的值被置为0。</p>
+<p>下面我们从代码层面上看看dropout的实现：</p>
+<p>在 <a href="http://cs231n.github.io/" target="_blank" rel="noopener">CS231n Convolutional Neural Networks for Visual Recognition</a> 中提供展示了两种 dropout的实现逻辑：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">p = <span class="number">0.5</span>  <span class="comment"># probability of keeping a unit active. higher = less dropout</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train_step</span><span class="params">(X)</span>:</span></span><br><span class="line">    <span class="string">""" X contains the data """</span></span><br><span class="line">    <span class="comment"># forward pass for example 3-layer neural network</span></span><br><span class="line">    H1 = np.maximum(<span class="number">0</span>, np.dot(W1, X) + b1) </span><br><span class="line">    U1 = np.random.rand(*H1.shape) &lt; p  <span class="comment"># first dropout mask</span></span><br><span class="line">    H1 *= U1  <span class="comment"># drop!</span></span><br><span class="line">    H2 = np.maximum(<span class="number">0</span>, np.dot(W2, H1) + b2) </span><br><span class="line">    U2 = np.random.rand(*H2.shape) &lt; p  <span class="comment"># second dropout mask</span></span><br><span class="line">    H2 *= U2  <span class="comment"># drop!</span></span><br><span class="line">    out = np.dot(W3, H2) + b3</span><br><span class="line">    <span class="comment"># backward pass: compute gradients... (not shown)</span></span><br><span class="line">    <span class="comment"># perform parameter update... (not shown)</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">predict</span><span class="params">(X)</span>:</span></span><br><span class="line">    <span class="comment"># ensembled forward pass</span></span><br><span class="line">    H1 = np.maximum(<span class="number">0</span>, np.dot(W1, X) + b1) * p  <span class="comment"># <span class="doctag">NOTE:</span> scale the activations</span></span><br><span class="line">    H2 = np.maximum(<span class="number">0</span>, np.dot(W2, H1) + b2) * p  <span class="comment"># <span class="doctag">NOTE:</span> scale the activations</span></span><br><span class="line">    out = np.dot(W3, H2) + b3</span><br></pre></td></tr></table></figure>
+<p>可以看到在模型训练的 forward 环节 是严格按照上面的介绍的dropout的公式进行处理的。但是 模型的predict环节需要在每一个使用dropout的地方 乘以 概率 $p$ 来对该层的输出进行缩放。缩放的原因很简单：在训练的时候每个节点是用其上一层网络节点总数 乘以 $p$ 个节点计算得到的， 但是在predict环节却是使用了所有的上一层节点得到的，为了保持训练和预测一致，所以需要对其进行缩放。</p>
+<p>但是在预测环节乘以概率$p$ 不符合我们代码开发的逻辑， 总不能对所有现有模型单独开发一个 dropout版本的 predict函数。最好是所有的predict 函数都保持不变就可以实现 scale功能。其实是可以做到的。我们只需要在模型的训练阶段 对每一层dropout的输出进行缩放就可以了，逻辑代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">p = <span class="number">0.6</span> <span class="comment"># probability of keeping a unit active. higher = less dropout</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train_step</span><span class="params">(X)</span>:</span></span><br><span class="line">  <span class="comment"># forward pass for example 3-layer neural network</span></span><br><span class="line">  H1 = np.maximum(<span class="number">0</span>, np.dot(W1, X) + b1)</span><br><span class="line">  U1 = (np.random.rand(*H1.shape) &lt; p) / p <span class="comment"># first dropout mask. Notice /p!</span></span><br><span class="line">  H1 *= U1 <span class="comment"># drop!</span></span><br><span class="line">  H2 = np.maximum(<span class="number">0</span>, np.dot(W2, H1) + b2)</span><br><span class="line">  U2 = (np.random.rand(*H2.shape) &lt; p) / p <span class="comment"># second dropout mask. Notice /p!</span></span><br><span class="line">  H2 *= U2 <span class="comment"># drop!</span></span><br><span class="line">  out = np.dot(W3, H2) + b3</span><br><span class="line">  </span><br><span class="line">  <span class="comment"># backward pass: compute gradients... (not shown)</span></span><br><span class="line">  <span class="comment"># perform parameter update... (not shown)</span></span><br><span class="line">  </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">predict</span><span class="params">(X)</span>:</span></span><br><span class="line">  <span class="comment"># ensembled forward pass</span></span><br><span class="line">  H1 = np.maximum(<span class="number">0</span>, np.dot(W1, X) + b1) <span class="comment"># no scaling necessary</span></span><br><span class="line">  H2 = np.maximum(<span class="number">0</span>, np.dot(W2, H1) + b2)</span><br><span class="line">  out = np.dot(W3, H2) + b3</span><br></pre></td></tr></table></figure>
+<p>可以看到 U1，U2计算的使用都 除以 p 即达到了缩放的功能， 在预测环境不需要做任何改动。</p>
+<p>在 keras代码中以 theano 为 backend时 dropout的实现如下，可以看到倒数第二行 <code>x /= retain_prob</code> 即是我们所说的在训练环境对使用dropout 的输出节点进行 缩放(scale)。 tensorflow的dropout代码跳转比较负责，需要的可以自行查找。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dropout</span><span class="params">(x, level, noise_shape=None, seed=None)</span>:</span></span><br><span class="line">    <span class="string">"""Sets entries in `x` to zero at random,</span></span><br><span class="line"><span class="string">    while scaling the entire tensor.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    # Arguments</span></span><br><span class="line"><span class="string">        x: tensor</span></span><br><span class="line"><span class="string">        level: fraction of the entries in the tensor</span></span><br><span class="line"><span class="string">            that will be set to 0.</span></span><br><span class="line"><span class="string">        noise_shape: shape for randomly generated keep/drop flags,</span></span><br><span class="line"><span class="string">            must be broadcastable to the shape of `x`</span></span><br><span class="line"><span class="string">        seed: random seed to ensure determinism.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="keyword">if</span> level &lt; <span class="number">0.</span> <span class="keyword">or</span> level &gt;= <span class="number">1</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">'Dropout level must be in interval [0, 1[.'</span>)</span><br><span class="line">    <span class="keyword">if</span> seed <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        seed = np.random.randint(<span class="number">1</span>, <span class="number">10e6</span>)</span><br><span class="line">    <span class="keyword">if</span> isinstance(noise_shape, list):</span><br><span class="line">        noise_shape = tuple(noise_shape)</span><br><span class="line"></span><br><span class="line">    rng = RandomStreams(seed=seed)</span><br><span class="line">    retain_prob = <span class="number">1.</span> - level</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> noise_shape <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        random_tensor = rng.binomial(x.shape, p=retain_prob, dtype=x.dtype)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        random_tensor = rng.binomial(noise_shape, p=retain_prob, dtype=x.dtype)</span><br><span class="line">        random_tensor = T.patternbroadcast(random_tensor,</span><br><span class="line">                                           [dim == <span class="number">1</span> <span class="keyword">for</span> dim <span class="keyword">in</span> noise_shape])</span><br><span class="line">    x *= random_tensor</span><br><span class="line">    x /= retain_prob</span><br><span class="line">    <span class="keyword">return</span> x</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>当前Dropout被大量利用于全连接网络，而且一般认为设置为0.5或者0.3，而在卷积网络隐藏层中由于卷积自身的稀疏化以及稀疏化的ReLu函数的大量使用等原因，Dropout策略在卷积网络隐藏层中使用较少。总体而言，Dropout是一个超参，需要根据具体的网络、具体的应用领域进行尝试。</p>
+</blockquote>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://blog.csdn.net/program_developer/article/details/80737724" target="_blank" rel="noopener">深度学习中Dropout原理解析</a> (该blog为本文的主要参考，部分内容完全摘抄，基于扩展阅读后产生了本文)</p>
+<p>Srivastava, Nitish, et al. “Dropout: a simple way to prevent neural networks from overfitting.” <em>The Journal of Machine Learning Research</em> 15.1 (2014): 1929-1958.</p>
+<p><a href="http://cs231n.github.io/neural-networks-2/" target="_blank" rel="noopener">http://cs231n.github.io/neural-networks-2/</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+            <a href="/tags/NN/" rel="tag"># NN</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Simhash.html" rel="next" title="Simhash">
+                <i class="fa fa-chevron-left"></i> Simhash
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/n-gram-model.html" rel="prev" title="n元模型">
+                n元模型 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">49</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">13</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Dropout简介"><span class="nav-number">1.</span> <span class="nav-text">Dropout简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Dropout-解决过拟合"><span class="nav-number">1.1.</span> <span class="nav-text">Dropout 解决过拟合</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-Dropout-相关的几篇论文"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 Dropout 相关的几篇论文</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#神经网络中dropout的工作原理"><span class="nav-number">2.</span> <span class="nav-text">神经网络中dropout的工作原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Dropout-更深入探讨"><span class="nav-number">3.</span> <span class="nav-text">Dropout 更深入探讨</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
