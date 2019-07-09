@@ -120,7 +120,7 @@
 <meta property="og:image" content="http://weirping.coding.me/blog/GBDT/GBDT-LR.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/GBDT/dt-feature-compose.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/GBDT/gbdt-feature-compose.png">
-<meta property="og:updated_time" content="2019-01-03T14:57:52.000Z">
+<meta property="og:updated_time" content="2019-07-05T09:13:48.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="GBDT">
 <meta name="twitter:description" content="GBDT(Gradient Boosting Decision Tree) 又叫 MART（Multiple Additive Regression Tree)，是一种迭代的决策树算法，该算法由多棵决策树组成，所有树的结论累加起来做最终答案。它在被提出之初就和SVM一起被认为是泛化能力（generalization)较强的算法。该模型被广泛的应用与ctr预估和搜索排序中。 本文按照Gradient">
@@ -439,7 +439,7 @@
 <p>其中比较经典的算法有  AdaBoost，RealAdaBoost。</p>
 <p>Boosting 使用多个模型的预测结果的累加来作为最终的预测结果(即，加性模型)。比如在预测人的年龄任务中，A的真实年龄是18岁，但第一个模型的预测年龄是12岁，差了6岁，即残差为6岁。那么在第二个模型里我们把A的年龄设为6岁去学习，如果第二个模型真的能把A分到6岁的叶子节点，那累加两棵树的结论就是A的真实年龄；如果第二棵树的结论是5岁，则A仍然存在1岁的残差，第三棵树里A的年龄就变成1岁，继续学。这就是 Boosting  的意义。</p>
 <p>关于这个方面的理论这里简单介绍如下：</p>
-<p>对于一个预测任务，使用了M的模型， 那么对于一条数据$x_i$ 的预测值可以表示为：<br>$$<br>\hat y_i = \sum_{m=1}^M \beta_m b(x_i, \gamma_m)<br>$$<br>其中：</p>
+<p>对于一个预测任务，使用了M个模型， 那么对于一条数据$x_i$ 的预测值可以表示为：<br>$$<br>\hat y_i = \sum_{m=1}^M \beta_m b(x_i, \gamma_m)<br>$$<br>其中：</p>
 <ul>
 <li>$b$ : 基础模型， 对于分类任务来说，也称为 <strong>基分类器</strong>。</li>
 <li>$\beta$: 每个基础模型在总的预测结果中占有的权重。</li>
@@ -472,8 +472,8 @@
 </tr>
 </tbody>
 </table>
-<p>$\min_{\vec f}\mathcal L(\vec y, \vec f)$ 在$ \vec f_{m-1}$ 处的梯度：<br>$$<br>\vec g_m = [\frac{\partial \mathcal L(\vec y, \vec f)}{\partial {\vec f}}]_{\vec f = \vec f_{m-1}}<br>$$<br>那么求解$\vec f_m$ 的迭代公式为:<br>$$<br>\vec f_m = \vec f_{m-1} + \alpha_m (- \vec g_m)<br>$$<br>其中： $\alpha$ 为每一步的步长， 在GBDT里面使用的是统一的步长，即，对于所有的 基础模型 使用同一个预设的步长(超参)。</p>
-<p>那么:<br>$$<br>\vec f_m =  \alpha_0 (- \vec g_0) + \alpha_1 (- \vec g_1) + \alpha_2 (- \vec g_2) + \dots + \alpha_m (- \vec g_m) \tag 1<br>$$<br>对于上试我们可以这样理解：</p>
+<p>$\min_{\vec f}\mathcal L(\vec y, \vec f)$ 在$ \vec f_{m-1}$ 处的梯度：<br>$$<br>\vec g_m = [\frac{\partial \mathcal L(\vec y, \vec f)}{\partial {\vec f}}] | _{\vec f = \vec f_{m-1}}<br>$$<br>那么求解$\vec f_m$ 的迭代公式为:<br>$$<br>\vec f_m = \vec f_{m-1} + \alpha_m (- \vec g_m)<br>$$<br>其中： $\alpha$ 为每一步的步长， 在GBDT里面使用的是统一的步长，即，对于所有的 基础模型 使用同一个预设的步长(超参)。</p>
+<p>那么:<br>$$<br>\vec f_m =  \alpha_0 (- \vec g_0) + \alpha_1 (- \vec g_1) + \alpha_2 (- \vec g_2) + \dots + \alpha_m (- \vec g_m) \tag 1<br>$$<br>对于上式我们可以这样理解：</p>
 <ul>
 <li>每一步的 $(- \vec g)$ 都表示一个基础模型的预测结果, 在GBDT中这个基础模型就是 决策树。那么最终的模型预测结果，是所有单个模型预测结果的累加；</li>
 <li>增加新的模型，使结果在前一步的基础上更加逼近最优点；</li>
@@ -482,14 +482,14 @@
 <p>这就是 Gradient + Boosting 的数学推导。</p>
 <h1 id="GBDT"><a href="#GBDT" class="headerlink" title="GBDT"></a>GBDT</h1><p>DT在这里指的是决策树(Decesion Tree)， 而决策树有分为  分类树(Classification Tree) 和 回归树 (Regression Tree)。 实际上在GBDT模型中使用的是回归树，这也是为什么GBDT又名 MART(Multiple Additive Regression Tree) 的原因。</p>
 <blockquote>
-<p>Decesion Trees partition the space of all joint predictor variable values into disjoint regions $R_j,  j = 1, 2,  \dots, J​$ , as represented by the terminal nodes of the tree. A constant $\gamma_j​$ is assigned to each such region and the predictive  rule is<br>$$<br>x \in R_j  \Rightarrow f(x) = \gamma_j<br>$$<br>决策树可以被定义为：<br>$$<br>T(x; \Theta) = \sum_{j=i}^J \gamma_j I(x \in R_j)<br>$$<br>其中： $\Theta = \{R_j, \gamma_j\}_1^J $ 表示模型参数, $J$ 表示决策树叶子节点的数量(通常是通过限制树的深度限制叶子节点的数量)。</p>
+<p>Decesion Trees partition the space of all joint predictor variable values into disjoint regions $R_j,  j = 1, 2,  \dots, J$ , as represented by the terminal nodes of the tree. A constant $\gamma_j$ is assigned to each such region and the predictive  rule is<br>$$<br>x \in R_j  \Rightarrow f(x) = \gamma_j<br>$$<br>决策树可以被定义为：<br>$$<br>T(x; \Theta) = \sum_{j=i}^J \gamma_j I(x \in R_j)<br>$$<br>其中： $\Theta = \{R_j, \gamma_j\}_1^J $ 表示模型参数, $J$ 表示决策树叶子节点的数量(通常是通过限制树的深度限制叶子节点的数量)。</p>
 </blockquote>
 <p>决策树就是将样本的属性映射到一个具体的类别(分类树)或者score(回归树)。</p>
-<p>使用 若干颗回归树对 式 1 中的所有梯度 $-g$ 进行替换即得到一个GBDT模型的表示方法。如下：<br>$$<br>\begin {align}<br>\vec f_m &amp;=  \alpha_0 (- \vec g_0 &amp;) + \alpha_1 (- \vec g_1 &amp;) + \alpha_2 ( - \vec g_2 &amp;) + \dots &amp; + \alpha_m (- \vec g_m &amp;) \\<br>\downarrow \\<br>\vec f_m &amp;=  \alpha_0 (T_0 &amp;) + \alpha_1 (T_1 &amp;) + \alpha_2 (T_2 &amp;) + \dots &amp; + \alpha_m (T_m &amp;) \\<br>\end {align}<br>$$</p>
+<p>使用 若干颗回归树对 式 1 中的所有梯度 $-g$ 进行替换即得到一个GBDT模型的表示方法。如下：<br>$$<br>\begin {align}<br>\vec f_m &amp;=  \alpha_0 (- \vec g_0)&amp; +&amp; \alpha_1 (- \vec g_1)&amp; +&amp; \alpha_2 ( - \vec g_2)&amp; + \dots +&amp; \alpha_m (- \vec g_m) \\<br>\downarrow \\<br>\vec f_m &amp;=  \alpha_0 (T_0)&amp; +&amp; \alpha_1 (T_1)&amp; +&amp; \alpha_2 (T_2)&amp; + \dots +&amp; \alpha_m (T_m) \\<br>\end {align}<br>$$</p>
 <p>通常来说，一个机器学习模型的训练实际上就是寻找模型参数的过程。那么GBDT模型的参数是什么呢？</p>
 <ol>
 <li>parameters Including structure of each tree, and the score in the leaf； 或者说GBDT模型的参数就是模型中的所有决策树 $\{T_0, T_1, T_2, \dots, T_m\}$</li>
-<li>与一般的模型(如LR)不同，Instead learning weights in , we are learning functions(trees) 。</li>
+<li>与一般的模型(如LR)不同，Instead learning weights ,  we are learning functions(trees) 。</li>
 </ol>
 <p>GBDT的算法流程如下:</p>
 <p><img src="GBDT/GBDT-algorithm.png" alt></p>
@@ -506,13 +506,12 @@
 </li>
 <li><p>特征组合<br>GBDT可以对现有的特征进行特征组合，直接生成新的更有效的特征，省去了人工特征组合的麻烦。通过GBDT生成的特征，可直接作为LR的特征使用，省去人工处理分析特征的环节，LR的输入特征完全依赖于通过GBDT得到的特征。这个方法被facebook用来做ctr预估。同时也有使用GBDT+FM的方案，在 2014 Kaggle CTR竞赛冠军就是使用GBDT+FM。</p>
 <p>GBDT进行特征组合的原理比较简单，其本质还要追溯到决策树原理。 对于一个决策树来说，其本质是将特征空间分割成若干个不相交的离散区域，对于每一个区域赋予一个预测值。<br><img src="GBDT/dt-feature-compose.png" alt></p>
-<p>​<br>如上图所示，假设我们使用的训练样本只有两个特征，即我么的样本空间就是右图那样的一个平面。使用一颗决策树训练后得到左图所示的决策树，其四格叶子节点实际上就是将右图那样的特征空间分割称为四个区域。其一一对于关系如图中的数字所示。一个样本必然会落在四个叶子节点中的一个内。</p>
-<p>当我们使用GBDT时，将会有多颗决策树，如下图所示，基于训练样本得到由三颗决策树组成的GBDT模型。</p>
-<p><img src="GBDT/gbdt-feature-compose.png" alt></p>
-<p>​</p>
-<p>对于任何一个样本(record A)，该样本将会在每颗决策树中落到一个节点上，假设 record A 落在了 3, 5, 13 这三个叶子节点上。那么 record  A 的新特征为 :(0,0,1,0<strong>,</strong> 1,0,0,0<strong>,</strong> 0,0,0,1)。note： 新特征中每一位对应一个叶子节点，每四位对应一颗决策树， 1 表示样本落在了相应节点上，0 表示样本没有落在了相应节点上。</p>
 </li>
 </ol>
+<p>   如上图所示，假设我们使用的训练样本只有两个特征，即我么的样本空间就是右图那样的一个平面。使用一颗决策树训练后得到左图所示的决策树，其四格叶子节点实际上就是将右图那样的特征空间分割称为四个区域。其一一对于关系如图中的数字所示。一个样本必然会落在四个叶子节点中的一个内。</p>
+<p>   当我们使用GBDT时，将会有多颗决策树，如下图所示，基于训练样本得到由三颗决策树组成的GBDT模型。</p>
+<p>   <img src="GBDT/gbdt-feature-compose.png" alt></p>
+<p>   对于任何一个样本(record A)，该样本将会在每颗决策树中落到一个节点上，假设 record A 落在了 3, 5, 13 这三个叶子节点上。那么 record  A 的新特征为 :(0,0,1,0<strong>,</strong> 1,0,0,0<strong>,</strong> 0,0,0,1)。note： 新特征中每一位对应一个叶子节点，每四位对应一颗决策树， 1 表示样本落在了相应节点上，0 表示样本没有落在了相应节点上。</p>
 <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p>The Elements of Statistical Learning</p>
 <p><a href="http://quinonero.net/Publications/predicting-clicks-facebook.pdf" target="_blank" rel="noopener">Practical Lessons from Predicting Clicks on Ads at Facebook</a></p>
 

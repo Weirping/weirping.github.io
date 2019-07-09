@@ -111,14 +111,14 @@
   <meta name="description" content="nDCG(Normalized Discounted Cumulative Gain)源自一篇参考维基百科的文章 Normalized Discounted Cumulative Gain：一种对搜索引擎或相关程序有效性的度量。 2个假设： ​    1.强相关的文档应该出现在结果列表前面，且越靠前（rank越高）越有用。 ​    2.强相关文档比弱相关文档有用，比不相关文档有用。 $DCG$来">
 <meta name="keywords" content="IR">
 <meta property="og:type" content="article">
-<meta property="og:title" content="信息检索评价指标(nDCG,MRR,MAP)">
+<meta property="og:title" content="信息检索评价指标">
 <meta property="og:url" content="http://weirping.coding.me/blog/Metrics-in-IR.html">
 <meta property="og:site_name" content="Weiping&#39;s notes">
 <meta property="og:description" content="nDCG(Normalized Discounted Cumulative Gain)源自一篇参考维基百科的文章 Normalized Discounted Cumulative Gain：一种对搜索引擎或相关程序有效性的度量。 2个假设： ​    1.强相关的文档应该出现在结果列表前面，且越靠前（rank越高）越有用。 ​    2.强相关文档比弱相关文档有用，比不相关文档有用。 $DCG$来">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-07-25T09:42:46.000Z">
+<meta property="og:updated_time" content="2019-07-03T10:07:24.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="信息检索评价指标(nDCG,MRR,MAP)">
+<meta name="twitter:title" content="信息检索评价指标">
 <meta name="twitter:description" content="nDCG(Normalized Discounted Cumulative Gain)源自一篇参考维基百科的文章 Normalized Discounted Cumulative Gain：一种对搜索引擎或相关程序有效性的度量。 2个假设： ​    1.强相关的文档应该出现在结果列表前面，且越靠前（rank越高）越有用。 ​    2.强相关文档比弱相关文档有用，比不相关文档有用。 $DCG$来">
 
 
@@ -136,7 +136,7 @@
   };
 </script>
 
-  <title>信息检索评价指标(nDCG,MRR,MAP) | Weiping's notes</title>
+  <title>信息检索评价指标 | Weiping's notes</title>
   
 
 
@@ -345,7 +345,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">信息检索评价指标(nDCG,MRR,MAP)
+          <h1 class="post-title" itemprop="name headline">信息检索评价指标
               
             
           </h1>
@@ -429,7 +429,7 @@
 <p>​    2.强相关文档比弱相关文档有用，比不相关文档有用。</p>
 <p>$DCG$来源于一个更早的、更基础的方法—$CG$。</p>
 <h2 id="CG"><a href="#CG" class="headerlink" title="CG"></a>CG</h2><p>$CG$不考虑结果集中的序信息，单纯把分级相关度相加。前个$P$个位置的$CG$值是：</p>
-<p>$$<br>CG_p = \sum\limits_{i=1}^{p}<br>$$</p>
+<p>$$<br>CG_p = \sum\limits_{i=1}^{p}{rel_i}<br>$$</p>
 <p>$rel_i$是搜索结果列表的位置$i$处结果的分级相关度。</p>
 <h2 id="DCG"><a href="#DCG" class="headerlink" title="DCG"></a>DCG</h2><p>$DCG$取代$CG$作为一个更准确的测量方法。</p>
 <p> 如果一个强相关的文档排名靠后则应该受到惩罚，前个$P$个位置的$DCG$值是：</p>
@@ -493,18 +493,24 @@
 </table>
 <p>所以 $DCG_6$ 的值为：<br>$$<br>{DCG_{6}} =\sum _{i=1}^{6}{\frac {rel_{i}}{\log _{2}(i+1)}}=3+1.262+1.5+0+0.387+0.712=6.861<br>$$</p>
 <p>一个理想的排序应该是：$3，3，2，2，1，0$ ，所以<br>$$<br>\begin {aligned}<br>&amp;IDCG_{6} =8.740 \\<br>\\<br>&amp; nDCG_{6} ={\frac {DCG_{6}}{IDCG_{6}}}={\frac {6.861}{8.740}}=0.785 \\<br> \end {aligned}<br>$$</p>
-<p>$nDCG$的缺点是：当排序的数很少（比如：只有1-3个），那么任何排序的$nDCG​$值都比较接近，所以可以考虑使用AUC（area under the ROC curve）。</p>
+<p>$nDCG$的缺点是：当排序的数很少（比如：只有1-3个），那么任何排序的$nDCG$值都比较接近，所以可以考虑使用AUC（area under the ROC curve）。</p>
 <p>AUC学习参考文章：<a href="http://blog.csdn.net/chjjunking/article/details/5933105" target="_blank" rel="noopener">http://blog.csdn.net/chjjunking/article/details/5933105</a> </p>
 <p>自己用python写的一个计算ndcg函数。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">calc_dcg</span><span class="params">(sorted_vec, at)</span>:</span></span><br><span class="line">    <span class="string">'''</span></span><br><span class="line"><span class="string">    sorted_vec: list[tuple], type of element is tuple,</span></span><br><span class="line"><span class="string">    	tuple(v0, v1), v0: predict score; v1: label score</span></span><br><span class="line"><span class="string">    at: int, calculate dcg@at</span></span><br><span class="line"><span class="string">    '''</span></span><br><span class="line">    <span class="keyword">import</span> math</span><br><span class="line">    ranking = [t[<span class="number">1</span>] <span class="keyword">for</span> t <span class="keyword">in</span> sorted_vec[<span class="number">0</span>: at]]</span><br><span class="line">    dcg_ = sum([(<span class="number">2</span>**r - <span class="number">1</span>) / math.log(i + <span class="number">2</span>, <span class="number">2</span>) <span class="keyword">for</span> i, r <span class="keyword">in</span> enumerate(ranking)])</span><br><span class="line">    <span class="keyword">return</span> dcg_</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">calc_ndcg</span><span class="params">(vec, at)</span>:</span></span><br><span class="line">    <span class="string">'''</span></span><br><span class="line"><span class="string">    vec: list[tuple], type of element is tuple,</span></span><br><span class="line"><span class="string">    	tuple(v0, v1), v0: predict score; v1: label score</span></span><br><span class="line"><span class="string">    at: int, calculate ndcg@at</span></span><br><span class="line"><span class="string">    '''</span></span><br><span class="line">    sorted_vec = sorted(vec, key=<span class="keyword">lambda</span> t: t[<span class="number">1</span>], reverse=<span class="literal">True</span>)</span><br><span class="line">    ideal_dcg = calc_dcg(sorted_vec, at)</span><br><span class="line">    sorted_vec = sorted(vec, key=<span class="keyword">lambda</span> t: t[<span class="number">0</span>], reverse=<span class="literal">True</span>)</span><br><span class="line">    cur_dcg = calc_dcg(sorted_vec, at)</span><br><span class="line">    <span class="keyword">if</span> ideal_dcg == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> cur_dcg / ideal_dcg</span><br></pre></td></tr></table></figure>
-<h1 id="MRR-Mean-Reciprocal-Rank"><a href="#MRR-Mean-Reciprocal-Rank" class="headerlink" title="MRR(Mean Reciprocal Rank)"></a>MRR(Mean Reciprocal Rank)</h1><p>这是一个常用来衡量搜索算法效果的指标，目前被广泛用在允许返回多个结果的问题，或者目前还比较难以解决的问题中（由于如果只返回top 1的结果，准确率或召回率会很差，所以在技术不成熟的情况下，先返回多个结果）。在这类问题中，系统会对每一个返回的结果给一个置信度（打分），然后根据置信度排序，将得分高的结果排在前面返回。</p>
-<p>而MRR得核心思想很简单：返回的结果集的优劣，跟第一个正确答案的位置有关，第一个正确答案越靠前，结果越好。</p>
-<p>具体来说：<strong>对于一个query，若第一个正确答案排在第n位，则MRR得分就是$\frac1n$。</strong>（如果没有正确答案，则得分为0）</p>
+<h1 id="RR（reciprocal-rank）"><a href="#RR（reciprocal-rank）" class="headerlink" title="RR（reciprocal rank）"></a>RR（reciprocal rank）</h1><p> RR（reciprocal rank）倒数排名，指检索结果中第一个相关文档的排名的倒数。<br>$$<br>RR = \frac 1  {rank_i}<br>$$<br>具体来说：<strong>对于一个query，若第一个正确答案排在第n位，则RR得分就是$\frac1n$。</strong>（如果没有正确答案，则得分为0）。</p>
+<h2 id="MRR-Mean-Reciprocal-Rank"><a href="#MRR-Mean-Reciprocal-Rank" class="headerlink" title="MRR(Mean Reciprocal Rank)"></a>MRR(Mean Reciprocal Rank)</h2><p>MRR的核心思想很简单：返回的结果集的优劣，跟第一个正确答案的位置有关，第一个正确答案越靠前，结果越好。MRR为所有query的RR的平均值。</p>
 <p>公式为： </p>
-<p>$$<br>MRR = \frac1 {\left| Q \right|}\sum\limits_{i = 1}^{\left| Q \right|} \frac 1  {rank_i}<br>$$</p>
+<p>$$<br>MRR = \frac1 {\left| Q \right|}\sum_{i = 1}^{\left| Q \right|} \frac 1  {rank_i}<br>$$</p>
 <p>其中，$Q$为样本query集合，${\left| Q \right|}$表示$Q$中query个数，$rank_i$ 表示在第$i$个query中，第一个正确答案的排名</p>
 <h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><p>比如，设测试集有4个query，他们的结果中，前三个query的第一个正确答案分别被排在第3，1，5位，而第四个query没有找到正确答案。则该系统的MRR得分就是： </p>
-<p>$$<br>MRR=\left(\frac13+\frac11+\frac15+0 \right)÷4=0.383<br>$$</p>
+<p>$$<br>MRR = \frac14(\frac13+\frac11+\frac15+0 )=0.383<br>$$</p>
+<h2 id="ERR（Expected-reciprocal-rank）"><a href="#ERR（Expected-reciprocal-rank）" class="headerlink" title="ERR（Expected reciprocal rank）"></a>ERR（Expected reciprocal rank）</h2><p>ERR是受到cascade model的启发。点击模型中的cascade model，考虑到在同一个检索结果列表中各文档之间的位置依赖关系，假设用户从上至下查看，如果遇到某一检索结果项满意并进行点击，则操作结束；否则跳过该项继续往后查看。第 i 个位置的文档项被点击的概率为：<br>$$<br>P(C_i) = r_i \prod_{j=1}^{i-1} (1 - r_j)<br>$$<br>其中 $r_i$ 表示第 $i$ 个文档被点击的概率，前 $i-1$ 个文档则没有被点击，概率均为 $1-r_j$；</p>
+<p>ERR (倒数排名的期望)，表示用户的需求被满足时<strong>停止的位置</strong>的倒数的期望，与 MRR 计算第一个相关文档的位置倒数不同。</p>
+<p>首先用户在位置 $r$ 处停止的概率 $P_r$ 计算公式如下：<br>$$<br>P_r = R_r \prod_{i=1}^{r-1}(1 - R_i)<br>$$</p>
+<p>其中 $R_i $是关于文档相关度等级的函数，现假设该函数为：<br>$$<br>R_i = \frac {2^{l_i} - 1}{2^{l_m}}<br>$$<br>$l_m$表示相关性评分最高的一档。$l_i$ 表示样本中第$i$ 个结果的相关度标记。</p>
+<p>ERR 的计算公式如下：</p>
+<p>$$<br>ERR = \sum_{r} \frac1r P_r = \sum_{r} \frac1r R_r \prod_{i=1}^{r-1}(1 - R_i)<br>$$</p>
+<p>注： 当将上式中 的 reciprocal rank 部分 $\frac 1r$ 换成  $\frac 1{\log_2 {r + 1}}$ ， 则和 DCG是等价的。</p>
 <h1 id="MAP-mean-average-precision"><a href="#MAP-mean-average-precision" class="headerlink" title="MAP(mean average precision)"></a>MAP(mean average precision)</h1><h2 id="Precision"><a href="#Precision" class="headerlink" title="Precision"></a>Precision</h2><p>Precision is the fraction of the documents retrieved that are relevant  to the user’s information need.</p>
 <p>$$<br>precision = \frac {\left| {\{ relevant\;documents\}  \cap \{ retrieved\;documents\} } \right|}  {\left| {\left\{ {retieved\;documents} \right\}} \right|}<br>$$</p>
 <p>Precision takes all retrieved documents into account. It can also be evaluated at a given cut-off rank, considering only the topmost results returned by the system. This measure is called <em>precision at n</em> or <em>P@n</em>.</p>
@@ -776,7 +782,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#nDCG-Normalized-Discounted-Cumulative-Gain"><span class="nav-number">1.</span> <span class="nav-text">nDCG(Normalized Discounted Cumulative Gain)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CG"><span class="nav-number">1.1.</span> <span class="nav-text">CG</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DCG"><span class="nav-number">1.2.</span> <span class="nav-text">DCG</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nDCG"><span class="nav-number">1.3.</span> <span class="nav-text">nDCG</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MRR-Mean-Reciprocal-Rank"><span class="nav-number">2.</span> <span class="nav-text">MRR(Mean Reciprocal Rank)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#例子"><span class="nav-number">2.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MAP-mean-average-precision"><span class="nav-number">3.</span> <span class="nav-text">MAP(mean average precision)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Precision"><span class="nav-number">3.1.</span> <span class="nav-text">Precision</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Average-precision"><span class="nav-number">3.2.</span> <span class="nav-text">Average precision</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mean-average-precision"><span class="nav-number">3.3.</span> <span class="nav-text">Mean average precision</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#nDCG-Normalized-Discounted-Cumulative-Gain"><span class="nav-number">1.</span> <span class="nav-text">nDCG(Normalized Discounted Cumulative Gain)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CG"><span class="nav-number">1.1.</span> <span class="nav-text">CG</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DCG"><span class="nav-number">1.2.</span> <span class="nav-text">DCG</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nDCG"><span class="nav-number">1.3.</span> <span class="nav-text">nDCG</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RR（reciprocal-rank）"><span class="nav-number">2.</span> <span class="nav-text">RR（reciprocal rank）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#MRR-Mean-Reciprocal-Rank"><span class="nav-number">2.1.</span> <span class="nav-text">MRR(Mean Reciprocal Rank)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#例子"><span class="nav-number">2.2.</span> <span class="nav-text">例子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ERR（Expected-reciprocal-rank）"><span class="nav-number">2.3.</span> <span class="nav-text">ERR（Expected reciprocal rank）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MAP-mean-average-precision"><span class="nav-number">3.</span> <span class="nav-text">MAP(mean average precision)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Precision"><span class="nav-number">3.1.</span> <span class="nav-text">Precision</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Average-precision"><span class="nav-number">3.2.</span> <span class="nav-text">Average precision</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mean-average-precision"><span class="nav-number">3.3.</span> <span class="nav-text">Mean average precision</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
