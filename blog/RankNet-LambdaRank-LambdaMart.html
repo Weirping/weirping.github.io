@@ -118,7 +118,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://weirping.coding.me/blog/RankNet-LambdaRank-LambdaMart/RankNet-LambdaRank.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/RankNet-LambdaRank-LambdaMart/LambdaMART.png">
-<meta property="og:updated_time" content="2019-07-18T15:40:41.468Z">
+<meta property="og:updated_time" content="2019-07-18T15:58:34.356Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="From RankNet to LambdaRank to LambdaMart An Overview阅读笔记">
 <meta name="twitter:description" content="LTR问题搜索引擎根据用户输入的Query检索得到最相关的topk个网页；推荐引擎根据用户的兴趣偏好推荐用户最感兴趣的topk个文章。涉及到topk的问题，都会涉及到排序的问题。LTR(Learning To Rank)是在处理排序问题时采用机器学习方法来训练模型的方法。可以将LTR方法分为  point-wise、pair-wise、list-wise 三类. 之前介绍的Prank 算法属于po">
@@ -504,7 +504,7 @@
 </ol>
 <p>定义 $I$ 为同一query下，所有的url对的index的集合， 并且任何一个url对只能在 $I$ 中出现过一次。即，$U_i \rhd U_j$ 且$\{i,j\} \in I$。例如：有三个url，其相关性满足 $U_1 \rhd U_2 \rhd U_3$，那么集合$I$中就包含{(1,2), (1,3), (2,3)}共三个pair。</p>
 <p>在集合 $I$ 中的所有url对都满足 $U_i \rhd U_j$ ，$S_{ij} = 1, \bar P_{ij}=1$。 损失函数变为：<br>$$<br>C(s_i - s_j)= - \log P_{ij} = -\log \frac{1}{1+e^{-\sigma(s_i - s_j)}}<br>$$<br>$\lambda_{ij}$ 变为：<br>$$<br>\begin {align}<br>\lambda_{ij} = \frac{\partial C(s_i - s_j)}{\partial s_{i}} &amp;= \sigma (- \frac{1}{1+e^{\sigma(s_i - s_j)}})\\<br>&amp;= - \frac{\sigma}{1+e^{\sigma(s_i - s_j)}}<br>\end {align}  \tag {11}<br>$$</p>
-<p>可以对 $\lambda$ 进一步变化。考察一个query下的 $U_i$， 分为两部分: 所有排在$U_i$后面的 url 的集合 $I_{i_}$;  所有排在$U_i$前面的 url 的集合 $I_{_i}$; 可以定义与 $U_i$ 有关的 $\lambda_i$ :<br>$$<br>\lambda_i = \sum_{m\in I_{i_}} \lambda_{im} - \sum_{n \in I_{_i}}\lambda_{in} \tag {12}<br>$$</p>
+<p>可以对 $\lambda$ 进一步变化。考察一个query下的 $U_i$， 分为两部分: 所有排在$U_i$后面的 url 的集合 $I_{i-}$;  所有排在$U_i$前面的 url 的集合 $I_{-i}$; 可以定义与 $U_i$ 有关的 $\lambda_i$ :<br>$$<br>\lambda_i = \sum_{m\in I_{i-}} \lambda_{im} - \sum_{n \in I_{-i}}\lambda_{in}  \tag {12}<br>$$</p>
 <blockquote>
 <p>To compute $\lambda_i$ (for url $U_i$), we find all $m$ for which $\{i, m\} \in I$ and all $n$ for which $\{n, i\} \in I$ . For the former, we increment $\lambda_i$ by $\lambda_{i m}$  , and for the latter, we decrement $\lambda_i$ by $\lambda_{ni}$ . For example, if there were just one pair with  $U1 \rhd  U2$ , then $I = \{\{1, 2\}\}$ , and $\lambda_1 = \lambda_{12} = −\lambda_2$ .</p>
 </blockquote>
@@ -513,7 +513,7 @@
 <p>下面举例说明 $\sum_{\{i,j\} \in I} \lambda_{ij}(\frac{\partial s_i}{\partial{w_k}} - \frac{\partial s_j}{\partial{w_k}}) \equiv \sum_i \lambda_i \frac{\partial s_i}{\partial{w_k}}$ 。</p>
 <p>例如有三个url，其相关性满足 $U_1 \rhd U_2 \rhd U_3$，那么集合$I$中就包含{(1,2), (1,3), (2,3)}共三个pair。此时：<br>$$<br>\begin {align}<br>\sum_{\{i,j\} \in I} \lambda_{ij}(\frac{\partial s_i}{\partial{w_k}} - \frac{\partial s_j}{\partial{w_k}}) &amp;= \lambda_{12}(\frac{\partial s_1}{\partial{w_k}} - \frac{\partial s_2}{\partial{w_k}}) + \lambda_{13}(\frac{\partial s_1}{\partial{w_k}} - \frac{\partial s_3}{\partial{w_k}}) + \lambda_{23}(\frac{\partial s_2}{\partial{w_k}} - \frac{\partial s_3}{\partial{w_k}}) \\<br>&amp;=(\lambda_{12}+\lambda_{13})\frac{\partial s_1}{\partial{w_k}}+(\lambda_{23} -\lambda_{12})\frac{\partial s_2}{\partial{w_k}}+(-\lambda_{13} -\lambda_{23})\frac{\partial s_3}{\partial{w_k}} \\<br>&amp;=\lambda_{1}\frac{\partial s_1}{\partial{w_k}} + \lambda_{2}\frac{\partial s_2}{\partial{w_k}} + \lambda_{3}\frac{\partial s_3}{\partial{w_k}} \\<br>&amp;= \sum_i \lambda_i \frac{\partial s_i}{\partial{w_k}}<br>\end {align}<br>$$<br>(13)式 中 $\delta w_k = \eta \sum_i \lambda_i \frac{\partial s_i}{\partial{w_k}}$ 可以 分为两部分理解：</p>
 <ul>
-<li><p>$\lambda_i $ : 与排序有关的部分。$$\lambda_i$$ 决定着第 $i$ 个doc在迭代中的移动方向和幅度，样本中的排在 $U_i$ 前面的doc越少，排在 $U_i$ 后面的doc越多，那么文档 $U_i$ 向前移动的幅度就越大。结合式(12)的定义可以发现 <strong>每条文档移动的方向和趋势取决于其他所有与之 label 不同的文档。</strong></p>
+<li><p>$\lambda_i $ : 与排序有关的部分。$\lambda_i$ 决定着第 $i$ 个doc在迭代中的移动方向和幅度，样本中的排在 $U_i$ 前面的doc越少，排在 $U_i$ 后面的doc越多，那么文档 $U_i$ 向前移动的幅度就越大。结合式(12)的定义可以发现 <strong>每条文档移动的方向和趋势取决于其他所有与之 label 不同的文档。</strong></p>
 <blockquote>
 <p>The arrows ($\lambda$’s) mentioned above are exactly those gradients. The $\lambda$’s for a given URL $U_1$ get contributions from all other URLs for the same query that have different labels. The $\lambda$ ’s can also be interpreted as forces : if $U_2$ is more relevant than $U_1$, then $U_1$ will get a push downwards of size $|\lambda |$ ; if $U_2$ is less relevant than $U_1$, then $U_1$ will get a push upwards of size $| \lambda |$.</p>
 </blockquote>
