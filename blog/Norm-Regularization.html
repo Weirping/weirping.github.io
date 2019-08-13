@@ -109,29 +109,29 @@
 
 
   <meta name="description" content="0 概述机器学习的中心问题是在训练集上训练出一个能够在新的输入数据上表现良好的模型。现有的很多策略是在牺牲训练误差来减小泛化误差，这些策略被统称为正则化。 和传统的机器学习算法一样，神经网络的范数正则化方法也是通过限制模型参数来减少过拟合的。但是神经网络的范数正则化也有自己的特点，为了论述方便本文将神经网络的参数分为两类：  $\boldsymbol w$ ：仿射变换权重参数，模型向量两层神经元的">
-<meta name="keywords" content="Machine Learning,Neural Network">
+<meta name="keywords" content="Neural Network,Machine Learning">
 <meta property="og:type" content="article">
-<meta property="og:title" content="范数正则化-神经网络">
-<meta property="og:url" content="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks.html">
+<meta property="og:title" content="范数正则化">
+<meta property="og:url" content="http://weirping.coding.me/blog/Norm-Regularization.html">
 <meta property="og:site_name" content="Weiping&#39;s notes">
 <meta property="og:description" content="0 概述机器学习的中心问题是在训练集上训练出一个能够在新的输入数据上表现良好的模型。现有的很多策略是在牺牲训练误差来减小泛化误差，这些策略被统称为正则化。 和传统的机器学习算法一样，神经网络的范数正则化方法也是通过限制模型参数来减少过拟合的。但是神经网络的范数正则化也有自己的特点，为了论述方便本文将神经网络的参数分为两类：  $\boldsymbol w$ ：仿射变换权重参数，模型向量两层神经元的">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks/L2_regularization.png">
-<meta property="og:image" content="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks/L1_regularization.png">
-<meta property="og:image" content="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks/L2.png">
-<meta property="og:image" content="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks/dropout.png">
-<meta property="og:updated_time" content="2019-04-28T11:44:12.000Z">
+<meta property="og:image" content="http://weirping.coding.me/blog/Norm-Regularization/L2_regularization.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Norm-Regularization/L1_regularization.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Norm-Regularization/L2.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Norm-Regularization/dropout.png">
+<meta property="og:updated_time" content="2019-08-13T02:28:11.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="范数正则化-神经网络">
+<meta name="twitter:title" content="范数正则化">
 <meta name="twitter:description" content="0 概述机器学习的中心问题是在训练集上训练出一个能够在新的输入数据上表现良好的模型。现有的很多策略是在牺牲训练误差来减小泛化误差，这些策略被统称为正则化。 和传统的机器学习算法一样，神经网络的范数正则化方法也是通过限制模型参数来减少过拟合的。但是神经网络的范数正则化也有自己的特点，为了论述方便本文将神经网络的参数分为两类：  $\boldsymbol w$ ：仿射变换权重参数，模型向量两层神经元的">
-<meta name="twitter:image" content="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks/L2_regularization.png">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/Norm-Regularization/L2_regularization.png">
 
 
 
 
 
 
-  <link rel="canonical" href="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks.html">
+  <link rel="canonical" href="http://weirping.coding.me/blog/Norm-Regularization.html">
 
 
 
@@ -141,7 +141,7 @@
   };
 </script>
 
-  <title>范数正则化-神经网络 | Weiping's notes</title>
+  <title>范数正则化 | Weiping's notes</title>
   
 
 
@@ -333,7 +333,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/Norm_Regularization_for_DeepLearning-Neural_networks.html">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/Norm-Regularization.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Weiping">
@@ -350,7 +350,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">范数正则化-神经网络
+          <h1 class="post-title" itemprop="name headline">范数正则化
               
             
           </h1>
@@ -446,7 +446,7 @@
 <li>$p=2$时，$L^2$ 称为2范数，欧几里得范数， $||\boldsymbol x||_2=(\sum_i |x_i|^2)^{\frac12}$ 。实际应用当中，常用的是它的平方， $||\boldsymbol x||_2^2=\sum_i |x_i|^2 = \boldsymbol x^{\mathrm{T}} \boldsymbol x$ 。</li>
 <li>$p=1$时，$L^1$ 称为1范数，$||\boldsymbol x||_1=\sum_i |x_i|$ 。当区分元素 恰好是零 和 非零(但值可能很小) 对于模型很重要的时候使用这种范数。</li>
 <li>$p=\infty$时，$L^\infty$ 称为最大范数，$||\boldsymbol x ||_ \infty=\max_i|x_i|$ 。</li>
-<li>“$L^0​$范数”表示向量中非零元素的个数，但是这个术语在数学意义上是不对的。</li>
+<li>“$L^0$范数”表示向量中非零元素的个数，但是这个术语在数学意义上是不对的。</li>
 </ul>
 <h1 id="1-L-2-范数正则化"><a href="#1-L-2-范数正则化" class="headerlink" title="1 $L^2$范数正则化"></a>1 $L^2$范数正则化</h1><p>$L^2$范数正则化将目标函数$\tilde J$中正则化项定义为参数的2范数的平方，$\Omega(\boldsymbol \theta) = \frac 12 ||\boldsymbol w||_2^2 = \frac 12 \boldsymbol w ^ {\mathrm{T}} \boldsymbol w$ 。</p>
 <p>下面从三个角度理解$L^2$范数正则化：</p>
@@ -484,7 +484,7 @@
 <ol start="3">
 <li><strong>几何角度</strong></li>
 </ol>
-<p><img src="Norm_Regularization_for_DeepLearning-Neural_networks/L2_regularization.png" alt="L2_regularization"></p>
+<p><img src="Norm-Regularization/L2_regularization.png" alt="L2_regularization"></p>
 <p>蓝线椭圆表示没有正则化目标函数的等值线。红线圆圈表示$L^2$正则化项的等值线。在$\tilde w$点，原始目标函数和正则化项的和达到最小值。目标函数$J$的Hessian的第一维(横向)特征值很小。当横向平移动时，目标函数不会增加得太多。因为目标函数对这个方向没有强烈的偏好，所以正则化项对该轴具有更强烈的影响。正则化项将$w^1$拉向零。而目标函数对沿着第二维的移动非常敏感。对应的特征值较大，表示高曲率。因此，权重衰减对$w^2$的位置影响相对较小。</p>
 <p>可以理解为<strong>原始目标函数$J$</strong> 和<strong>正则化项</strong>竞争的过程。原始目标函数$J$希望最优点落在$\hat w$处，正则化项希望最优点落在原点处。在$w$的各个维度上他们通过比较各自的曲率（二阶导数）来决定谁起主要作用，谁的曲率大，谁就起主导作用。</p>
 <p>note: $L^2$正则化项在原点处各方向上的曲率是相同的。</p>
@@ -521,12 +521,12 @@
 <p>根据以上公式总结如下：</p>
 <ul>
 <li>1.若$|\hat w_i| \leq \frac{\alpha}{H_{i,i}}$，$\tilde w_i=0$ 。此时$\hat{J}(\boldsymbol w) $中的正则化项起到的主导作用。</li>
-<li>2.若$|\hat w_i| \gt \frac{\alpha}{H_{i,i}}​$，$\tilde w_i = \sign(\hat w_i)(|\hat w_i| -  \frac {\alpha}{H_{i,i}})​$ ，正则化结果$\tilde w_i​$是将$\hat w_i​$沿着第$i​$个坐标轴向该轴的原点方向移动$\frac{\alpha}{H_{i,i}}​$得到的。</li>
+<li>2.若$|\hat w_i| \gt \frac{\alpha}{H_{i,i}}$，$\tilde w_i = \sign(\hat w_i)(|\hat w_i| -  \frac {\alpha}{H_{i,i}})$ ，正则化结果$\tilde w_i$是将$\hat w_i$沿着第$i$个坐标轴向该轴的原点方向移动$\frac{\alpha}{H_{i,i}}$得到的。</li>
 </ul>
 <ol start="2">
 <li><strong>几何角度</strong></li>
 </ol>
-<p><img src="Norm_Regularization_for_DeepLearning-Neural_networks/L1_regularization.png" alt="L1_regularization"></p>
+<p><img src="Norm-Regularization/L1_regularization.png" alt="L1_regularization"></p>
 <p>蓝线椭圆表示没有正则化目标函数的等值线。红线圆圈表示$L^2$正则化项的等值线。在$\tilde w$点，原始目标函数和正则化项的和达到最小值。</p>
 <h1 id="3-关于近似"><a href="#3-关于近似" class="headerlink" title="3 关于近似"></a>3 关于近似</h1><p>在这一节介绍$L^1$范数和$L^2$范数正则化项对目标函数的影响时都采用了近似。我个人对于这一点是很疑惑的，我思考的结论是这样的：</p>
 <ul>
@@ -544,9 +544,9 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">dpt_model = keras.models.Sequential([</span><br><span class="line">    keras.layers.Dense(<span class="number">16</span>, activation=tf.nn.relu, input_shape=(NUM_WORDS,)),</span><br><span class="line">    keras.layers.Dropout(rate=<span class="number">0.5</span>),</span><br><span class="line">    keras.layers.Dense(<span class="number">16</span>, activation=tf.nn.relu),</span><br><span class="line">    keras.layers.Dropout(rate=<span class="number">0.5</span>),</span><br><span class="line">    keras.layers.Dense(<span class="number">1</span>, activation=tf.nn.sigmoid)</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">dpt_model.compile(optimizer=<span class="string">'adam'</span>,</span><br><span class="line">                  loss=<span class="string">'binary_crossentropy'</span>,</span><br><span class="line">                  metrics=[<span class="string">'accuracy'</span>,<span class="string">'binary_crossentropy'</span>])</span><br><span class="line"></span><br><span class="line">dpt_model_history = dpt_model.fit(train_data, train_labels,</span><br><span class="line">                                  epochs=<span class="number">20</span>,</span><br><span class="line">                                  batch_size=<span class="number">512</span>,</span><br><span class="line">                                  validation_data=(test_data, test_labels),</span><br><span class="line">                                  verbose=<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">plot_history</span><span class="params">(histories, key=<span class="string">'binary_crossentropy'</span>)</span>:</span></span><br><span class="line">    plt.figure(figsize=(<span class="number">16</span>, <span class="number">10</span>))</span><br><span class="line">    <span class="keyword">for</span> name, history <span class="keyword">in</span> histories:</span><br><span class="line">        val = plt.plot(history.epoch, history.history[<span class="string">'val_'</span> + key],</span><br><span class="line">                       <span class="string">'--'</span>, label=name.title() + <span class="string">' Val'</span>)</span><br><span class="line">        plt.plot(history.epoch, history.history[key], color=val[<span class="number">0</span>].get_color(),</span><br><span class="line">                 label=name.title() + <span class="string">' Train'</span>)</span><br><span class="line">    plt.xlabel(<span class="string">'Epochs'</span>)</span><br><span class="line">    plt.ylabel(key.replace(<span class="string">'_'</span>, <span class="string">' '</span>).title())</span><br><span class="line">    plt.legend()</span><br><span class="line">    plt.xlim([<span class="number">0</span>, max(history.epoch)])</span><br></pre></td></tr></table></figure>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">plot_history([(<span class="string">'baseline'</span>, baseline_history),</span><br><span class="line">              (<span class="string">'l2'</span>, l2_model_history)])</span><br></pre></td></tr></table></figure>
-<p><img src="Norm_Regularization_for_DeepLearning-Neural_networks/L2.png" alt="png"></p>
+<p><img src="Norm-Regularization/L2.png" alt="png"></p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">plot_history([(<span class="string">'baseline'</span>, baseline_history),</span><br><span class="line">              (<span class="string">'dropout'</span>, dpt_model_history)])</span><br></pre></td></tr></table></figure>
-<p><img src="Norm_Regularization_for_DeepLearning-Neural_networks/dropout.png" alt="png"></p>
+<p><img src="Norm-Regularization/dropout.png" alt="png"></p>
 <p>可以发现加入正则化项的模型相对于baseline的泛化能力更强。</p>
 <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p>Deep Learning</p>
 <p>线性代数-第五版-同济</p>
@@ -570,9 +570,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
-          
             <a href="/tags/Neural-Network/" rel="tag"># Neural Network</a>
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
           
         </div>
       
@@ -585,8 +585,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/Output_Units_and_Cost_Functions-Neural_networks.html" rel="next" title="输出层激活函数和模型损失函数-神经网络">
-                <i class="fa fa-chevron-left"></i> 输出层激活函数和模型损失函数-神经网络
+              <a href="/blog/Maximum-Likehook-Estimator-Cost-Functions.html" rel="next" title="最大似然损失函数">
+                <i class="fa fa-chevron-left"></i> 最大似然损失函数
               </a>
             
           </div>

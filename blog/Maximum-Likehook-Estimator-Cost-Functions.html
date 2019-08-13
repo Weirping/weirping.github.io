@@ -109,16 +109,16 @@
 
 
   <meta name="description" content="损失函数是神经网络设计中的重要一环。在神经网络的设计中，输出层的使用的激活函数和模型损失函数是根据实际问题设计的。本文以最大似然估计为理论基础，阐述回归问题、二分类问题和多分类问题中输出层的激活函数和模型损失函数的选择。 符号定义：  训练集特征$\matrix {X}=\{x^{(1)},x^{(2)} \dots x^{(N)} \}$ ，第$n$个样本的属性特征向量为$x^{(n)}$ ；">
-<meta name="keywords" content="Machine Learning,Neural Network">
+<meta name="keywords" content="Neural Network,Machine Learning">
 <meta property="og:type" content="article">
-<meta property="og:title" content="输出层激活函数和模型损失函数-神经网络">
-<meta property="og:url" content="http://weirping.coding.me/blog/Output_Units_and_Cost_Functions-Neural_networks.html">
+<meta property="og:title" content="最大似然损失函数">
+<meta property="og:url" content="http://weirping.coding.me/blog/Maximum-Likehook-Estimator-Cost-Functions.html">
 <meta property="og:site_name" content="Weiping&#39;s notes">
 <meta property="og:description" content="损失函数是神经网络设计中的重要一环。在神经网络的设计中，输出层的使用的激活函数和模型损失函数是根据实际问题设计的。本文以最大似然估计为理论基础，阐述回归问题、二分类问题和多分类问题中输出层的激活函数和模型损失函数的选择。 符号定义：  训练集特征$\matrix {X}=\{x^{(1)},x^{(2)} \dots x^{(N)} \}$ ，第$n$个样本的属性特征向量为$x^{(n)}$ ；">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-05-29T06:32:28.000Z">
+<meta property="og:updated_time" content="2019-08-13T02:14:25.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="输出层激活函数和模型损失函数-神经网络">
+<meta name="twitter:title" content="最大似然损失函数">
 <meta name="twitter:description" content="损失函数是神经网络设计中的重要一环。在神经网络的设计中，输出层的使用的激活函数和模型损失函数是根据实际问题设计的。本文以最大似然估计为理论基础，阐述回归问题、二分类问题和多分类问题中输出层的激活函数和模型损失函数的选择。 符号定义：  训练集特征$\matrix {X}=\{x^{(1)},x^{(2)} \dots x^{(N)} \}$ ，第$n$个样本的属性特征向量为$x^{(n)}$ ；">
 
 
@@ -126,7 +126,7 @@
 
 
 
-  <link rel="canonical" href="http://weirping.coding.me/blog/Output_Units_and_Cost_Functions-Neural_networks.html">
+  <link rel="canonical" href="http://weirping.coding.me/blog/Maximum-Likehook-Estimator-Cost-Functions.html">
 
 
 
@@ -136,7 +136,7 @@
   };
 </script>
 
-  <title>输出层激活函数和模型损失函数-神经网络 | Weiping's notes</title>
+  <title>最大似然损失函数 | Weiping's notes</title>
   
 
 
@@ -328,7 +328,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/Output_Units_and_Cost_Functions-Neural_networks.html">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/Maximum-Likehook-Estimator-Cost-Functions.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Weiping">
@@ -345,7 +345,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">输出层激活函数和模型损失函数-神经网络
+          <h1 class="post-title" itemprop="name headline">最大似然损失函数
               
             
           </h1>
@@ -434,10 +434,9 @@
 <li><p>通过一个模型$y=y(x, w)$ 进行预测：根据样本的属性特征$x^{(n)}$预测样本的label值，预测值为$y$ ，预测值的集合为$Y=\{y^{(1)},y^{(2)} \dots y^{(N)} \}$<br>如果是回归问题：预测值$y$为一个实数；<br>如果是分类问题，预测值$y$为一个向量，各维度通常为概率值。如逻辑回归(二分类)(0.3, 0.7)、softmax(多分类)(0.1, 0.2, 0.7)。</p>
 </li>
 <li><p>损失函数$E(\theta) = g(T, Y)$ 是用来衡量模型预测值和样本真实值相近程度的，模型预测值和样本真实值越相近，则模型越好。其中$Y$ 是通过参数为$\theta$的模型预测得到的。（当然还有正则化问题，本文先不考虑正则化）</p>
-<p>​</p>
-<p>note: <em>下文中的上标表示样本在样本在样本集中的序号，下标表示向量的序号。在必要的时候为了使公式简洁会省略上标</em></p>
 </li>
 </ul>
+<p>  note: <em>下文中的上标表示样本在样本在样本集中的序号，下标表示向量的序号。在必要的时候为了使公式简洁会省略上标</em></p>
 <h1 id="1-Maximum-Likehook-Estimator"><a href="#1-Maximum-Likehook-Estimator" class="headerlink" title="1. Maximum Likehook Estimator"></a>1. Maximum Likehook Estimator</h1><p>最大似然函数应该是机器学习中最为常见的损失函数了。</p>
 <p><strong>最大似然理论认为，样本从服从分布$p(\theta)$ 的总体随机抽取的($\theta$是分布的参数，未知的)：</strong><br><strong>那么样本集中的每个样本也服从于分布$p(\theta)$ 。</strong> 即：<br>$$<br>p(t) = p(t|\theta)<br>$$<br><strong>这个分布$p(\theta)$是能够使样本的联合分布最大的分布。</strong> 即：<br>$$<br>p(T| \theta) =\prod_{n=1}^N {p(t^{(n)}|\theta)}<br>$$</p>
 <p>该公式称为<strong>似然函数(Likehook Function)</strong>。由于分布$p(\theta)$是以$\theta$为参数的，也就是说未知数$\theta$是能够使似然函数最大的$\theta_{ML}$:<br>$$<br>\theta_{ML}={\arg\max}_\theta \prod_{n=1}^N {p(t^{(n)}|\theta)}<br>$$</p>
@@ -448,7 +447,7 @@
 <p>使似然函数或者$E_D$对$w$的导数为0，求得：<br>$$<br>w_{ML} = (X^TX)^{-1}X^TT<br>$$<br>这个公式就是<strong>最小二乘法</strong>的公式。</p>
 <h1 id="3-二分类问题"><a href="#3-二分类问题" class="headerlink" title="3. 二分类问题"></a>3. 二分类问题</h1><p>在二分类问题中，可以认为$\theta$是由变量$x^{(i)}$和模型参数$w$组成的。并且目标值$t^{(i)}$服从<strong>Bernoulli distribution（伯努力分布，0-1分布）</strong>。$t^{(i)}$的取值为0或1。</p>
 <p>使用神经网络处理二分类问题时，输出层通常使用sigmoid函数作为激活函数。而在传统的逻辑回归模型中也是使用的sigmoid函数。即：<br>$$<br>y = \sigma(a) \equiv \frac 1{1+exp(-a)}<br>$$<br>sigmoid函数的一个重要特性就是其输出值表示的是概率，即：$y(x,w)$表示取$t=1$的概率，而$(1-y(x,w))$表示取$t=0$的概率。所以对于任何一个样本$\{ x,t \}$ 满足参数为$y(x,w)$的伯努力分布:<br>$$<br>p(t|x,w)=y(x,w)^t \{1-y(x,w)\}^{(1-t)}<br>$$<br>那么其似然函数和对数似然函数为：<br>$$<br>\begin {aligned}<br>p(T|X,w)     &amp;= \prod_{n=1}^N  y(x^{(n)},w)^{t^{(n)}} \{1-y(x^{(n)},w)\}^{(1-t^{(n)})}  \\<br>\\<br>\ln p(T|X,w)&amp;= \sum_{n=1}^N \{ t^{(n)} \ln y(x^{(n)},w) + (1-t^{(n)}) \ln [1-y(x^{(n)},w)]\} \\<br>\\<br>E(w)             &amp;= - \ln p(T|X,w) \\<br>                    &amp;= - \sum_{n=1}^N \{ t^{(n)} \ln y(x^{(n)},w) + (1-t^{(n)}) \ln [1-y(x^{(n)},w)]\}<br>\end {aligned}<br>$$<br>此处的$E(w)$就是我们常用到的<strong>交叉熵损失函数(cross-entropy error function)</strong> ，是对数似然函数的负数。</p>
-<h1 id="4-多分类问题"><a href="#4-多分类问题" class="headerlink" title="4. 多分类问题"></a>4. 多分类问题</h1><p>首先介绍一下<strong>Multinoulli分布</strong>。在多分类问题中，样本的目标值有$K$种可能的互斥取值，所以每个目标值$t^{(n)}​$可以使用$K​$维向量的one-hot编码。如$K=6$，一个样本属于第3个类别，则$t_3=1, t_k=1,(1 \le k \le K ,k  \ne 3)$，即：<br>$$<br>\begin {aligned}<br>&amp; t =(0,0,1,0,0,0) \\<br>&amp; \sum_{k=1}^K t_k = 1<br>\end {aligned}<br>$$<br>那么从总体抽样时，一个样本属于每个类别的概率也可以使用一个$K$维向量$\mu$表示，$\mu_k$表示$t_k = 1$的概率，且$\sum_{k=1}^K\mu_k =1$ 。</p>
+<h1 id="4-多分类问题"><a href="#4-多分类问题" class="headerlink" title="4. 多分类问题"></a>4. 多分类问题</h1><p>首先介绍一下<strong>Multinoulli分布</strong>。在多分类问题中，样本的目标值有$K$种可能的互斥取值，所以每个目标值$t^{(n)}$可以使用$K$维向量的one-hot编码。如$K=6$，一个样本属于第3个类别，则$t_3=1, t_k=0,(1 \le k \le K ,k  \ne 3)$，即：<br>$$<br>\begin {aligned}<br>&amp; t =(0,0,1,0,0,0) \\<br>&amp; \sum_{k=1}^K t_k = 1<br>\end {aligned}<br>$$<br>那么从总体抽样时，一个样本属于每个类别的概率也可以使用一个$K$维向量$\mu$表示，$\mu_k$表示$t_k = 1$的概率，且$\sum_{k=1}^K\mu_k =1$ 。</p>
 <p>那么一个样本$t$服从的分布就是：<br>$$<br>\begin {aligned}<br>p(t) &amp;= p(t | \mu)  \\<br>       &amp;= \prod_{k=1}^K p(t_k= 1 | \mu_k) \\<br>       &amp;=\prod_{k=1}^K \mu_k^{ t_k}<br>\end {aligned}<br>$$<br>其中：<br>$$<br>\begin {aligned}<br>t  &amp;= (t_1,t_2 \dots t_K)^T \\<br>\mu &amp;= (\mu_1,\mu_2 \dots \mu_K)^T<br>\end {aligned}<br>$$<br>使用神经网络处理多分类问题时，输出层通常使用softmax函数作为激活函数。即：<br>$$<br>y_k(x,w) = \frac {\exp(a_k(x,w))}{\sum_j^K \exp(a_j(x,w))} , (1 \le k \le K)<br>$$<br>softmax函数的一个重要特性就是其输出值表示的是概率，即:$y_k(x,w)$ 和上文的离散型分布中的$\mu_k$ 的意义是一样，都表示$t_k=1$的概率。所以对于任何一个样本$\{ x,t \}$ :<br>$$<br>\begin {aligned}<br>p(t|x,w)   &amp;=\prod_{k=1}^K y_k^{ t_k} \\<br>                 &amp;=\prod_{k=1}^K y_k(x,w)^{ t_k}<br>\end {aligned}<br>$$</p>
 <p>那么其似然函数和对数似然函数为：<br>$$<br>\begin {aligned}<br>p(T|X,w)         &amp; = \prod_{n=1}^N \prod_{k=1}^K y_k(x^{(n)},w)^{ t_k^{(n)}} \\<br>\\<br>\ln p(T|X,w)   &amp; = \sum_{n=1}^N \sum_{k=1}^K t_k^{(n)} \ln y_k(x^{(n)},w)\\<br>\\<br>E(w)                &amp; = - \ln p(T|X,w) \\<br>                       &amp; = - \sum_{n=1}^N \sum_{k=1}^K t_k^{(n)} \ln y_k(x^{(n)},w)<br>\end {aligned}<br>$$<br>此处的$E(w)$就是我们常用到的<strong>交叉熵损失函数(cross-entropy error function)</strong> ，是对数似然函数的负数。</p>
 <p>二分类问题可以看做是一种特殊的多分类问题，所以在神经网络中也可以使用softmax函数作为二分类问题的输出层激活函数。</p>
@@ -517,9 +516,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
-          
             <a href="/tags/Neural-Network/" rel="tag"># Neural Network</a>
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
           
         </div>
       
@@ -542,8 +541,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/blog/Norm_Regularization_for_DeepLearning-Neural_networks.html" rel="prev" title="范数正则化-神经网络">
-                范数正则化-神经网络 <i class="fa fa-chevron-right"></i>
+              <a href="/blog/Norm-Regularization.html" rel="prev" title="范数正则化">
+                范数正则化 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
