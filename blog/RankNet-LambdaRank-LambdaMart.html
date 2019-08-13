@@ -118,7 +118,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://weirping.coding.me/blog/RankNet-LambdaRank-LambdaMart/RankNet-LambdaRank.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/RankNet-LambdaRank-LambdaMart/LambdaMART.png">
-<meta property="og:updated_time" content="2019-07-18T15:58:34.356Z">
+<meta property="og:updated_time" content="2019-07-31T07:58:17.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="From RankNet to LambdaRank to LambdaMart An Overview阅读笔记">
 <meta name="twitter:description" content="LTR问题搜索引擎根据用户输入的Query检索得到最相关的topk个网页；推荐引擎根据用户的兴趣偏好推荐用户最感兴趣的topk个文章。涉及到topk的问题，都会涉及到排序的问题。LTR(Learning To Rank)是在处理排序问题时采用机器学习方法来训练模型的方法。可以将LTR方法分为  point-wise、pair-wise、list-wise 三类. 之前介绍的Prank 算法属于po">
@@ -504,7 +504,7 @@
 </ol>
 <p>定义 $I$ 为同一query下，所有的url对的index的集合， 并且任何一个url对只能在 $I$ 中出现过一次。即，$U_i \rhd U_j$ 且$\{i,j\} \in I$。例如：有三个url，其相关性满足 $U_1 \rhd U_2 \rhd U_3$，那么集合$I$中就包含{(1,2), (1,3), (2,3)}共三个pair。</p>
 <p>在集合 $I$ 中的所有url对都满足 $U_i \rhd U_j$ ，$S_{ij} = 1, \bar P_{ij}=1$。 损失函数变为：<br>$$<br>C(s_i - s_j)= - \log P_{ij} = -\log \frac{1}{1+e^{-\sigma(s_i - s_j)}}<br>$$<br>$\lambda_{ij}$ 变为：<br>$$<br>\begin {align}<br>\lambda_{ij} = \frac{\partial C(s_i - s_j)}{\partial s_{i}} &amp;= \sigma (- \frac{1}{1+e^{\sigma(s_i - s_j)}})\\<br>&amp;= - \frac{\sigma}{1+e^{\sigma(s_i - s_j)}}<br>\end {align}  \tag {11}<br>$$</p>
-<p>可以对 $\lambda$ 进一步变化。考察一个query下的 $U_i$， 分为两部分: 所有排在$U_i$后面的 url 的集合 $I_{i-}$;  所有排在$U_i$前面的 url 的集合 $I_{-i}$; 可以定义与 $U_i$ 有关的 $\lambda_i$ :<br>$$<br>\lambda_i = \sum_{m\in I_{i-}} \lambda_{im} - \sum_{n \in I_{-i}}\lambda_{in}  \tag {12}<br>$$</p>
+<p>可以对 $\lambda$ 进一步变化。考察一个query下的 $U_i$， 分为两部分: 所有排在$U_i$后面的 url 的集合 $I_{i-}$;  所有排在$U_i$前面的 url 的集合 $I_{-i}$; 可以定义与 $U_i$ 有关的 $\lambda_i$ :<br>$$<br>\lambda_i = \sum_{m\in I_{i-}} \lambda_{im} - \sum_{n \in I_{-i}}\lambda_{ni}  \tag {12}<br>$$</p>
 <blockquote>
 <p>To compute $\lambda_i$ (for url $U_i$), we find all $m$ for which $\{i, m\} \in I$ and all $n$ for which $\{n, i\} \in I$ . For the former, we increment $\lambda_i$ by $\lambda_{i m}$  , and for the latter, we decrement $\lambda_i$ by $\lambda_{ni}$ . For example, if there were just one pair with  $U1 \rhd  U2$ , then $I = \{\{1, 2\}\}$ , and $\lambda_1 = \lambda_{12} = −\lambda_2$ .</p>
 </blockquote>
@@ -542,7 +542,7 @@
 <p><img src="RankNet-LambdaRank-LambdaMart/LambdaMART.png" alt></p>
 <p>可以看出LambdaMART的框架其实就是MART，主要的创新在于中间计算的梯度使用的是Lambda，是pairwise的。</p>
 <p>下面简单介绍LambdaMART每一步的工作：</p>
-<p>​         1)  每棵树的训练会先遍历所有的训练数据（label不同的文档pair），计算每个pair互换位置导致的指标变化$\Delta Z_{ij}$以及Lambda，即 $\lambda_{ij} = \frac{\partial C(s_i - s_j)}{\partial s_{i}} = - \frac{\sigma}{1+e^{\sigma(s_i - s_j)}} |\Delta Z_{ij}|$ ，然后计算每个文档的Lambda：$\lambda_i = \sum_{m\in I_{i_}} \lambda_{im} - \sum_{n \in I_{_i}}\lambda_{in}$ ，再计算每个 $\lambda_i$ 的导数$w_i$，用于后面的Newton step求解叶子节点的数值。(此处Mart使用的是牛顿法求解的, 可以参考 <a href="https://weirping.github.io/blog/xgboost.html" target="_blank" rel="noopener">xgboost</a> )</p>
+<p>​         1)  每棵树的训练会先遍历所有的训练数据（label不同的文档pair），计算每个pair互换位置导致的指标变化$\Delta Z_{ij}$以及Lambda，即 $\lambda_{ij} = \frac{\partial C(s_i - s_j)}{\partial s_{i}} = - \frac{\sigma}{1+e^{\sigma(s_i - s_j)}} |\Delta Z_{ij}|$ ，然后计算每个文档的Lambda：$\lambda_i = \sum_{m \in I_{i-}} \lambda_{im} - \sum_{n \in I_{-i}}\lambda_{in}$ ，再计算每个 $\lambda_i$ 的导数$w_i$，用于后面的Newton step求解叶子节点的数值。(此处Mart使用的是牛顿法求解的, 可以参考 <a href="https://weirping.github.io/blog/xgboost.html" target="_blank" rel="noopener">xgboost</a> )</p>
 <p>​         2)  创建回归树拟合第一步生成的 $\lambda_i$，划分树节点的标准是Mean Square Error，生成一颗叶子节点数为L的回归树。</p>
 <p>​         3)  对第二步生成的回归树，计算每个叶子节点的数值，采用Newton step求解，即对落入该叶子节点的文档集，用公式 $\gamma_{lm} = \frac{\sum_{x_i \in R_{lm}} \lambda_i}{\sum_{x_i \in R_{lm}} w_i}$  计算该叶子节点的输出值。</p>
 <p>​         4)  更新模型，将当前学习到的回归树加入到已有的模型中，学习率取$v$</p>
@@ -718,7 +718,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">14</span>
+                      
+                    
+                    <span class="site-state-item-count">15</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
@@ -767,7 +769,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">18</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">20</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
