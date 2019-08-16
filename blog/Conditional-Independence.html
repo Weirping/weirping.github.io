@@ -108,13 +108,13 @@
 
 
 
-  <meta name="description" content="条件独立性定义多变量概率分布中的一个重要概念就是条件独立性(conditional independence)。 考虑三个变量$a$, $b$, $c$， 并且假设给定$b$, $c$的条件下$a$的条件概率分布不依赖于$b$的值，即：$$p(a| b, c) = p(a |c)$$此时我们说，给定$c$的条件下，$a$条件独立于b。 推论：给定$c$的条件下，对于$a$条件独立于b ，有下试成立">
-<meta name="keywords" content="Machine Learning,Math">
+  <meta name="description" content="条件独立性定义多变量概率分布中的一个重要概念就是条件独立性(conditional independence)。 考虑三个变量$a$, $b$, $c$， 并且假设给定$b$, $c$的条件下$a$的条件概率分布不依赖于$b$的值，即：$$p(a| b, c) = p(a |c)$$此时我们说，给定$c$的条件下，$a$条件独立于b。 推论：给定$c$的条件下，对于$a$条件独立于b ，有下式成立">
+<meta name="keywords" content="Mathematics,Probability">
 <meta property="og:type" content="article">
 <meta property="og:title" content="条件独立性">
 <meta property="og:url" content="http://weirping.coding.me/blog/Conditional-Independence.html">
 <meta property="og:site_name" content="Weiping&#39;s notes">
-<meta property="og:description" content="条件独立性定义多变量概率分布中的一个重要概念就是条件独立性(conditional independence)。 考虑三个变量$a$, $b$, $c$， 并且假设给定$b$, $c$的条件下$a$的条件概率分布不依赖于$b$的值，即：$$p(a| b, c) = p(a |c)$$此时我们说，给定$c$的条件下，$a$条件独立于b。 推论：给定$c$的条件下，对于$a$条件独立于b ，有下试成立">
+<meta property="og:description" content="条件独立性定义多变量概率分布中的一个重要概念就是条件独立性(conditional independence)。 考虑三个变量$a$, $b$, $c$， 并且假设给定$b$, $c$的条件下$a$的条件概率分布不依赖于$b$的值，即：$$p(a| b, c) = p(a |c)$$此时我们说，给定$c$的条件下，$a$条件独立于b。 推论：给定$c$的条件下，对于$a$条件独立于b ，有下式成立">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://weirping.coding.me/blog/Conditional-Independence/tail-2-tail1.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Conditional-Independence/tail-2-tail0.png">
@@ -124,10 +124,10 @@
 <meta property="og:image" content="http://weirping.coding.me/blog/Conditional-Independence/head-2-head0.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Conditional-Independence/d-separation.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Conditional-Independence/markov-ci.png">
-<meta property="og:updated_time" content="2018-09-09T14:49:42.000Z">
+<meta property="og:updated_time" content="2019-08-16T08:43:51.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="条件独立性">
-<meta name="twitter:description" content="条件独立性定义多变量概率分布中的一个重要概念就是条件独立性(conditional independence)。 考虑三个变量$a$, $b$, $c$， 并且假设给定$b$, $c$的条件下$a$的条件概率分布不依赖于$b$的值，即：$$p(a| b, c) = p(a |c)$$此时我们说，给定$c$的条件下，$a$条件独立于b。 推论：给定$c$的条件下，对于$a$条件独立于b ，有下试成立">
+<meta name="twitter:description" content="条件独立性定义多变量概率分布中的一个重要概念就是条件独立性(conditional independence)。 考虑三个变量$a$, $b$, $c$， 并且假设给定$b$, $c$的条件下$a$的条件概率分布不依赖于$b$的值，即：$$p(a| b, c) = p(a |c)$$此时我们说，给定$c$的条件下，$a$条件独立于b。 推论：给定$c$的条件下，对于$a$条件独立于b ，有下式成立">
 <meta name="twitter:image" content="http://weirping.coding.me/blog/Conditional-Independence/tail-2-tail1.png">
 
 
@@ -397,7 +397,7 @@
                 <span class="post-meta-item-text">In</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Machine-Learning/" itemprop="url" rel="index"><span itemprop="name">Machine Learning</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Mathematics/" itemprop="url" rel="index"><span itemprop="name">Mathematics</span></a></span>
 
                 
                 
@@ -433,11 +433,11 @@
       
         <h1 id="条件独立性"><a href="#条件独立性" class="headerlink" title="条件独立性"></a>条件独立性</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>多变量概率分布中的一个重要概念就是条件独立性(conditional independence)。</p>
 <p>考虑三个变量$a$, $b$, $c$， 并且假设给定$b$, $c$的条件下$a$的条件概率分布不依赖于$b$的值，即：<br>$$<br>p(a| b, c) = p(a |c)<br>$$<br>此时我们说，给定$c$的条件下，$a$条件独立于b。</p>
-<p>推论：给定$c$的条件下，对于$a$条件独立于b ，有下试成立：<br>$$<br>\begin {aligned}<br>p(a,b|c)  &amp;= p(a|b,c)p(b|c)    \mathrm{:product  rule}\ <br>&amp; =p(a|c)p(b|c)     \mathrm{:conditional  independence}<br>\end {aligned}<br>$$<br>当使用概率模型时，条件独立性起着重要的作用，它简化了模型的结构，降低了模型的训练和推断的计算量。</p>
-<h2 id="证明"><a href="#证明" class="headerlink" title="证明"></a>证明</h2><p>在图模型中，对于是三个变量$a$, $b$, $c$来说要证明 given $c$， $a$条件独立与$b$。需要$c$是否被观察到分两种情况讨论：</p>
+<p>推论：给定$c$的条件下，对于$a$条件独立于b ，有下式成立：<br>$$<br>\begin {aligned}<br>p(a,b|c) &amp; = p(a|b,c)p(b|c)  \\<br>         &amp; =p(a|c)p(b|c) \\<br>\end {aligned}<br>$$<br>当使用概率模型时，条件独立性起着重要的作用，它简化了模型的结构，降低了模型的训练和推断的计算量。</p>
+<h2 id="证明"><a href="#证明" class="headerlink" title="证明"></a>证明</h2><p>在图模型中，对于是三个变量$a$, $b$, $c$来说要证明 given $c$， $a$条件独立与$b$。按照 $c$ 是否被观察到分两种情况讨论：</p>
 <p>如果$c$被观察到了， given $c$， $a$条件独立与$b$ 等价于<br>$$<br>p(a,b|c)  =p(a|c)p(b|c)<br>$$<br>如果$c$是隐变量， given $c$， $a$条件独立与$b$等价于<br>$$<br>p(a,b)  =p(a)p(b)<br>$$<br>即，此时需要marginalizing with respect to $c$。</p>
-<h1 id="贝叶斯网条件独立性（D-separation）"><a href="#贝叶斯网条件独立性（D-separation）" class="headerlink" title="贝叶斯网条件独立性（D-separation）"></a>贝叶斯网条件独立性（D-separation）</h1><p>如上文所述，条件独立性能够大大的简化模型结构降低模型的训练和推断的计算量。</p>
-<p>对于有向图来说，当我们拿到一个使用若干个变量的条件概率的乘积表示的这些变量的联合分布时，怎么确定其中哪些变量之间是条件独立的呢？有两种方案：</p>
+<h1 id="贝叶斯网条件独立性（D-separation）"><a href="#贝叶斯网条件独立性（D-separation）" class="headerlink" title="贝叶斯网条件独立性（D-separation）"></a>贝叶斯网条件独立性（D-separation）</h1><p>如上文所述，条件独立性能够大大的简化模型结构, 降低模型的训练和推断的计算量。</p>
+<p>对于有向图来说，我们可以使用图中变量的联合分布来表示这张图,  即, 图中相关变量的条件概率的乘积.  表示的这些变量的联合分布时，怎么确定其中哪些变量之间是条件独立的呢？有两种方案：</p>
 <ul>
 <li>使用概率公式推导。该方法已经验证是非常复杂的一个过程。</li>
 <li>d-separation。本文所要论述的内容。</li>
@@ -445,18 +445,18 @@
 <p>图模型的一个重要特征是，图中所有变量之间的条件独立性可以直接从图中读出来，不需要进行任何计算。从图中读出条件独立性的方法叫做d-separation，其中”d“即directed。</p>
 <h2 id="三个例子"><a href="#三个例子" class="headerlink" title="三个例子"></a>三个例子</h2><p>下面首先使用三个简单的例子来说明d-separation中的核心概念。 这三个例子都是讨论 <strong>given $c$， $a$条件独立与$b$</strong>是否成立的。</p>
 <h3 id="tail-2-tail"><a href="#tail-2-tail" class="headerlink" title="tail-2-tail"></a>tail-2-tail</h3><p><img src="Conditional-Independence/tail-2-tail1.png" alt></p>
-<p>$$<br>\begin {aligned}<br>p(a,b,c) &amp;= p(a|c)p(b|c)p(c)<br>\\<br>p(a,b|c) &amp; = \frac{p(a,b,c)}{p(c)} \\<br>&amp;= p(a|c)p(b|c)<br>\end {aligned}<br>$$</p>
+<p>$$<br>\begin {aligned}<br>p(a,b,c) &amp; = p(a|c)p(b|c)p(c) \\<br>\\<br>p(a,b|c) &amp; = \frac{p(a,b,c)}{p(c)} \\<br>         &amp; = p(a|c)p(b|c)<br>\end {aligned}<br>$$</p>
 <p>given $c$， $a$条件独立于$b$ 成立。</p>
 <p><img src="Conditional-Independence/tail-2-tail0.png" alt></p>
-<p>$$<br>\begin {aligned}<br>p(a,b,c) &amp;= p(a|c)p(b|c)p(c) \\<br>\\<br>p(a,b) &amp;=\sum_c p(a,b,c)=\sum_c p(a|c)p(b|c) p(c) \neq p(a)p(b)<br>\end {aligned}<br>$$<br>given $c$， $a$条件独立于$b$ 不成立。</p>
+<p>$$<br>\begin {aligned}<br>p(a,b,c)  &amp; = p(a|c)p(b|c)p(c) \\<br>\\<br>p(a,b)    &amp; =\sum_c p(a,b,c) \\<br>          &amp; =\sum_c p(a|c)p(b|c) p(c) \neq p(a)p(b)<br>\end {aligned}<br>$$<br>given $c$， $a$条件独立于$b$ 不成立。</p>
 <h3 id="head-2-tail"><a href="#head-2-tail" class="headerlink" title="head-2-tail"></a>head-2-tail</h3><p><img src="Conditional-Independence/head-2-tail1.png" alt></p>
-<p>$$<br>\begin {aligned}<br>p(a,b,c)&amp;=p(a)p(c|a)p(b|c)\\<br>\\<br>p(a,b|c)&amp;= \frac{p(a,b,c)}{p(c)} \\<br>&amp;= \frac{p(a)p(c|a)p(b|c)}{p(c)} \\<br>&amp;= p(a|c)p(b|c)<br>\end {aligned}<br>$$<br>given $c$， $a$条件独立于$b$ 成立。</p>
+<p>$$<br>\begin {aligned}<br>p(a,b,c)  &amp; =p(a)p(c|a)p(b|c)\\<br>\\<br>p(a,b|c)  &amp; = \frac{p(a,b,c)}{p(c)} \\<br>          &amp; = \frac{p(a)p(c|a)p(b|c)}{p(c)} \\<br>          &amp; = p(a|c)p(b|c)<br>\end {aligned}<br>$$<br>given $c$， $a$条件独立于$b$ 成立。</p>
 <p><img src="Conditional-Independence/head-2-tail0.png" alt></p>
-<p>$$<br>\begin {aligned}<br>p(a,b,c)&amp;=p(a)p(c|a)p(b|c)\\<br>\\<br>p(a,b)&amp;=p(a)\sum_c p(c|a)p(b|c)=p(a)p(b|a) \neq p(a)p(b)<br>\end {aligned}<br>$$</p>
+<p>$$<br>\begin {aligned}<br>p(a,b,c)  &amp; =p(a)p(c|a)p(b|c)\\<br> \\<br>p(a,b)    &amp; =p(a)\sum_c p(c|a)p(b|c)=p(a)p(b|a) \neq p(a)p(b)<br>\end {aligned}<br>$$</p>
 <p>given $c$， $a$条件独立于$b$ 不成立。</p>
-<h3 id="head-2-head"><a href="#head-2-head" class="headerlink" title="head-2-head"></a>head-2-head</h3><p><img src="Conditional-Independence/head-2-head1.png" alt><br>$$<br>\begin {aligned}<br>p(a,b,c)&amp;=p(a)p(b)p(c|a,b) \\<br>\\<br>p(a,b|c) &amp; =\quad \frac{p(a,b,c)}{p(c)} \\<br>&amp;= \frac{p(a)p(b)p(c|a,b)}{p(c)} \neq p(a|c)p(b|c)<br>\end {aligned}<br>$$<br>given $c$， $a$条件独立于$b$ 不成立。</p>
+<h3 id="head-2-head"><a href="#head-2-head" class="headerlink" title="head-2-head"></a>head-2-head</h3><p><img src="Conditional-Independence/head-2-head1.png" alt><br>$$<br>\begin {aligned}<br>p(a,b,c)  &amp; =p(a)p(b)p(c|a,b) \\<br>\\<br>p(a,b|c)  &amp; =\quad \frac{p(a,b,c)}{p(c)} \\<br>          &amp; = \frac{p(a)p(b)p(c|a,b)}{p(c)} \neq p(a|c)p(b|c)<br>\end {aligned}<br>$$<br>given $c$， $a$条件独立于$b$ 不成立。</p>
 <p><img src="Conditional-Independence/head-2-head0.png" alt></p>
-<p>$$<br>\begin {aligned}<br>p(a,b,c)&amp;=p(a)p(b)p(c|a,b) \\<br>\\<br>p(a,b)&amp;=\sum_c p(a,b,c) = p(a)p(b)<br>\end {aligned}<br>$$<br>given $c$， $a$条件独立于$b$ 成立。</p>
+<p>$$<br>\begin {aligned}<br>p(a,b,c)  &amp; =p(a)p(b)p(c|a,b) \\<br>\\<br>p(a,b)    &amp; =\sum_c p(a,b,c) = p(a)p(b)<br>\end {aligned}<br>$$<br>given $c$， $a$条件独立于$b$ 成立。</p>
 <p>作为原因的多个因素(a,b)，即使它们之间是相互独立的，确定结果(c)之后这些原因就可能变的相关了。当结果(c)不作为观测变量的时候，原因是相互独立的，也叫做边缘独立（Marginal Independence）.</p>
 <p>如果一个节点$y$是$x$的一个子节点，则</p>
 <p>如果存在从结点$x$到结点$y$的一条路径，其中路径的每一步都沿着箭头的方向，那么我们说结点$y$是结点$x$的后代(descendant)。可以证明，在类似于上图中的head-2-head的路径中，如果结点$c$或者它的任意后代节点被观测到，那么路径会unblocked，即a和b是条件相关的。</p>
@@ -514,15 +514,15 @@
 <li>f：tail-to-tail节点，f属于C，符合第（1）条，blocked。</li>
 </ol>
 <p>结论：given C， A 和 B 是否是关于 C 条件独立的 <strong>成立</strong>。</p>
-<h1 id="马尔可夫随机场的条件独立性"><a href="#马尔可夫随机场的条件独立性" class="headerlink" title="马尔可夫随机场的条件独立性"></a>马尔可夫随机场的条件独立性</h1><p>在有向图的情形下，我们看到可以通过使⽤被称为d-separation的图检测⽅法判断⼀个特定的条件独⽴性质是否成⽴。这涉及到判断链接两个结点集合的路径是否被“阻隔”(blocked)。其中涉及到的三种情形(head-2-head, head-2-tail, tail-2-tail)中head-2-head是比较特殊的(D-separation的第二个条件)。</p>
-<p>对应于⽆向图模型。通过移除图中链接的⽅向性，⽗结点和⼦结点的⾮对称性也被移除了，因此head-2-head结点的特殊性质也就不再存在了。</p>
-<h2 id="第一种方法："><a href="#第一种方法：" class="headerlink" title="第一种方法："></a>第一种方法：</h2><p>假设在⼀个⽆向图中，我们有三个结点集合，记作A，B， C。我们考虑条件独⽴性质，其中C是被观测点的集合。<br>考虑连接集合A的结点和集合B的结点的所有可能路径。如果所有这些路径 <strong>都</strong> 通过了集合C中的⼀个或多个结点，那么所有这样的路径都被“阻隔”(blocked)，因此条件独⽴性质成⽴。 如果存在⾄少⼀条未被阻隔的路径，那么条<br>件独⽴的性质不成⽴。</p>
-<p>这与d划分的准则完全相同，唯⼀的差别在于没有头到头的现象。因此，⽆向图的条件独⽴性的检测⽐有向图简单。</p>
-<h2 id="第二种方法："><a href="#第二种方法：" class="headerlink" title="第二种方法："></a>第二种方法：</h2><p>另⼀种条件独⽴性的检测的⽅法是假设从图中把集合C中的结点以及与这些结点相连的链接全部删除，如果不存在⼀条从A中任意结点到B中任意结点的路径，那么条件独⽴的性质⼀定成⽴。</p>
+<h1 id="马尔可夫随机场的条件独立性"><a href="#马尔可夫随机场的条件独立性" class="headerlink" title="马尔可夫随机场的条件独立性"></a>马尔可夫随机场的条件独立性</h1><p>在有向图的情形下，我们看到可以通过使用被称为d-separation的图检测法判断一个特定的条件独立性质是否成立。这涉及到判断链接两个结点集合的路径是否被”阻隔”(blocked), 其中涉及到的三种情形(head-2-head, head-2-tail, tail-2-tail)中head-2-head是比较特殊的(D-separation的第二个条件)。</p>
+<p>对应于无向图模型。通过移除图中链接的方向性，一个结点和另一个结点的非对称性也被移除了，因此head-2-head结点的特殊性质也就不再存在了。</p>
+<h2 id="第一种方法："><a href="#第一种方法：" class="headerlink" title="第一种方法："></a>第一种方法：</h2><p>假设在一个无向图中，我们有三个结点集合，记作A，B， C。我们考虑条件独立性质，其中C是被观测点的集合。<br>考虑连接集合A的结点和集合B的结点的所有可能路径。如果所有这些路径 <strong>都</strong> 通过了集合C中的一个或多个结点，那么所有这样的路径都被“阻隔”(blocked)，因此条件独立性质成立, 如果存在至少一条未被阻隔的路径，那么条<br>件独立的性质不成立. </p>
+<p>这与d划分的准则完全相同，唯一的差别在于没有头到头的现象。因此，无向图的条件独立性的检测比有向图简单。</p>
+<h2 id="第二种方法："><a href="#第二种方法：" class="headerlink" title="第二种方法："></a>第二种方法：</h2><p>另一种条件独立性的检测的方法是假设从图中把集合C中的结点以及与这些结点相连的链接全部删除，如果不存在一条从A中任意结点到B中任意结点的路径，那么条件独立的性质便定成立.</p>
 <p>举例：</p>
 <p><img src="Conditional-Independence/markov-ci.png" alt></p>
-<p>如上图，其中从集合A中的任意结点到集合B中的任意结点的每条路径都通过集合C中的⾄少⼀个结点。所以given C，A与B条件独立。</p>
-<p>移除集合C中的所有节点和与之相关的连接，不存在⼀条从A中任意结点到B中任意结点的路径，所以given C，A与B条件独立。</p>
+<p>如上图，其中从集合A中的任意结点到集合B中的任意结点的每条路径都通过集合C中的至少一个结点。所以given C，A与B条件独立。</p>
+<p>移除集合C中的所有节点和与之相关的连接，不存在一条从A中任意结点到B中任意结点的路径，所以given C，A与B条件独立。</p>
 <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p>Pattern Recognition and Machine Learning</p>
 <p><a href="https://blog.csdn.net/github_36326955/article/details/69569032#141-d-%E5%88%86%E7%A6%BB" target="_blank" rel="noopener">概率图模型4：贝叶斯网络</a></p>
 
@@ -545,9 +545,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+            <a href="/tags/Mathematics/" rel="tag"># Mathematics</a>
           
-            <a href="/tags/Math/" rel="tag"># Math</a>
+            <a href="/tags/Probability/" rel="tag"># Probability</a>
           
         </div>
       
@@ -570,8 +570,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/blog/edit-distance.html" rel="prev" title="字串相似度-编辑距离">
-                字串相似度-编辑距离 <i class="fa fa-chevron-right"></i>
+              <a href="/blog/Simhash.html" rel="prev" title="Simhash">
+                Simhash <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -685,7 +685,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">15</span>
+                      
+                    
+                    <span class="site-state-item-count">16</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
@@ -738,7 +740,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">20</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>

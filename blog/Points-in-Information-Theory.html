@@ -109,7 +109,7 @@
 
 
   <meta name="description" content="信息量(自信息)信息奠基人香农(Shannon)认为“信息是用来消除随机不确定性的东西”. 一个事件蕴含的信息量与这条信息能够消除的不确定性是正相关的.  信息量应该满足如下条件:  事件发生的概率越低, 信息量越大;  事件发生的概率越高, 信息量越低;  多个对立事件同时发生, 总信息量是多个事件信息量相加.   由此确定的信息量表示为:$$I(x)=-\log_{2}p(x)$$ 其中, $">
-<meta name="keywords" content="Math,Information Theory">
+<meta name="keywords" content="Mathematics,Information Theory">
 <meta property="og:type" content="article">
 <meta property="og:title" content="信息论中的一些知识点">
 <meta property="og:url" content="http://weirping.coding.me/blog/Points-in-Information-Theory.html">
@@ -121,7 +121,7 @@
 <meta property="og:image" content="http://weirping.coding.me/blog/Points-in-Information-Theory/cond-joint-entropy-info.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Points-in-Information-Theory/mic01.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Points-in-Information-Theory/Machine-Learning-A-Probabilistic-Perspective.jpg">
-<meta property="og:updated_time" content="2018-11-14T11:19:40.000Z">
+<meta property="og:updated_time" content="2019-08-16T10:48:02.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="信息论中的一些知识点">
 <meta name="twitter:description" content="信息量(自信息)信息奠基人香农(Shannon)认为“信息是用来消除随机不确定性的东西”. 一个事件蕴含的信息量与这条信息能够消除的不确定性是正相关的.  信息量应该满足如下条件:  事件发生的概率越低, 信息量越大;  事件发生的概率越高, 信息量越低;  多个对立事件同时发生, 总信息量是多个事件信息量相加.   由此确定的信息量表示为:$$I(x)=-\log_{2}p(x)$$ 其中, $">
@@ -394,7 +394,7 @@
                 <span class="post-meta-item-text">In</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Information-Theory/" itemprop="url" rel="index"><span itemprop="name">Information Theory</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Mathematics/" itemprop="url" rel="index"><span itemprop="name">Mathematics</span></a></span>
 
                 
                 
@@ -437,20 +437,20 @@
 <p>由此确定的信息量表示为:<br>$$<br>I(x)=-\log_{2}p(x)<br>$$</p>
 <p>其中, $p(x)$表示随机事件发生的概率. 可以看出, 自信息的计算和随机变量本身数值没有关系, 只和其概率有关. </p>
 <h1 id="熵-entropy"><a href="#熵-entropy" class="headerlink" title="熵(entropy)"></a>熵(entropy)</h1><p>对于一个变量$X \sim p$($X$服从$p$分布), 该变量的熵是描述其不确定性的量, 表示该变量蕴含的信息量的期望(平均信息量).</p>
-<p>eg:对于一个有k个状态的离散随机变量$X$, 有<br>$$<br>H(X)=-\sum_{k=1}^Kp(X=k) \log p(X=k)<br>$$<br>a.当$\log$以2为底的时候称之为bits,结果可以视为多少个二进制位可以表示该变量</p>
-<p>b.当\log以e为底的时侯称之为 nats</p>
+<p>eg:对于一个有k个状态的离散随机变量$X$, 有<br>$$<br>H(X)=-\sum_{k=1}^Kp(X=k) \log p(X=k)<br>$$<br>a.当 $\log$ 以2为底的时候称之为bits,结果可以视为多少个二进制位可以表示该变量</p>
+<p>b.当 $\log$ 以e为底的时侯称之为 nats</p>
 <p>熵只依赖于随机变量的分布, 与随机变量取值无关, 所以也可以将 $X$ 的熵记作$ H(p)$. </p>
 <p>$0log0=0$.  </p>
 <p>熵的基本性质:</p>
 <ul>
 <li>非负性: $𝐻(𝑋) ≥ 0$, 等号表明确定场(无随机性)的熵最小;</li>
-<li>基质性: $𝐻(𝑋) ≤ \log |X|$, 其中等号成立当且仅当$p(x)=\frac 1{\mid x \mid}$, 这里$\mid X \mid$表示集合$X$中的元素个数. 该性质表明等概场具有的最大熵;</li>
+<li>极值性: $𝐻(𝑋) ≤ \log |X|$, 其中等号成立当且仅当$p(x)=\frac 1{\mid x \mid}$, 这里$\mid X \mid$表示集合$X$中的元素个数. 该性质表明等概场具有的最大熵;</li>
 <li>熵描述了随机变量的不确定性, 熵越大，随机变量的不确定性就越大，分布越混乱;</li>
 <li>熵描述了随机变量的平均信息量;</li>
 </ul>
 <h1 id="联合熵和条件熵"><a href="#联合熵和条件熵" class="headerlink" title="联合熵和条件熵"></a>联合熵和条件熵</h1><p>设$X$、$Y$是两个离散型随机变量, 它们的联合分布为$𝑝(𝑥, 𝑦)$, 则$X$ 、$Y$的联合熵定义为<br>$$<br>H(X,Y)=-\sum_{x \in X} \sum_{y \in Y} p(x, y) \log p(x, y)<br>$$<br>设$X$、$Y$是两个离散型随机变量, 它们的联合分布为$𝑝(𝑥, 𝑦)$, 则给定𝑋时𝑌的条件熵定义为<br>$$<br>\begin {align}<br>H(Y|X) &amp; =\sum_{x \in X} p(x)H(y|X=x)                        \\<br>       &amp; =-\sum_{x \in X} \sum_{y \in Y} p(x, y) \log p(y|x) \\<br>       &amp; =E[-\log (y \mid x)]                                \\<br>\end {align}<br>$$<br>联合熵和条件熵的直观含义见下图:</p>
 <p><img src="Points-in-Information-Theory/cond-joint-entropy.png" alt></p>
-<p>链式规则:<br>$$<br>H(X, Y) = H(Y|X) + 𝐻(X)<br>$$</p>
+<p>链式规则:<br>$$<br>H(X, Y) = H(Y|X) + H(X)<br>$$</p>
 <p>$$<br>\begin {align}<br>H(X_1, X_2, X_3) &amp;= H(X_1) + 𝐻(X_2, X_3 \mid X_1) \\<br>                 &amp;= H(X_1) + 𝐻(X_2 \mid X_1) + 𝐻(X_3 \mid X_1, X_2) \\<br>\end {align}<br>$$</p>
 <p>定理:<br>$$<br>\begin {align}<br>&amp; H(X \mid Y) \le H(X) \\<br>&amp; H(X, Y) \le H(X) + H(Y)<br>\end {align}<br>$$</p>
 <h1 id="交叉熵-cross-entropy"><a href="#交叉熵-cross-entropy" class="headerlink" title="交叉熵 (cross entropy)"></a>交叉熵 (cross entropy)</h1><p>设随机变量$X$的分布密度为$𝑝(𝑥)$, $𝑞(𝑥)$是通过统计手段得到的$X$的近似分布, 则随机变量$X$的交叉熵定义为<br>$$<br>H(X,q)=-\sum_{x \in X}p(x) \log q(x)<br>$$</p>
@@ -479,7 +479,7 @@
 <li>语言模型评价方法</li>
 </ul>
 <h1 id="相对熵"><a href="#相对熵" class="headerlink" title="相对熵"></a>相对熵</h1><p>这个值是用来衡量两个分布之间相异度的, </p>
-<p>设$𝑝(𝑥)$ 是随机变量𝑋的真实分布密度, $𝑞(𝑥)$是通过统计手段得到的𝑋 的近似分布, 则二者间相对熵定义为:<br>$$<br>D_{KL}(p||q)=-\sum_{k=1}^Kp_k \log \frac{p_k}{q_k}<br>$$<br>如果是连续的随机变量, 把$\sum$用积分 符号替换就好了</p>
+<p>设$p(x)$ 是随机变量X的真实分布密度, $q(x)$是通过统计手段得到的X的近似分布, 则二者间相对熵定义为:<br>$$<br>D_{KL}(p||q)=-\sum_{k=1}^Kp_k \log \frac{p_k}{q_k}<br>$$<br>如果是连续的随机变量, 把$\sum$用积分 符号替换就好了</p>
 <p>对上式进行转化：<br>$$<br>D_{KL}(p||q)=\sum_{k}{p_k} \log{p_k} -\sum_kp_k \log q_k=-H(p)+H(p,q)<br>$$<br>其中$H(p,q)$为交叉熵, $p$ 为真是分布, $q$为近似分布.</p>
 <p>相对熵也称作<br>– Kullback-Leibler 发散度、KL发散度<br>– Kullback-Leibler 距离、KL距离</p>
 <p>KL距离就可以看做是：</p>
@@ -515,7 +515,7 @@
 </li>
 <li><p>对互信息值进行归一化: $\frac {\max_{G \in \mathcal G(c, r)} I(x_G ; y_G)} {\log \min(c, r)}$ .</p>
 </li>
-<li><p>选取所有离散化方案中互信息的最大值作为MIC值: $c$, $r$ 有多种选取方案, 在所有的备选方案中选取一个使归一化的互信息最大的值 即:<br>$$<br>MIC = \max_{c \times r \lt B} \frac {\max_{G \in \mathcal G (c, r)} I(x_G ; y_G)} {\log \min(c, r)}<br>$$<br>​</p>
+<li><p>选取所有离散化方案中互信息的最大值作为MIC值: $c$, $r$ 有多种选取方案, 在所有的备选方案中选取一个使归一化的互信息最大的值 即:<br>$$<br>MIC = \max_{c \times r \lt B} \frac {\max_{G \in \mathcal G (c, r)} I(x_G ; y_G)} {\log \min(c, r)}<br>$$</p>
 </li>
 </ol>
 <p>其中: </p>
@@ -574,7 +574,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Math/" rel="tag"># Math</a>
+            <a href="/tags/Mathematics/" rel="tag"># Mathematics</a>
           
             <a href="/tags/Information-Theory/" rel="tag"># Information Theory</a>
           
@@ -714,7 +714,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">15</span>
+                      
+                    
+                    <span class="site-state-item-count">16</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
@@ -767,7 +769,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">20</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>

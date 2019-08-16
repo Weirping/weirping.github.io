@@ -109,7 +109,7 @@
 
 
   <meta name="description" content="举例假设我们有两个盒子，一个红色的，一个蓝色的，红盒子中有2个苹果和6个橘子，蓝盒子中有3个苹果和1个橘子。现在假定我们随机选择一个盒子，从这个盒子中我们随机选择一个水果，观察选择了哪种水果，然后放回盒子中。我们重复这个过程很多次。 在这个例子中，我们要选择的盒子的颜色是一个随机变量，这个随机变量可以取两个值中的一个，即r(红盒子)或b(蓝盒子)。类似地，水果的种类也是一个随机变量 ，它可以取a（">
-<meta name="keywords" content="Math">
+<meta name="keywords" content="Mathematics,Probability">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Sum Rule and Product Rule in Probability">
 <meta property="og:url" content="http://weirping.coding.me/blog/Sum-Rule-and-Product-Rule-in-Probability.html">
@@ -118,7 +118,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://weirping.coding.me/blog/Sum-Rule-and-Product-Rule-in-Probability/box-fruit.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Sum-Rule-and-Product-Rule-in-Probability/sum-product.png">
-<meta property="og:updated_time" content="2018-08-20T07:34:40.000Z">
+<meta property="og:updated_time" content="2019-08-16T08:46:56.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Sum Rule and Product Rule in Probability">
 <meta name="twitter:description" content="举例假设我们有两个盒子，一个红色的，一个蓝色的，红盒子中有2个苹果和6个橘子，蓝盒子中有3个苹果和1个橘子。现在假定我们随机选择一个盒子，从这个盒子中我们随机选择一个水果，观察选择了哪种水果，然后放回盒子中。我们重复这个过程很多次。 在这个例子中，我们要选择的盒子的颜色是一个随机变量，这个随机变量可以取两个值中的一个，即r(红盒子)或b(蓝盒子)。类似地，水果的种类也是一个随机变量 ，它可以取a（">
@@ -391,7 +391,7 @@
                 <span class="post-meta-item-text">In</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Math/" itemprop="url" rel="index"><span itemprop="name">Math</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Mathematics/" itemprop="url" rel="index"><span itemprop="name">Mathematics</span></a></span>
 
                 
                 
@@ -433,7 +433,7 @@
 <p>对于两个随机变量$X$和$Y$，$X$可能的取值为$\{x_1, \dots, x_M \}$， $Y$可能取值为$\{x_1, \dots, x_L \}$。</p>
 <p>那么 $X=x_i, Y=y_j$ 的联合概率为:<br>$$<br>p(X=x_i, Y=y_j)=\frac{n_{ij}}{N}<br>$$<br>那么 $X=x_i$ 的概率为:<br>$$<br>p(X=x_i)=\frac{c_i}{N} = \sum_{j=1}^L p(X=x_i, Y=y_j)<br>$$<br>这是概率的加和规则（<strong>sum rule</strong>）。$p(X=x_i)$也被称为边 缘 概 率(<strong>marginal probability</strong>)，因为它通过把其他变量（本例中的Y ）边缘化或者加和得到。</p>
 <p>给定$X = x_i$ ，$Y = y_j$ 的条件概率（conditional probability）：<br>$$<br>p(Y = y_j | X = x_i)=\frac{n_{ij}}{c_i}<br>$$<br>那么：<br>$$<br>p(X=x_i, Y=y_j)=\frac{n_{ij}}{N} = \frac{n_{ij}}{c_i}\cdot \frac{c_i}{N} = p(Y = y_j | X = x_i)p(X=x_i)<br>$$<br>这被称为概率的乘积规则（product rule）。</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>$$<br>\begin {aligned}<br>\rm{sum  rule} &amp;      p(X)= \sum_{Y} p(X, Y)\\<br>\rm{product rule} &amp;      p(X,Y)=p(Y|X)p(X)<br>\end {aligned}<br>$$</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>sum  rule, 其实就是全概率公式<br>$$<br>p(X)= \sum_{Y} p(X, Y)<br>$$<br>product rule, 其实就是条件概率<br>$$<br>p(X,Y)=p(Y|X)p(X)<br>$$</p>
 <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p>Pattern Recognition and Machine Learning</p>
 
       
@@ -455,7 +455,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Math/" rel="tag"># Math</a>
+            <a href="/tags/Mathematics/" rel="tag"># Mathematics</a>
+          
+            <a href="/tags/Probability/" rel="tag"># Probability</a>
           
         </div>
       
@@ -593,7 +595,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">15</span>
+                      
+                    
+                    <span class="site-state-item-count">16</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
@@ -646,7 +650,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">20</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
