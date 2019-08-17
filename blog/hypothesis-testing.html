@@ -109,7 +109,7 @@
 
 
   <meta name="description" content="看文章是每次遇到假设检验方面的内容老是犯迷糊，导致每次都需要重新翻书本。所有我决定干脆把假设检验想管的内容做一次系统性的整理。 引例某车间用一台包装机包装葡萄糖.袋装糖的净重是一个随机变量,它服从正态分布当机器正常时,其均值为0.5kg,标准差为0.015kg,某日开工后为检验包装机是否正常,随机地抽取它所包装的糖9袋称得净重为(kg)$$0.497, 0.506, 0.518, 0.524, 0">
-<meta name="keywords" content="Math,Basic">
+<meta name="keywords" content="Mathematics,Statistics">
 <meta property="og:type" content="article">
 <meta property="og:title" content="假设检验">
 <meta property="og:url" content="http://weirping.coding.me/blog/hypothesis-testing.html">
@@ -118,7 +118,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://weirping.coding.me/blog/hypothesis-testing/normal-dist.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/hypothesis-testing/right-test.jpg">
-<meta property="og:updated_time" content="2018-12-19T11:03:50.000Z">
+<meta property="og:updated_time" content="2019-08-17T15:04:17.066Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="假设检验">
 <meta name="twitter:description" content="看文章是每次遇到假设检验方面的内容老是犯迷糊，导致每次都需要重新翻书本。所有我决定干脆把假设检验想管的内容做一次系统性的整理。 引例某车间用一台包装机包装葡萄糖.袋装糖的净重是一个随机变量,它服从正态分布当机器正常时,其均值为0.5kg,标准差为0.015kg,某日开工后为检验包装机是否正常,随机地抽取它所包装的糖9袋称得净重为(kg)$$0.497, 0.506, 0.518, 0.524, 0">
@@ -391,7 +391,7 @@
                 <span class="post-meta-item-text">In</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Math/" itemprop="url" rel="index"><span itemprop="name">Math</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Mathematics/" itemprop="url" rel="index"><span itemprop="name">Mathematics</span></a></span>
 
                 
                 
@@ -432,7 +432,7 @@
 <p>当检验统计量取某个区域$C$中的值时, 我们拒绝原假设 $H_0$, 则称区域$C$为<strong>拒绝域</strong>， 反之则为<strong>接受域</strong>。 拒绝域的边界点称为<strong>临界点</strong>。此处的$k$ 即是临界点。</p>
 <h1 id="假设检验"><a href="#假设检验" class="headerlink" title="假设检验"></a>假设检验</h1><h2 id="两类错误"><a href="#两类错误" class="headerlink" title="两类错误"></a>两类错误</h2><p>由于检验法则是根据样本作出的, 总有可能作出错误的决策。 在假设 $H_0$ 实际上为真时,我们可能犯拒绝 $H_0$ 的错误,称这类“弃真”的错误为第I类错误. 又当 $H_0$ 实际上不真时, 我们也有可能接受 $H_0$ 称这类“取伪”的错误为第Ⅱ类错。</p>
 <p>一般来说,当样本容量固定时,若减少犯一类错误的概率, 则犯另一类错误的概率往往增大. 若要使犯两类错误的概率都减小,除非增加样本容量. </p>
-<p>在给定样本容量的情况下, 我们总是控制犯第I类错误的概率, 使它不大于 $\alpha​$,  $\alpha​$的大小视具体情况而定,通常取0.1, 0.05, 0.01, 0.005等值.  $\alpha​$ 即为 <strong>显著性水平</strong>。</p>
+<p>在给定样本容量的情况下, 我们总是控制犯第I类错误的概率, 使它不大于 $\alpha$,  $\alpha$的大小视具体情况而定,通常取0.1, 0.05, 0.01, 0.005等值.  $\alpha$ 即为 <strong>显著性水平</strong>。</p>
 <p>这种只对犯第I类错误的概率加以控制,而不考虑犯第Ⅱ类错误的概率的检验, 称<strong>显著性检验</strong> 。</p>
 <h2 id="引例求解"><a href="#引例求解" class="headerlink" title="引例求解"></a>引例求解</h2><p>此例中 犯第一类错误的概率为 $P(\text{当}H_0 \text{为真时拒绝}H_0)$  , 使得犯这一类错误的概率不超过 显著性水平 $\alpha$ 。<br>$$<br>P(\text{当}H_0 \text{为真时拒绝}H_0) = P_{\mu \in H_0}(\frac{ | \bar x - \mu_0 | }{\sigma / \sqrt n} \ge k ) \le \alpha<br>$$<br>其中:  $P_{\mu \in H_0}(.)$ 表示 $\mu$ 取 $H_0$ 规定的值时的事件， 即$H_0$ 为真时。此时, $z = \frac{\bar X - \mu_0}{\sigma / \sqrt n} \sim N(0, 1)$ . 由标准正太分布的分位点得<br>$$<br>k = z_{\alpha/2}<br>$$<br>分位点与显著行水平的关系如下：</p>
 <p><img src="hypothesis-testing/normal-dist.png" alt></p>
@@ -503,9 +503,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Math/" rel="tag"># Math</a>
+            <a href="/tags/Mathematics/" rel="tag"># Mathematics</a>
           
-            <a href="/tags/Basic/" rel="tag"># Basic</a>
+            <a href="/tags/Statistics/" rel="tag"># Statistics</a>
           
         </div>
       
