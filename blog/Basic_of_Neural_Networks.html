@@ -109,7 +109,7 @@
 
 
   <meta name="description" content="虽然学习神经网络很长时间了，但是也经常遇到问题的时候产生混乱，本次计算做一个神经网络的专题，将我看到的关于神经网络的东西按照我自己的学习和理解习惯整理下来。 本文是这个专题的第一章，介绍基本的神经网络中知识。并在最后整理了一下神经网络的设计中的几个问题，以后会逐一学习。 1 对一个神经元(neuron)建模人工神经网络一开始是用来对生物神经系统进行建模的，后来发现它在机器学习任务中能够获得比较好的">
-<meta name="keywords" content="Machine Learning,Neural Network">
+<meta name="keywords" content="Neural Networks,Basic">
 <meta property="og:type" content="article">
 <meta property="og:title" content="神经网络基础">
 <meta property="og:url" content="http://weirping.coding.me/blog/Basic_of_Neural_Networks.html">
@@ -121,7 +121,7 @@
 <meta property="og:image" content="http://weirping.coding.me/blog/Basic_of_Neural_Networks/muliti_layer_forward_networks.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Basic_of_Neural_Networks/three_layers_networks.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Basic_of_Neural_Networks/backpropagation.png">
-<meta property="og:updated_time" content="2018-01-15T15:52:28.000Z">
+<meta property="og:updated_time" content="2019-08-22T15:20:49.037Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="神经网络基础">
 <meta name="twitter:description" content="虽然学习神经网络很长时间了，但是也经常遇到问题的时候产生混乱，本次计算做一个神经网络的专题，将我看到的关于神经网络的东西按照我自己的学习和理解习惯整理下来。 本文是这个专题的第一章，介绍基本的神经网络中知识。并在最后整理了一下神经网络的设计中的几个问题，以后会逐一学习。 1 对一个神经元(neuron)建模人工神经网络一开始是用来对生物神经系统进行建模的，后来发现它在机器学习任务中能够获得比较好的">
@@ -394,7 +394,7 @@
                 <span class="post-meta-item-text">In</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Neural-Network/" itemprop="url" rel="index"><span itemprop="name">Neural Network</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Neural-Networks/" itemprop="url" rel="index"><span itemprop="name">Neural Networks</span></a></span>
 
                 
                 
@@ -488,7 +488,7 @@
 <p>下面按照backpropagation来计算下图中的$ \frac{\partial E}{\partial w_{ji}}$ ，以下所有推到都是按照随机梯度下降法，所以只需要求与第n个样本相关的梯度，故省略n：</p>
 <p><img src="Basic_of_Neural_Networks/backpropagation.png" alt="backpropagation"></p>
 <blockquote>
-<p>上图中有做到右依次为输入层(以$i$为, 共$I$个)、隐藏层(以$j$为下标, 共$J$个节点)、输出层(以$k$为下标, 共$K$个节点)。</p>
+<p>上图中由左到右依次为输入层(以$i$为下标, 共$I$个节点)、隐藏层(以$j$为下标, 共$J$个节点)、输出层(以$k$为下标, 共$K$个节点)。</p>
 <p>对于每个节点：字母$a$表示激活因子，如：$a_j = \sum_{i=0}^I w_{ji}z_i$ ,$a_k = \sum_{j=0}^J w_{kj}z_j$</p>
 <p>隐藏层的激活函数为$h$ ,  输出层的激活函数为identity, </p>
 <p>字母$z$ 表示节点输出值，如: $z_j = h(a_j)$ ,$z_k = a_k$ </p>
@@ -498,10 +498,10 @@
 <p>其中</p>
 <p>$$<br>\frac{\partial a_j}{\partial w_{ji}} =z_i<br>$$</p>
 <p>$$<br>\delta_j \equiv \frac{\partial E}{\partial a_j}<br>$$</p>
-<p><strong>$\delta_j$表示$j$这个节点对最终的误差需要负多少责任。</strong>输出层节点$k$ 的误差是(输出层的激活函数为identity, $\hat y_k = z_k = a_k$ ):<br>$$<br>\delta_k =\frac {\partial}{\partial a_k}\frac12(z_k - t_k)^2 = z_k - t_k<br>$$<br>后向传播算法可以理解为，误差$\delta$从输层向输入成方向传播的过程，所以也叫做 <strong>Error Backpropagation</strong> 。</p>
+<p><strong>$\delta_j$表示$j$这个节点对最终的误差需要负多少责任。</strong>输出层节点$k$ 的误差是(输出层的激活函数为identity, $\hat y_k = z_k = a_k$ ):<br>$$<br>\delta_k =\frac {\partial}{\partial a_k}\frac12(z_k - t_k)^2 = z_k - t_k<br>$$<br>后向传播算法可以理解为，误差$\delta$从输出层向输入层方向传播的过程，所以也叫做 <strong>Error Backpropagation</strong> 。</p>
 <p>下面只需要推导$\delta_j$ , 利用链式法则，<br>$$<br>\begin{aligned}<br>\delta_j &amp; \equiv \frac{\partial E}{\partial a_j} \\<br>&amp;= \sum_{k=1}^K \frac {\partial E}{\partial a_k} \frac{\partial a_k}{\partial a_j} \\<br>&amp; = h’(a_j) \sum_{k=1}^K w_{kj} \delta_k<br>\end{aligned}<br>$$</p>
 <p>其中<br>$$<br>\frac {\partial E}{\partial a_k} = \delta_k<br>$$</p>
-<p>$$<br>\begin{aligned}<br>\frac{\partial a_k}{\partial a_j} &amp; = \frac{\partial }{\partial a_j}(\sum_{j=0}^Jz_j w_{kj}) \\<br>&amp;=\frac{\partial }{\partial a_j}(\sum_{j=0}^J h(a_j) w_{kj}) \\<br>&amp;= h’(a_j) \sum_{k=1}^K w_{kj}<br>\end{aligned}<br>$$<br><strong>后向传播的目标是为了计算偏导数$\frac{\partial E}{\partial w_{ji}}$ ，方法是误差$\delta$ 沿着神经网络向后传播。</strong></p>
+<p>$$<br>\begin{aligned}<br>\frac{\partial a_k}{\partial a_j} &amp; = \frac{\partial }{\partial a_j}(\sum_{j=0}^Jz_j w_{kj}) \\<br>&amp;=\frac{\partial }{\partial a_j}(\sum_{j=0}^J h(a_j) w_{kj}) \\<br>&amp;= h’(a_j) w_{kj}<br>\end{aligned}<br>$$<br><strong>后向传播的目标是为了计算偏导数$\frac{\partial E}{\partial w_{ji}}$ ，方法是误差$\delta$ 沿着神经网络向后传播。</strong></p>
 <p>PRLM 中5.3.1 节将后向传播的流程总结如下</p>
 <blockquote>
 <ol>
@@ -542,9 +542,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+            <a href="/tags/Neural-Networks/" rel="tag"># Neural Networks</a>
           
-            <a href="/tags/Neural-Network/" rel="tag"># Neural Network</a>
+            <a href="/tags/Basic/" rel="tag"># Basic</a>
           
         </div>
       
@@ -639,7 +639,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">57</span>
+                    <span class="site-state-item-count">60</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -680,9 +680,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-count">14</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
@@ -743,7 +741,29 @@
                     
                       
                     
-                    <span class="site-state-item-count">24</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">35</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>

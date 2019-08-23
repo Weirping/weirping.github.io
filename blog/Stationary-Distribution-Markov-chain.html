@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="马尔科夫链假设某一时刻状态转移的概率只依赖于它的前一个状态。这样做可以大大简化模型的复杂度，因此马尔科夫链在很多序列模型中得到广泛的应用，比如循环神经网络RNN，隐式马尔科夫模型HMM等.  马尔科夫链分布提供了使马尔科夫链和初始状态无关的一个办法，并刻画了马尔科夫链在长时间下的极限行为和平均行为。 马尔科夫过程/马尔科夫链 是一种随机过程, 本文首先简单回顾随机过程中的平稳随机过程, 然后引出马">
+<meta name="keywords" content="Mathematics,Information Theory">
+<meta property="og:type" content="article">
+<meta property="og:title" content="马尔科夫链及其平稳分布">
+<meta property="og:url" content="http://weirping.coding.me/blog/Stationary-Distribution-Markov-chain.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="马尔科夫链假设某一时刻状态转移的概率只依赖于它的前一个状态。这样做可以大大简化模型的复杂度，因此马尔科夫链在很多序列模型中得到广泛的应用，比如循环神经网络RNN，隐式马尔科夫模型HMM等.  马尔科夫链分布提供了使马尔科夫链和初始状态无关的一个办法，并刻画了马尔科夫链在长时间下的极限行为和平均行为。 马尔科夫过程/马尔科夫链 是一种随机过程, 本文首先简单回顾随机过程中的平稳随机过程, 然后引出马">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/Stationary-Distribution-Markov-chain/stationary-example.png">
+<meta property="og:updated_time" content="2019-08-23T15:41:09.101Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="马尔科夫链及其平稳分布">
+<meta name="twitter:description" content="马尔科夫链假设某一时刻状态转移的概率只依赖于它的前一个状态。这样做可以大大简化模型的复杂度，因此马尔科夫链在很多序列模型中得到广泛的应用，比如循环神经网络RNN，隐式马尔科夫模型HMM等.  马尔科夫链分布提供了使马尔科夫链和初始状态无关的一个办法，并刻画了马尔科夫链在长时间下的极限行为和平均行为。 马尔科夫过程/马尔科夫链 是一种随机过程, 本文首先简单回顾随机过程中的平稳随机过程, 然后引出马">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/Stationary-Distribution-Markov-chain/stationary-example.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/Stationary-Distribution-Markov-chain.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>马尔科夫链及其平稳分布 | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/Stationary-Distribution-Markov-chain.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">马尔科夫链及其平稳分布
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-11-09 22:22:22" itemprop="dateCreated datePublished" datetime="2018-11-09T22:22:22+08:00">2018-11-09</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Mathematics/" itemprop="url" rel="index"><span itemprop="name">Mathematics</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>马尔科夫链假设某一时刻状态转移的概率只依赖于它的前一个状态。这样做可以大大简化模型的复杂度，因此马尔科夫链在很多序列模型中得到广泛的应用，比如循环神经网络RNN，隐式马尔科夫模型HMM等. </p>
+<p>马尔科夫链分布提供了使马尔科夫链和初始状态无关的一个办法，并刻画了马尔科夫链在长时间下的极限行为和平均行为。</p>
+<p>马尔科夫过程/马尔科夫链 是一种随机过程, 本文首先简单回顾随机过程中的平稳随机过程, 然后引出马尔科夫链及其平稳分布.</p>
+<p>变量说明:</p>
+<ul>
+<li>$X$ : 随机变量;</li>
+<li>$x$ : 随机变量的值;</li>
+<li>$\chi$ : 随机变量所有可能取值的集合. $ \forall x \in \chi$ . 对于马尔科夫链来说 $\chi$ 为其状态空间. </li>
+</ul>
+<h1 id="平稳随机过程"><a href="#平稳随机过程" class="headerlink" title="平稳随机过程"></a>平稳随机过程</h1><p><strong>随机过程</strong>: 设有一个过程$\{X_i\}$, 若对于每一个固定的时刻 $i$ , $X_i$ 是一个随机变量, 则称 $\{X_i\}$ 为随机过程. </p>
+<p>随机过程是一组随时间变化的随机变量序列, 刻画一个过程需要知道所有有限的联合概率密度函数:<br>$$<br>\begin {align}<br>&amp; P(X_1 = x_1, X_2=x_2, \dots, X_n=x_n) = P(x_1, x_2, \dots, x_n) \\<br>&amp; (x_1, x_2, \dots, x_n) \in \chi ^n<br>\end {align}<br>$$<br><strong>平稳随机过程</strong>: 如果随机变量序列的任何有限子集的 <em>*联合分布</em> 关于时间下标的位移 <em>不变</em> , 即 对于每个 $n$ 和 位移$l$, 以及任意的 $ x_1, x_2, \dots, x_n \in \chi $ 有:<br>$$<br>\begin {align}<br>P(X_1 = x_1, X_2=x_2, \dots, X_n=x_n) = P(X_{1+l} = x_1, X_{2+l}=x_2, \dots, X_{n+l}=x_n) \\<br>\end {align}<br>$$<br>则称该随机过程是平稳的(Stationary). </p>
+<h1 id="马尔科夫过程"><a href="#马尔科夫过程" class="headerlink" title="马尔科夫过程"></a>马尔科夫过程</h1><p>离散随机过程 $\{X_i\}$ 满足<br>$$<br>P(X_n=x_n|X_{n-1}=x_{n-1},…,X_1=x_1) = P(X_n=x_n|X_{n-1}=x_{n-1})<br>$$<br>则称其为马尔可夫链/马尔科夫过程. </p>
+<p>既然某一时刻状态转移的概率只依赖于它的前一个状态，那么我们只要能求出系统中任意两个状态之间的转换概率，这个马尔科夫链的模型就定了。</p>
+<p>马尔科夫链:</p>
+<ul>
+<li>是一种随机事件序列;</li>
+<li>认为未来的取值只与当前取值有关，与历史取值无关</li>
+<li>是一种离散型的随机过程。</li>
+</ul>
+<p><strong>时间不变的马尔科夫过程</strong> : 如果条件概率 $P(x_{n+1} \mid x_n)$ 不依赖与 $n$, 即对 $n=1,2, \dots$ 有:<br>$$<br>P(X_{n+1}= b \mid X_n = a) = P(X_2=b \mid X_1=a)<br>$$<br>则成马尔科夫链是 时间不变的. </p>
+<p>时间不变的马尔科夫链中, 从一个状态变道另一个状态的的概率与下标(时间)无关. 一个时间不变的马尔科夫链完全可以由其初始状态和概率转移矩阵表示.</p>
+<p>实际上我们平时所说的马尔科夫链 一般都是 时间不变的. 如在HMM中用到的马尔科夫链.</p>
+<p><strong>状态空间</strong>: 马尔科夫链中所有可能的状态值的集合, 记为 $\chi$ . </p>
+<p>如果马尔科夫链可以从任意状态经过有限步转移到另一任意状态, 且其转移概率为正, 则成词马尔科夫链是不可约的.  即<strong>状态空间中任意两个状态都是相互连通的</strong>. 这里的连通可以不是直接相连，只要能够通过有限次转移到达即可。比如对于a, b, c状态，存在a-&gt;b, b-&gt;c，则我们认为a到c是可连通的。</p>
+<p>马尔科夫链中如果从一个状态转移到他自身的不同路径长度的最大公因子为1, 则称马尔科夫链是<strong>非周期的</strong>. 我们处理的问题基本上都是非周期性的.</p>
+<h1 id="平稳分布-平稳马尔科夫过程"><a href="#平稳分布-平稳马尔科夫过程" class="headerlink" title="平稳分布 / 平稳马尔科夫过程"></a>平稳分布 / 平稳马尔科夫过程</h1><p>马尔科夫链完全可以由其初始状态和概率转移矩阵表示. 令向量$\pi(j)$ 表示序列中某个随机变量正好取第 $j$ 个状态的概率, $P$ 表示状态转移矩阵, $P_{ij}$表示从第$i$个状态转移到第$j$个状态的概率. note: 此处的 $i$ 和 $j$ 表示的是状态空间中状态的序号, 而不是随机过程中的时间序号.</p>
+<p>如果一个<strong>非周期</strong>的马尔科夫链有状态转移矩阵$P$, 并且它的任何两个状态是<strong>连通</strong>的，那么$\lim_{n \to \infty} P_{ij}^n $与$i$无关，我们有：</p>
+<p>结论一:</p>
+<p>$$<br>\lim_{n \to \infty}P_{ij}^n = \pi (j)<br>$$</p>
+<p>结论二: </p>
+<p>假设状态空间中共有 $K$ 个状态($K$ 可以是有限的，也可以是无限的), 状态转移矩阵经过 $n$ 自乘以次后的方阵中各元素的值只与列号有关,  同列中的元素的值相同.<br>$$<br>\lim_{n \to \infty}P^n =<br>\begin {Bmatrix}<br>\pi(1) &amp; \pi(2) &amp; \dots &amp; \pi(j) &amp; \dots&amp; \pi(K) \\<br>\pi(1) &amp; \pi(2) &amp; \dots&amp; \pi(j) &amp; \dots&amp; \pi(K) \\<br>\vdots &amp; \vdots &amp; \ddots &amp; \vdots &amp;  &amp; \vdots &amp;  \\<br>\pi(1) &amp; \pi(2) &amp; \dots&amp; \pi(j) &amp; \dots &amp; \pi(K) \\<br>\vdots &amp; \vdots &amp;  &amp; \vdots &amp; \ddots &amp; \vdots &amp;  \\<br>\pi(1) &amp; \pi(2) &amp; \dots&amp; \pi(j) &amp; \dots&amp; \pi(K) \\<br>\end{Bmatrix}<br>$$</p>
+<p>结论三: </p>
+<p>$$<br>\pi (j) = \sum_{i=0}^{K} \pi(i)P_{ij}<br>$$<br>note: $K$ 可以是有限的，也可以是无限的. 一般文章中使用 $\infty$, 为了避免将此处的$i$误解为马尔科夫链中随机变量的序号, 我使用了$K$来代替. </p>
+<p>结论四: </p>
+<p>若马尔科夫链是 <strong>非周期的</strong> , 并且其何两个状态是<strong>连通的</strong> , 则该马尔科夫链具有唯一.<br>即: $\pi$是方程$\pi P = \pi$的唯一非负解.</p>
+<p>其中：<br>$$<br>\begin {align}<br>&amp; \pi=[\pi(1),\pi(2),\dots ,\pi(j), \dots \pi(K)] \ <br>&amp; \sum_{i=0}^{K} \pi(i)=1 \\<br>&amp; K \le \infty \\<br>\end {align}<br>$$</p>
+<p>再次强调: $n$ 表示一个马尔科夫链中第 $n$ 个随机变量的序号.  $i$ 和 $j$ 是状态序号. </p>
+<p>上面的性质中需要注意的有：</p>
+<ol>
+<li>非周期的马尔科夫链：这个主要是指马尔科夫链的状态转化不是循环的，如果是循环的则永远不会收敛。我们遇到的马尔科夫链一般都是非周期性的。</li>
+<li>任何两个状态是连通的：这个指的是从任意一个状态可以通过有限步到达其他的任意一个状态。</li>
+<li>马尔科夫链的状态数可以是有限的，也可以是无限的。因此可以用于连续概率分布和离散概率分布。</li>
+<li>$\pi$通常称为马尔科夫链的平稳分布。</li>
+</ol>
+<h1 id="平稳马尔科夫过程的例子"><a href="#平稳马尔科夫过程的例子" class="headerlink" title="平稳马尔科夫过程的例子"></a>平稳马尔科夫过程的例子</h1><p><img src="Stationary-Distribution-Markov-chain/stationary-example.png" alt></p>
+<p>　这个马尔科夫链是表示股市模型的，共有三种状态：牛市（Bull market）, 熊市（Bear market）和横盘（Stagnant market）。每一个状态都以一定的概率转化到下一个状态。比如，牛市以0.025的概率转化到横盘的状态。这个状态概率转化图可以以矩阵的形式表示。如果我们定义矩阵阵$P$, 某一位置$P(i,j)$的值为$P(j \mid i)$, 即从状态 $i$ 转化到状态 $j$ 的概率，并定义牛市为状态0， 熊市为状态1, 横盘为状态2. 这样我们得到了马尔科夫链模型的状态转移矩阵为：<br>$$<br>P =<br>\begin {Bmatrix}<br>0.9 &amp; 0.075 &amp; 0.025 \\<br>0.15 &amp; 0.8 &amp; 0.05 \\<br>0.25 &amp; 0.25 &amp; 0.5 \\<br>\end {Bmatrix}<br>$$<br>假设我们当前股市的概率分布为：$[0.3,0.4,0.3]$, 即30%概率的牛市，40%概率的熊盘与30%的横盘。然后这个状态作为序列概率分布的初始状态$v_{t0}$，将其带入这个状态转移矩阵计算$v_{t1},v_{t2},v_{t3} \dots$ 的状态。代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">matrix = np.matrix([[<span class="number">0.9</span>,<span class="number">0.075</span>,<span class="number">0.025</span>],</span><br><span class="line">                    [<span class="number">0.15</span>,<span class="number">0.8</span>,<span class="number">0.05</span>],</span><br><span class="line">                    [<span class="number">0.25</span>,<span class="number">0.25</span>,<span class="number">0.5</span>]], dtype=float)</span><br><span class="line">vector = np.matrix([[<span class="number">0.3</span>,<span class="number">0.4</span>,<span class="number">0.3</span>]], dtype=float)</span><br><span class="line"><span class="keyword">print</span> <span class="string">"round: %d \t"</span> % (<span class="number">0</span>), vector</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">100</span>):</span><br><span class="line">    vector = vector * matrix</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"round: %d \t"</span> % (i+<span class="number">1</span>), vector</span><br></pre></td></tr></table></figure>
+<p>部分输出结果如下:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">round: 0 	[[0.3 0.4 0.3]]</span><br><span class="line">round: 1 	[[0.405  0.4175 0.1775]]</span><br><span class="line">round: 2 	[[0.4715  0.40875 0.11975]]</span><br><span class="line">round: 3 	[[0.5156 0.3923 0.0921]]</span><br><span class="line">round: 4 	[[0.54591  0.375535 0.078555]]</span><br><span class="line">round: 5 	[[0.567288 0.36101  0.071702]]</span><br><span class="line">...</span><br><span class="line">round: 51 	[[0.62499994 0.31250005 0.06250001]]</span><br><span class="line">round: 52 	[[0.62499996 0.31250004 0.0625    ]]</span><br><span class="line">round: 53 	[[0.62499997 0.31250003 0.0625    ]]</span><br><span class="line">round: 54 	[[0.62499998 0.31250002 0.0625    ]]</span><br><span class="line">round: 55 	[[0.62499998 0.31250002 0.0625    ]]</span><br><span class="line">...</span><br><span class="line">round: 60 	[[0.625  0.3125 0.0625]]</span><br><span class="line">round: 61 	[[0.625  0.3125 0.0625]]</span><br><span class="line">round: 62 	[[0.625  0.3125 0.0625]]</span><br><span class="line">round: 63 	[[0.625  0.3125 0.0625]]</span><br><span class="line">round: 64 	[[0.625  0.3125 0.0625]]</span><br><span class="line">round: 65 	[[0.625  0.3125 0.0625]]</span><br></pre></td></tr></table></figure>
+<p>可以发现，从第60轮开始，我们的状态概率分布就不变了，一直保持在[0.625   0.3125  0.0625]，即62.5%的牛市，31.25%的熊市与6.25%的横盘。那么这个是巧合吗？</p>
+<p>我们现在换一个初始概率分布试一试，现在我们用$[0.7,0.1,0.2]$作为初始概率分布，然后这个状态作为序列概率分布的初始状态$v_{t0}$，将其带入这个状态转移矩阵计算$v_{t1},v_{t2},v_{t3} \dots$的状态。结果如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">round: 0 	[[0.7 0.1 0.2]]</span><br><span class="line">round: 1 	[[0.695  0.1825 0.1225]]</span><br><span class="line">round: 2 	[[0.6835  0.22875 0.08775]]</span><br><span class="line">round: 3 	[[0.6714 0.2562 0.0724]]</span><br><span class="line">round: 4 	[[0.66079  0.273415 0.065795]]</span><br><span class="line">round: 5 	[[0.652172 0.28474  0.063088]]</span><br><span class="line">...</span><br><span class="line">round: 56 	[[0.62500001 0.31249999 0.0625    ]]</span><br><span class="line">round: 57 	[[0.625  0.3125 0.0625]]</span><br><span class="line">round: 58 	[[0.625  0.3125 0.0625]]</span><br><span class="line">round: 59 	[[0.625  0.3125 0.0625]]</span><br><span class="line">round: 60 	[[0.625  0.3125 0.0625]]</span><br></pre></td></tr></table></figure>
+<p>尽管这次我们采用了不同初始概率分布，最终状态的概率分布趋于同一个稳定的概率分布$[0.625   0.3125  0.0625]$， 也就是说<strong>马尔科夫链模型的状态收敛到的稳定概率分布与我们的初始状态概率分布无关</strong>。如果我们得到了这个稳定概率分布对应的马尔科夫链模型的状态转移矩阵，则我们可以用任意的概率分布样本开始，带入马尔科夫链模型的状态转移矩阵，这样经过一些序列的转换，最终就可以得到符合对应稳定概率分布的样本。这个性质不光对离散状态成立，连续状态时也成立。</p>
+<p>对于一个确定的状态转移矩阵 $P$ ，它的 $n$ 次幂 $P^n$ 在当 $n$ 足够大的时候是确定的的值. </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">matrix0 = np.matrix([[<span class="number">0.9</span>,<span class="number">0.075</span>,<span class="number">0.025</span>],</span><br><span class="line">                     [<span class="number">0.15</span>,<span class="number">0.8</span>,<span class="number">0.05</span>],</span><br><span class="line">                     [<span class="number">0.25</span>,<span class="number">0.25</span>,<span class="number">0.5</span>]], dtype=float)</span><br><span class="line">matrix = np.matrix(matrix0)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">100</span>):</span><br><span class="line">    matrix = np.matmul(matrix, matrix0)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"round: %d \n"</span> % (i+<span class="number">1</span>), matrix</span><br></pre></td></tr></table></figure>
+<p>部分结果如下:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">round: 1 </span><br><span class="line">[[0.8275  0.13375 0.03875]</span><br><span class="line"> [0.2675  0.66375 0.06875]</span><br><span class="line"> [0.3875  0.34375 0.26875]]</span><br><span class="line">round: 2 </span><br><span class="line">[[0.7745  0.17875 0.04675]</span><br><span class="line"> [0.3575  0.56825 0.07425]</span><br><span class="line"> [0.4675  0.37125 0.16125]]</span><br><span class="line">...</span><br><span class="line">round: 61 </span><br><span class="line">[[0.625      0.3125     0.0625    ]</span><br><span class="line"> [0.62499999 0.31250001 0.0625    ]</span><br><span class="line"> [0.625      0.3125     0.0625    ]]</span><br><span class="line">round: 62 </span><br><span class="line">[[0.625  0.3125 0.0625]</span><br><span class="line"> [0.625  0.3125 0.0625]</span><br><span class="line"> [0.625  0.3125 0.0625]]</span><br><span class="line">round: 63 </span><br><span class="line">[[0.625  0.3125 0.0625]</span><br><span class="line"> [0.625  0.3125 0.0625]</span><br><span class="line"> [0.625  0.3125 0.0625]]</span><br><span class="line">round: 64 </span><br><span class="line">[[0.625  0.3125 0.0625]</span><br><span class="line"> [0.625  0.3125 0.0625]</span><br><span class="line"> [0.625  0.3125 0.0625]]</span><br><span class="line">round: 65 </span><br><span class="line">[[0.625  0.3125 0.0625]</span><br><span class="line"> [0.625  0.3125 0.0625]</span><br><span class="line"> [0.625  0.3125 0.0625]]</span><br></pre></td></tr></table></figure>
+<p>可以发现，在 $n \le 2$ 以后，$P^n$ 的值稳定不再变化，而且每一行都为$[0.625   0.3125  0.0625]$，这和我们前面的稳定分布是一致的。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://www.cnblogs.com/pinard/p/6632399.html" target="_blank" rel="noopener">MCMC(二)马尔科夫链</a></p>
+<p><a href="https://www.cnblogs.com/coshaho/p/9740937.html" target="_blank" rel="noopener">马尔科夫链及其平稳状态</a></p>
+<p>信息论基础</p>
+<p>​    </p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Mathematics/" rel="tag"># Mathematics</a>
+          
+            <a href="/tags/Information-Theory/" rel="tag"># Information Theory</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/n-gram-model.html" rel="next" title="n元模型">
+                <i class="fa fa-chevron-left"></i> n元模型
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/Maximum-Entropy-Model.html" rel="prev" title="最大熵模型">
+                最大熵模型 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">60</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">35</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#平稳随机过程"><span class="nav-number">1.</span> <span class="nav-text">平稳随机过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#马尔科夫过程"><span class="nav-number">2.</span> <span class="nav-text">马尔科夫过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#平稳分布-平稳马尔科夫过程"><span class="nav-number">3.</span> <span class="nav-text">平稳分布 / 平稳马尔科夫过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#平稳马尔科夫过程的例子"><span class="nav-number">4.</span> <span class="nav-text">平稳马尔科夫过程的例子</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

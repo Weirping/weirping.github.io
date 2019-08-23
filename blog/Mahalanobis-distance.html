@@ -109,7 +109,7 @@
 
 
   <meta name="description" content="本文曾发表在博客园中，重新修订发表于此。 马氏距离就是用于度量两个坐标点之间的距离关系，表示数据的协方差距离。与尺度无关的(scale-invariant)，即独立于测量尺度。 基本思想（intuition）如下图的过程（以两个维度作为例子），此例的数据重心为原点，$P1$,$P2$到原点的欧氏距离相同，但点$P2$在$y$轴上相对原点有较大的变异，而点$P1$在$x$轴上相对原点有较小的变异。所">
-<meta name="keywords" content="Math">
+<meta name="keywords" content="Mathematics,Similarity and DisSimilarity">
 <meta property="og:type" content="article">
 <meta property="og:title" content="马氏距离与其推导">
 <meta property="og:url" content="http://weirping.coding.me/blog/Mahalanobis-distance.html">
@@ -120,7 +120,7 @@
 <meta property="og:image" content="http://weirping.coding.me/blog/Mahalanobis-distance/p2.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Mahalanobis-distance/p3.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Mahalanobis-distance/p4.png">
-<meta property="og:updated_time" content="2018-09-05T07:53:02.000Z">
+<meta property="og:updated_time" content="2019-08-22T15:57:03.790Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="马氏距离与其推导">
 <meta name="twitter:description" content="本文曾发表在博客园中，重新修订发表于此。 马氏距离就是用于度量两个坐标点之间的距离关系，表示数据的协方差距离。与尺度无关的(scale-invariant)，即独立于测量尺度。 基本思想（intuition）如下图的过程（以两个维度作为例子），此例的数据重心为原点，$P1$,$P2$到原点的欧氏距离相同，但点$P2$在$y$轴上相对原点有较大的变异，而点$P1$在$x$轴上相对原点有较小的变异。所">
@@ -393,7 +393,7 @@
                 <span class="post-meta-item-text">In</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Math/" itemprop="url" rel="index"><span itemprop="name">Math</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Mathematics/" itemprop="url" rel="index"><span itemprop="name">Mathematics</span></a></span>
 
                 
                 
@@ -452,7 +452,7 @@
 <p>其中 $\sqrt{\lambda_i}$ 就是第$i$个维度的方差。 </p>
 <p>由于$\bf \Sigma_{\bf X}$是实对角阵，所以$\bf U$是一个正交矩阵 $\bf U^{\bf T} = \bf U^{-1}$。</p>
 <p>以上是准备知识，下面推导一个样本点$\bf{x} = \left( x_1,x_2 \cdots x_m \right)$到重心$\bf{\mu }_{\bf X} = \left( \mu _{X1},\mu _{X2} \cdots \mu _{Xm} \right)$的马氏距离。等价于求点 $\bf{f} = (f_1,f_2 \cdots f_m)$ <strong>压缩后的坐标</strong>值到数据重心压缩后的坐标值 $\bf{\mu }_\bf{F} = \left( \mu _{F1},\mu _{F2} \cdots \mu _{Fm} \right)$的欧式距离。</p>
-<p>$$<br>\begin {aligned}<br>&amp; d^2(\bf{f},\bf{\mu }_{\bf{F}} ) = (\frac {f_1 - \mu_{F1}}{\sqrt{\lambda_1}})^2 + (\frac{f_2 - \mu_{F2}}{\sqrt{\lambda_2}})^2 +  \cdots  + (\frac{f_m - \mu_{Fm}}{\sqrt{\lambda_m}})^2  \ <br>&amp; = ( f_1 - \mu_{F1},{f_2} - \mu_{F2} \cdots f_m - \mu_{Fm} )<br>\left (<br>    \begin  {matrix}<br>        {\frac 1{\lambda_1}} &amp; {} &amp; {} &amp; {}    \ <br>        {} &amp; {\frac 1 {\lambda _2}} &amp; {} &amp; {}  \ <br>        {} &amp; {} &amp;  \ddots &amp; {}                 \ <br>        {} &amp; {} &amp; {} &amp; {\frac 1 {\lambda _m}}  \ <br>    \end {matrix}<br>\right)<br>\left(<br>    \begin {matrix}<br>        {f_1 - \mu_{F1}}  \ <br>        {f_2 - \mu_{F2}}  \ <br>        \vdots            \ <br>        {f_m - \mu_{Fm}}  \ <br>    \end {matrix}<br>\right)  \ <br>&amp; = (\bf{f} - \bf{\mu}_{\bf{F}})(\bf{U}\bf{\Sigma}_X \bf{U}^{\bf{T}})^{-1}(\bf{f} - \bf{\mu}_{\bf{F}})^T  \ <br>&amp;   \ <br>&amp; = (\bf{x} - \bf{\mu}_X)\bf{U}^T(\bf{U}\bf{\Sigma}_X \bf{U}^\bf{T})^{-1}\bf{U}(\bf{x} - \bf{\mu}_X )^T  \ <br>&amp;   \ <br>&amp; = (\bf{x} - \bf{\mu}_X )\bf{U}^T \bf{U}\bf{\Sigma}_X^{-1}\bf{U}^{\bf{T}}\bf{U}(\bf{x} - \bf{\mu}_X )^T  \ <br>&amp;   \ <br>&amp; = (\bf{x} - \bf{\mu }_X )\bf{\Sigma}_X^{-1}(\bf{x} - \bf{\mu }_X)^T \\<br>\end {aligned}<br>$$<br>这就是马氏距离的的计算公式了。</p>
+<p>$$<br>\begin {aligned}<br>&amp; d^2(\bf{f},\bf{\mu }_{\bf{F}} ) = (\frac {f_1 - \mu_{F1}}{\sqrt{\lambda_1}})^2 + (\frac{f_2 - \mu_{F2}}{\sqrt{\lambda_2}})^2 +  \cdots  + (\frac{f_m - \mu_{Fm}}{\sqrt{\lambda_m}})^2  \\<br>&amp; = ( f_1 - \mu_{F1},{f_2} - \mu_{F2} \cdots f_m - \mu_{Fm} )<br>\left (<br>    \begin  {matrix}<br>        {\frac 1{\lambda_1}} &amp; {} &amp; {} &amp; {}    \\<br>        {} &amp; {\frac 1 {\lambda _2}} &amp; {} &amp; {}  \\<br>        {} &amp; {} &amp;  \ddots &amp; {}                 \\<br>        {} &amp; {} &amp; {} &amp; {\frac 1 {\lambda _m}}  \\<br>    \end {matrix}<br>\right)<br>\left(<br>    \begin {matrix}<br>        {f_1 - \mu_{F1}}  \\<br>        {f_2 - \mu_{F2}}  \\<br>        \vdots            \\<br>        {f_m - \mu_{Fm}}  \\<br>    \end {matrix}<br>\right)  \\<br>&amp; = (\bf{f} - \bf{\mu}_{\bf{F}})(\bf{U}\bf{\Sigma}_X \bf{U}^{\bf{T}})^{-1}(\bf{f} - \bf{\mu}_{\bf{F}})^T  \\<br>&amp;   \\<br>&amp; = (\bf{x} - \bf{\mu}_X)\bf{U}^T(\bf{U}\bf{\Sigma}_X \bf{U}^\bf{T})^{-1}\bf{U}(\bf{x} - \bf{\mu}_X )^T  \\<br>&amp;   \\<br>&amp; = (\bf{x} - \bf{\mu}_X )\bf{U}^T \bf{U}\bf{\Sigma}_X^{-1}\bf{U}^{\bf{T}}\bf{U}(\bf{x} - \bf{\mu}_X )^T  \\<br>&amp;   \\<br>&amp; = (\bf{x} - \bf{\mu }_X )\bf{\Sigma}_X^{-1}(\bf{x} - \bf{\mu }_X)^T \\<br>\end {aligned}<br>$$<br>这就是马氏距离的的计算公式了。</p>
 <p>如果$\bf{x}$是列向量<br>$$<br>{d^2} = \left( \bf{x} - \bf{\mu }_X \right)^T\bf{\Sigma }_X^{-1}\left( \bf{x} - \bf{\mu }_X \right)<br>$$</p>
 <p>如果并把上文的重心$\bf{\mu }_{\bf{X}} = \left( \mu _{X1},\mu _{X2} \cdots \mu_{Xm} \right)$改为任意一个样本点$\bf{y}$，则可以得到$\bf{x}$和$\bf{y}$两个样本点之间的马氏距离公式为：<br>$$<br>d^2 = \left( \bf{x} - \bf{y} \right)^{\bf{T}}\bf{\Sigma }_{\bf{X}}^{-1}\left( \bf{x} - \bf{y} \right)<br>$$</p>
 <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p>细说马氏距离</p>
@@ -476,7 +476,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Math/" rel="tag"># Math</a>
+            <a href="/tags/Mathematics/" rel="tag"># Mathematics</a>
+          
+            <a href="/tags/Similarity-and-DisSimilarity/" rel="tag"># Similarity and DisSimilarity</a>
           
         </div>
       
@@ -571,7 +573,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">57</span>
+                    <span class="site-state-item-count">60</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -612,9 +614,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-count">14</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
@@ -675,7 +675,29 @@
                     
                       
                     
-                    <span class="site-state-item-count">24</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">35</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>

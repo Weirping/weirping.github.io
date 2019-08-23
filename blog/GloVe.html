@@ -109,7 +109,7 @@
 
 
   <meta name="description" content="1. 概述做自然语言处理的时候很多时候会用的Word Embedding，目前常用的方法是word2vec算法训练词向量。不过训练词向量的方法有很多，今天介绍GloVe算法。 GloVe：Global Vectors。 模型输入：语料库 corpus 模型输出：每个词的表示向量 2. 基本思想2.1. 背景知识要讲GloVe模型的思想方法，我们先介绍两个其他方法： 一个是基于奇异值分解（SVD）的">
-<meta name="keywords" content="Machine Learning,NLP">
+<meta name="keywords" content="Neural Networks,Embedding">
 <meta property="og:type" content="article">
 <meta property="og:title" content="GloVe">
 <meta property="og:url" content="http://weirping.coding.me/blog/GloVe.html">
@@ -118,7 +118,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://weirping.coding.me/blog/GloVe/Co-occurrence-probilities.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/GloVe/Weighting-function.png">
-<meta property="og:updated_time" content="2018-04-13T14:01:12.000Z">
+<meta property="og:updated_time" content="2019-08-22T15:21:18.441Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="GloVe">
 <meta name="twitter:description" content="1. 概述做自然语言处理的时候很多时候会用的Word Embedding，目前常用的方法是word2vec算法训练词向量。不过训练词向量的方法有很多，今天介绍GloVe算法。 GloVe：Global Vectors。 模型输入：语料库 corpus 模型输出：每个词的表示向量 2. 基本思想2.1. 背景知识要讲GloVe模型的思想方法，我们先介绍两个其他方法： 一个是基于奇异值分解（SVD）的">
@@ -391,7 +391,7 @@
                 <span class="post-meta-item-text">In</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/NLP/" itemprop="url" rel="index"><span itemprop="name">NLP</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Neural-Networks/" itemprop="url" rel="index"><span itemprop="name">Neural Networks</span></a></span>
 
                 
                 
@@ -514,9 +514,9 @@
 <li><p>上面的公式只是理想情况下，在实际实验中左右两边只能要求接近。从而就有了代价函数（cost function）<br>$$<br>J= \sum_{ik}(w_i^T w_k + b_i + b_k -logX_{ik})^2<br>$$</p>
 </li>
 <li><p>根据经验，如果两个词共同出现的次数越多，那么这两个词在代价函数中的影响就应该约大，所以可以根据两个词共同出现的次数设计一个权重项来对代价函数中的每一项进行加权：<br>$$<br>J= \sum_{ik}f(X_{ik})(w_i^T w_k + b_i + b_k -logX_{ik})^2<br>$$<br>模型认为权重函数$f$应该符合以下三个特点，1. $f(0)=0$ （如果两个词没有共同出现过，权重就是0）；2. $f(x)$必须是非减函数（两个词共同出现的次数多，反而权重变小了，违反了设置权重项的初衷）；3. $f(x)$对于较大的$x$不能取太大的值（就像是汉语中“的”这个字，在很多文章中都会出现很多次，但是其在文中的重要程度非常小）。综合这三条特点的$f(x)$定义为：<br>$$<br>f(x)=\left\{\begin{aligned} (\frac{x}{x_{max}})^\alpha &amp;,   if \;  x&lt;x_{max} \\1&amp;,\;otherwise   \end{aligned}\right.<br>$$</p>
-<p>​<br><img src="GloVe/Weighting-function.png" alt><br>根据经验，GloVe作者认为$x_{max}=100$, $\alpha=\frac34$是一个比较好的选择。</p>
 </li>
 </ol>
+<p>   <img src="GloVe/Weighting-function.png" alt><br>   根据经验，GloVe作者认为$x_{max}=100$, $\alpha=\frac34$是一个比较好的选择。</p>
 <p>note：本文是主要是基于原始paper论述，但也局限于个人知识面和理解水品，里面掺杂了一些个人的观点，如有错误，请谅解</p>
 <h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
 <li><a href="https://en.wikipedia.org/wiki/Latent_semantic_analysis" target="_blank" rel="noopener">LSA</a></li>
@@ -547,9 +547,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+            <a href="/tags/Neural-Networks/" rel="tag"># Neural Networks</a>
           
-            <a href="/tags/NLP/" rel="tag"># NLP</a>
+            <a href="/tags/Embedding/" rel="tag"># Embedding</a>
           
         </div>
       
@@ -644,7 +644,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">57</span>
+                    <span class="site-state-item-count">60</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -685,9 +685,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-count">14</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
@@ -748,7 +746,29 @@
                     
                       
                     
-                    <span class="site-state-item-count">24</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">35</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>

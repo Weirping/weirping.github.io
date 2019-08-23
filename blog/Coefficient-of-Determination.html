@@ -109,14 +109,14 @@
 
 
   <meta name="description" content="在scikit-learn中定义的回归问题模型评价指标有：  explained_variance_score(explained_variance)mean_absolute_error(MAE)mean_squared_error(MSE)mean_squared_log_error(MSLE)median_absolute_error(MedAE)r2_score($R^2$)  可决系数$">
-<meta name="keywords" content="Math,Metrics">
+<meta name="keywords" content="Concepts,Performance Analysis">
 <meta property="og:type" content="article">
 <meta property="og:title" content="可决系数(Coefficient of Determination)">
 <meta property="og:url" content="http://weirping.coding.me/blog/Coefficient-of-Determination.html">
 <meta property="og:site_name" content="Weiping&#39;s notes">
 <meta property="og:description" content="在scikit-learn中定义的回归问题模型评价指标有：  explained_variance_score(explained_variance)mean_absolute_error(MAE)mean_squared_error(MSE)mean_squared_log_error(MSLE)median_absolute_error(MedAE)r2_score($R^2$)  可决系数$">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-07-05T08:08:02.000Z">
+<meta property="og:updated_time" content="2019-08-23T04:59:12.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="可决系数(Coefficient of Determination)">
 <meta name="twitter:description" content="在scikit-learn中定义的回归问题模型评价指标有：  explained_variance_score(explained_variance)mean_absolute_error(MAE)mean_squared_error(MSE)mean_squared_log_error(MSLE)median_absolute_error(MedAE)r2_score($R^2$)  可决系数$">
@@ -388,7 +388,7 @@
                 <span class="post-meta-item-text">In</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Math/" itemprop="url" rel="index"><span itemprop="name">Math</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Concepts/" itemprop="url" rel="index"><span itemprop="name">Concepts</span></a></span>
 
                 
                 
@@ -453,7 +453,7 @@
 </tr>
 </tbody>
 </table>
-<h1 id="可决系数推导过程"><a href="#可决系数推导过程" class="headerlink" title="可决系数推导过程"></a>可决系数推导过程</h1><p>离差平方和：因变量$y​$相对于其均值的差异：$\sum_i(y_i- \bar{y})^2​$ 。</p>
+<h1 id="可决系数推导过程"><a href="#可决系数推导过程" class="headerlink" title="可决系数推导过程"></a>可决系数推导过程</h1><p>离差平方和：因变量$y$相对于其均值的差异：$\sum_i(y_i- \bar{y})^2$ 。</p>
 <p>对离差平方和进行如下分解：<br>$$<br>\begin {aligned}<br>\sum_i(y_i- \bar{y})^2 &amp;= \sum_i\{(y_i - \hat{y})+(\hat{y}_i-\bar{y})\}^2 \\<br>&amp;=\sum_i(y_i - \hat{y}_i)^2 +\sum_i(\hat{y}_i-\bar{y})^2 + \sum_i2(y_i - \hat{y}_i)(\hat{y}_i-\bar{y}) \\<br>&amp;=\sum_i(y_i - \hat{y}_i)^2 + \sum_i(\hat{y}_i-\bar{y})^2<br>\end {aligned}<br>$$</p>
 <p>上式中等号两边分别定义如下：</p>
 <p>总体离差平方和： $SST = \sum_i(y_i- \bar{y})^2$ 反应因变量的观察值与其均值的总体离差</p>
@@ -493,9 +493,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Math/" rel="tag"># Math</a>
+            <a href="/tags/Concepts/" rel="tag"># Concepts</a>
           
-            <a href="/tags/Metrics/" rel="tag"># Metrics</a>
+            <a href="/tags/Performance-Analysis/" rel="tag"># Performance Analysis</a>
           
         </div>
       
@@ -590,7 +590,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">57</span>
+                    <span class="site-state-item-count">60</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -631,9 +631,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-count">14</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
@@ -694,7 +692,29 @@
                     
                       
                     
-                    <span class="site-state-item-count">24</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">35</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>

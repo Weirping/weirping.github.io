@@ -109,7 +109,7 @@
 
 
   <meta name="description" content="LTR模型可以分为 point-wise、pair-wise、list-wise三类，Prank算法属于point-wise模型。 Pointwise可以用于推荐系统中也可以用于IR中。 以Pointwise在IR中的应用为例，它处理对象是doc-query pair，将doc-query的match信息转化为特征向量后，机器学习系统根据训练得出的模型对doc-query pair进行打分，打分的">
-<meta name="keywords" content="Machine Learning,LTR">
+<meta name="keywords" content="Model,LTR">
 <meta property="og:type" content="article">
 <meta property="og:title" content="PRank算法">
 <meta property="og:url" content="http://weirping.coding.me/blog/PRank.html">
@@ -121,7 +121,7 @@
 <meta property="og:image" content="http://weirping.coding.me/blog/PRank/wrong-right.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/PRank/update-rule.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/PRank/prank-algorithm.png">
-<meta property="og:updated_time" content="2018-08-09T06:24:54.000Z">
+<meta property="og:updated_time" content="2019-08-22T15:58:25.943Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="PRank算法">
 <meta name="twitter:description" content="LTR模型可以分为 point-wise、pair-wise、list-wise三类，Prank算法属于point-wise模型。 Pointwise可以用于推荐系统中也可以用于IR中。 以Pointwise在IR中的应用为例，它处理对象是doc-query pair，将doc-query的match信息转化为特征向量后，机器学习系统根据训练得出的模型对doc-query pair进行打分，打分的">
@@ -394,7 +394,7 @@
                 <span class="post-meta-item-text">In</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/LTR/" itemprop="url" rel="index"><span itemprop="name">LTR</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Model/" itemprop="url" rel="index"><span itemprop="name">Model</span></a></span>
 
                 
                 
@@ -436,7 +436,7 @@
 <p>在Ranking问题中我们使用的训练样本的label值不是分数，而是一个具有强弱分级的label，如<code>Perfect &gt; Excellent &gt; Good &gt; Fair &gt; Bad</code> 这样具有强弱关系的五级label。为了将score映射到分级label，需要设置5个阈值来区分score的label。如果score落在某两个相邻阈值之间，则划分为相应的label，常见算法包括：PRank、McRank。如下图所示为PRank算法示意图：</p>
 <p><img src="PRank/score-rank.png" alt></p>
 <h1 id="算法思想"><a href="#算法思想" class="headerlink" title="算法思想"></a>算法思想</h1><p>数据：$X_{T \times n}$ ， $y， y \in  {1, 2, 3, \dots, k}$， 即训练样本量为$T$， 特征维度为n，$y$共有k个等级的取值。</p>
-<p>PRank的目标是训练一个ranking rule H : $R^n \rightarrow y​$ ，即，将样本特征投影到$k​$个等级上。$H​$ 定义如下：<br>$$<br>H(\mathbf x)=\min_{r \in {1, 2, 3, \dots, k}}\{r: \mathbf w \cdot \mathbf x - b_r &lt; 0 \}<br>$$<br>其中：$\mathbf w$ 和 $b_r, r \in {1, 2, 3, \dots, k}$ 是模型参数。 $ \mathbf w \cdot \mathbf x$ 就是上文中所说的score，$k$ 个 $b_r$ 就是上文所说的阈值，$b_1 \le \dots \le  b_{k-1} \le  b_k = \infty$ 。如上文所述如果一个样本满足$b_{r-1} \lt \mathbf w \cdot \mathbf x \le b_r$ ，则该样本的预测rank值为$r$，即，$\hat y = H(\mathbf x) = r$。</p>
+<p>PRank的目标是训练一个ranking rule H : $R^n \rightarrow y$ ，即，将样本特征投影到$k$个等级上。$H$ 定义如下：<br>$$<br>H(\mathbf x)=\min_{r \in {1, 2, 3, \dots, k}}\{r: \mathbf w \cdot \mathbf x - b_r &lt; 0 \}<br>$$<br>其中：$\mathbf w$ 和 $b_r, r \in {1, 2, 3, \dots, k}$ 是模型参数。 $ \mathbf w \cdot \mathbf x$ 就是上文中所说的score，$k$ 个 $b_r$ 就是上文所说的阈值，$b_1 \le \dots \le  b_{k-1} \le  b_k = \infty$ 。如上文所述如果一个样本满足$b_{r-1} \lt \mathbf w \cdot \mathbf x \le b_r$ ，则该样本的预测rank值为$r$，即，$\hat y = H(\mathbf x) = r$。</p>
 <h1 id="模型参数估计"><a href="#模型参数估计" class="headerlink" title="模型参数估计"></a>模型参数估计</h1><p>PRank模型存在两组参数$\mathbf w$ 和 $b_r, r \in {1, 2, 3, \dots, k}$ ，只要能将这两组参数确定下来，就大功告成。下面讲解参数的确定过程。PRank更新参数的方法类似于随机梯度下降法，即，每当预测错误一个样本后，就更新参数。</p>
 <p>对于一个样本$(\mathbf x, y)$ 和模型参数$\mathbf w$ 和 $b_r, r \in \{1, 2, 3, \dots, k\}$ 。如果模型能够正确预测，则 :<br>$$<br>\begin {align}<br>&amp; \mathbf w \cdot \mathbf x \gt b_r ,  r \le y-1 \\<br>&amp; \mathbf w \cdot \mathbf x \lt b_r ,  r \ge y<br>\end {align}<br>$$</p>
 <p>如上所述，$y$的取值是从集合$\{1, 2, 3, \dots, k\}$ 中选取。模型引入辅助变量$s$(原文中依然使用$y$，我认为可能产生符号混淆，所以改用$s$) ， </p>
@@ -448,7 +448,7 @@
 <li>如果模型预测结果是错误的，则<strong>存在</strong>$s_r\cdot (\mathbf w \cdot \mathbf x - b_r ) \le 0$，此时需要更新参数</li>
 </ol>
 <p>对于特定的$r$，如果$s_r\cdot (\mathbf w \cdot \mathbf x - b_r ) \le 0$， 则说明score值$\mathbf w \cdot \mathbf x$ 落在了阈值$b_r$的<strong>错误的一侧</strong>，为了改正这个错误的预测，只需要将$\mathbf w \cdot \mathbf x$和$b_r$<strong>相对</strong>移动就能完成对于参数$\mathbf w$ 和 $b_r$ 的更新。更新公式如下：</p>
-<p>对于$s_r\cdot (\mathbf w \cdot \mathbf x - b_r ) \le 0​$：<br>$$<br>\begin {align}<br>&amp; b_r = b_r - s_r \\<br>&amp; \mathbf w = \mathbf w + s_r \cdot \mathbf x<br>\end {align}<br>$$<br>当$y=4$ ，预测值落在了Rank 3 范围内时：$s_ 3= +1$ ，此时需要将$b_3$向左移动， $\mathbf w \cdot \mathbf x$向右移动。<br>$$<br>\begin {align}<br>&amp; b_3 = b3 - s_3  = b3 - (+1) \\<br>&amp; \mathbf w = \mathbf w + (+1) \cdot \mathbf x  \Leftrightarrow \mathbf w \cdot \mathbf x = \mathbf w \cdot \mathbf x + (+1) \mathbf x^2<br>\end {align}<br>$$</p>
+<p>对于$s_r\cdot (\mathbf w \cdot \mathbf x - b_r ) \le 0$：<br>$$<br>\begin {align}<br>&amp; b_r = b_r - s_r \\<br>&amp; \mathbf w = \mathbf w + s_r \cdot \mathbf x<br>\end {align}<br>$$<br>当$y=4$ ，预测值落在了Rank 3 范围内时：$s_ 3= +1$ ，此时需要将$b_3$向左移动， $\mathbf w \cdot \mathbf x$向右移动。<br>$$<br>\begin {align}<br>&amp; b_3 = b3 - s_3  = b3 - (+1) \\<br>&amp; \mathbf w = \mathbf w + (+1) \cdot \mathbf x  \Leftrightarrow \mathbf w \cdot \mathbf x = \mathbf w \cdot \mathbf x + (+1) \mathbf x^2<br>\end {align}<br>$$</p>
 <p><img src="PRank/wrong-left.png" alt></p>
 <p>当$y=2$ ，预测值落在了Rank 3 范围内时：$s_ 2= -1$ ，此时需要将$b_2$向右移动， $\mathbf w \cdot \mathbf x$向左移动。<br>$$<br>\begin {align}<br>&amp; b_2 = b2 - s_2  = b3 - (-1) \\<br>&amp; \mathbf w = \mathbf w + (-1) \cdot \mathbf x  \Leftrightarrow \mathbf w \cdot \mathbf x = \mathbf w \cdot \mathbf x + (-1) \mathbf x^2<br>\end {align}<br>$$<br><img src="PRank/wrong-right.png" alt></p>
 <p>如果有存在多个$r$ 使得$s_r\cdot (\mathbf w \cdot \mathbf x - b_r ) \le 0$时，更新过程如下图所示：</p>
@@ -481,7 +481,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+            <a href="/tags/Model/" rel="tag"># Model</a>
           
             <a href="/tags/LTR/" rel="tag"># LTR</a>
           
@@ -578,7 +578,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">57</span>
+                    <span class="site-state-item-count">60</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -619,9 +619,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-count">14</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
@@ -682,7 +680,29 @@
                     
                       
                     
-                    <span class="site-state-item-count">24</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">35</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
