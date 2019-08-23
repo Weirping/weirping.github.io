@@ -109,7 +109,7 @@
 
 
   <meta name="description" content="本文整理记录在sklearn中提供的模型调参的几个工具。涉及内容有cross_val_score、validation curves和GridSearchCV。 在机器学习中一般存在两种类型的参数：  从训练数据中学习到的参数，如逻辑回归的权重参数$W$ 。 超参数(hyperparameters)，如逻辑回归中的正则化系数，决策树中的depth参数(控制树的深度)。  超参数是在模型训练前人为指">
-<meta name="keywords" content="Python,Machine Learning,Sklearn">
+<meta name="keywords" content="Python,Sklearn,Toolkit">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Hyperparameter Tuning in Sklearn">
 <meta property="og:url" content="http://weirping.coding.me/blog/Hyperparameter-Tuning-in-Sklearn.html">
@@ -120,7 +120,7 @@
 <meta property="og:image" content="http://weirping.coding.me/blog/Hyperparameter-Tuning-in-Sklearn/kfold.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Hyperparameter-Tuning-in-Sklearn/nested-cross-validation.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Hyperparameter-Tuning-in-Sklearn/validation-curves.png">
-<meta property="og:updated_time" content="2018-08-03T10:01:44.000Z">
+<meta property="og:updated_time" content="2019-08-23T17:00:48.086Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hyperparameter Tuning in Sklearn">
 <meta name="twitter:description" content="本文整理记录在sklearn中提供的模型调参的几个工具。涉及内容有cross_val_score、validation curves和GridSearchCV。 在机器学习中一般存在两种类型的参数：  从训练数据中学习到的参数，如逻辑回归的权重参数$W$ 。 超参数(hyperparameters)，如逻辑回归中的正则化系数，决策树中的depth参数(控制树的深度)。  超参数是在模型训练前人为指">
@@ -393,7 +393,7 @@
                 <span class="post-meta-item-text">In</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Machine-Learning/" itemprop="url" rel="index"><span itemprop="name">Machine Learning</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Toolkit/" itemprop="url" rel="index"><span itemprop="name">Toolkit</span></a></span>
 
                 
                 
@@ -526,8 +526,9 @@
 </li>
 <li><p>score函数。sklearn中的estimator都会用一个默认的score函数，该函数可以用于计算预定义的泛化指标。<br>如下面的例子所示，lr模型默认的score函数就是<code>accuracy_score</code> 。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_iris</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> StratifiedKFold</span><br><span class="line"><span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> StandardScaler</span><br><span class="line"><span class="keyword">from</span> sklearn.pipeline <span class="keyword">import</span> Pipeline</span><br><span class="line"><span class="keyword">from</span> sklearn.linear_model <span class="keyword">import</span> LogisticRegression</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> accuracy_score</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> precision_score</span><br><span class="line"></span><br><span class="line">np.random.seed(<span class="number">0</span>)</span><br><span class="line">iris = load_iris()</span><br><span class="line">X, y = iris.data, iris.target</span><br><span class="line">indices = np.arange(y.shape[<span class="number">0</span>])</span><br><span class="line">np.random.shuffle(indices)</span><br><span class="line">X, y = X[indices], y[indices]</span><br><span class="line">y = y &gt; <span class="number">1</span></span><br><span class="line">pipe_lr = Pipeline([(<span class="string">'scl'</span>, StandardScaler()),</span><br><span class="line">                    (<span class="string">'clf'</span>, LogisticRegression(penalty=<span class="string">'l2'</span>, random_state=<span class="number">0</span>, C=<span class="number">0.7</span>))])</span><br><span class="line">kfold = StratifiedKFold(n_splits = <span class="number">5</span>)</span><br><span class="line">scores = []</span><br><span class="line"><span class="keyword">for</span> i, (train_ind, test_ind) <span class="keyword">in</span> enumerate(kfold.split(X=X, y=y)):</span><br><span class="line">    trainX, trainy = X[train_ind], y[train_ind]</span><br><span class="line">    testX, testy = X[test_ind], y[test_ind]</span><br><span class="line">    pipe_lr.fit(trainX, trainy)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"[CV %d] default score %f"</span> % (i, pipe_lr.score(testX, testy))</span><br><span class="line">    test_pred = pipe_lr.predict(testX)</span><br><span class="line">    acc_score = accuracy_score(testy, test_pred)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"[CV %d] accuracy score %f"</span> % (i, acc_score)</span><br><span class="line">    pre_score = precision_score(testy, test_pred)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"[CV %d] precision score %f"</span> % (i, pre_score)</span><br><span class="line">    scores.append(acc_score)</span><br><span class="line"><span class="keyword">print</span> <span class="string">"mean accuracy score %f"</span> % np.mean(scores)</span><br><span class="line"></span><br><span class="line"><span class="comment"># [CV 0] default score 1.000000</span></span><br><span class="line"><span class="comment"># [CV 0] accuracy score 1.000000</span></span><br><span class="line"><span class="comment"># [CV 0] precision score 1.000000</span></span><br><span class="line"><span class="comment"># [CV 1] default score 0.833333</span></span><br><span class="line"><span class="comment"># [CV 1] accuracy score 0.833333</span></span><br><span class="line"><span class="comment"># [CV 1] precision score 0.777778</span></span><br><span class="line"><span class="comment"># [CV 2] default score 1.000000</span></span><br><span class="line"><span class="comment"># [CV 2] accuracy score 1.000000</span></span><br><span class="line"><span class="comment"># [CV 2] precision score 1.000000</span></span><br><span class="line"><span class="comment"># [CV 3] default score 1.000000</span></span><br><span class="line"><span class="comment"># [CV 3] accuracy score 1.000000</span></span><br><span class="line"><span class="comment"># [CV 3] precision score 1.000000</span></span><br><span class="line"><span class="comment"># [CV 4] default score 0.933333</span></span><br><span class="line"><span class="comment"># [CV 4] accuracy score 0.933333</span></span><br><span class="line"><span class="comment"># [CV 4] precision score 0.833333</span></span><br><span class="line"><span class="comment"># mean accuracy score 0.953333</span></span><br></pre></td></tr></table></figure>
-<p>​</p>
 </li>
+</ol>
+<ol start="3">
 <li><p><code>cross_val_score</code><br>上面两种方式都需要使用循环才能得到每一组测试集的score。cross_val_score是对以上两种方式的简化，用户只需要传入cv(交叉验证分割器)和scoring(使用的泛化误差评价方式)，直接返回每一组测试集的score。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_iris</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> StratifiedKFold</span><br><span class="line"><span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> StandardScaler</span><br><span class="line"><span class="keyword">from</span> sklearn.pipeline <span class="keyword">import</span> Pipeline</span><br><span class="line"><span class="keyword">from</span> sklearn.linear_model <span class="keyword">import</span> LogisticRegression</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> cross_val_score</span><br><span class="line"></span><br><span class="line">np.random.seed(<span class="number">0</span>)</span><br><span class="line">iris = load_iris()</span><br><span class="line">X, y = iris.data, iris.target</span><br><span class="line">indices = np.arange(y.shape[<span class="number">0</span>])</span><br><span class="line">np.random.shuffle(indices)</span><br><span class="line">X, y = X[indices], y[indices]</span><br><span class="line">y = y &gt; <span class="number">1</span></span><br><span class="line"></span><br><span class="line">pipe_lr = Pipeline([(<span class="string">'scl'</span>, StandardScaler()),</span><br><span class="line">                    (<span class="string">'clf'</span>, LogisticRegression(penalty=<span class="string">'l2'</span>, random_state=<span class="number">0</span>, C=<span class="number">0.7</span>))])</span><br><span class="line"></span><br><span class="line">kfold = StratifiedKFold(n_splits = <span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">scores = cross_val_score(estimator=pipe_lr, </span><br><span class="line">                         X=X, </span><br><span class="line">                         y=y, </span><br><span class="line">                         <span class="comment">#cv=5,  # 可以为一个数组，该例中使用 5-fold的交叉验证</span></span><br><span class="line">                         cv=kfold, <span class="comment"># 也可以使用一个 split对象</span></span><br><span class="line">                         scoring=<span class="literal">None</span>, <span class="comment"># None：使用estimator的score函数；string：预定义的metrics；callable：自定义metrics，签名需为scorer(estimator, X, y)</span></span><br><span class="line">                         n_jobs=<span class="number">1</span>)</span><br><span class="line"><span class="keyword">print</span> <span class="string">'CV accuracy scores: %s'</span> % scores</span><br><span class="line"><span class="keyword">print</span> <span class="string">"mean accuracy score %f +/- %f"</span> % (np.mean(scores) ,np.std(scores))</span><br><span class="line"></span><br><span class="line"><span class="comment"># CV accuracy scores: [ 1.          0.83333333  1.          1.          0.93333333]</span></span><br><span class="line"><span class="comment"># mean accuracy score 0.953333 +/- 0.065320</span></span><br></pre></td></tr></table></figure>
 </li>
@@ -597,9 +598,9 @@
           
             <a href="/tags/Python/" rel="tag"># Python</a>
           
-            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
-          
             <a href="/tags/Sklearn/" rel="tag"># Sklearn</a>
+          
+            <a href="/tags/Toolkit/" rel="tag"># Toolkit</a>
           
         </div>
       
@@ -733,9 +734,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-count">13</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
@@ -816,9 +815,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">35</span>
+                    <span class="site-state-item-count">34</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
