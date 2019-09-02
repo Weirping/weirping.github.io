@@ -1,3 +1,3 @@
+http://weirping.coding.me/blog/ListNet-model.html
 http://weirping.coding.me/blog/Newton-Methods.html
 http://weirping.coding.me/blog/RankNet-LambdaRank-LambdaMart.html
-http://weirping.coding.me/blog/tensorflow-datasets.html

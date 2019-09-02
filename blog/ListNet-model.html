@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="LTR方法可以分为 point-wise、pair-wise、list-wise 三类, ListNet 算法就是 list-wise 方法的一种.  ListWise 方法上标表示训练集中 query 的序号, 下标表示一个特定query对应的doc 的序号:  $Q = \{q^{(1)}, q^{(2)}, \dots, q^{(m)}\}$ : 训练集中query的集合, $m$ 表示训练">
+<meta name="keywords" content="LTR,IR">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ListNet Model">
+<meta property="og:url" content="http://weirping.coding.me/blog/ListNet-model.html">
+<meta property="og:site_name" content="Weiping&#39;s notes">
+<meta property="og:description" content="LTR方法可以分为 point-wise、pair-wise、list-wise 三类, ListNet 算法就是 list-wise 方法的一种.  ListWise 方法上标表示训练集中 query 的序号, 下标表示一个特定query对应的doc 的序号:  $Q = \{q^{(1)}, q^{(2)}, \dots, q^{(m)}\}$ : 训练集中query的集合, $m$ 表示训练">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://weirping.coding.me/blog/ListNet-model/listnet-alg.png">
+<meta property="og:updated_time" content="2019-09-02T16:07:51.307Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ListNet Model">
+<meta name="twitter:description" content="LTR方法可以分为 point-wise、pair-wise、list-wise 三类, ListNet 算法就是 list-wise 方法的一种.  ListWise 方法上标表示训练集中 query 的序号, 下标表示一个特定query对应的doc 的序号:  $Q = \{q^{(1)}, q^{(2)}, \dots, q^{(m)}\}$ : 训练集中query的集合, $m$ 表示训练">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/ListNet-model/listnet-alg.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://weirping.coding.me/blog/ListNet-model.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>ListNet Model | Weiping's notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Weiping's notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/ListNet-model.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Weiping">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Weiping's notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ListNet Model
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-08-30 22:22:22" itemprop="dateCreated datePublished" datetime="2019-08-30T22:22:22+08:00">2019-08-30</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Model/" itemprop="url" rel="index"><span itemprop="name">Model</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>LTR方法可以分为 point-wise、pair-wise、list-wise 三类, ListNet 算法就是 list-wise 方法的一种. </p>
+<h1 id="ListWise-方法"><a href="#ListWise-方法" class="headerlink" title="ListWise 方法"></a>ListWise 方法</h1><p>上标表示训练集中 query 的序号, 下标表示一个特定query对应的doc 的序号:</p>
+<ul>
+<li>$Q = \{q^{(1)}, q^{(2)}, \dots, q^{(m)}\}$ : 训练集中query的集合, $m$ 表示训练集中 query的数量;</li>
+<li>$d^{(i)} = (d_1^{(i)}, d_2^{(i)}, \dots, d_{n^{(i)}}^{(i)})$ : query $q^{(i)}$ 对应的doc列表, $n^{(i)}$ 表示第 $i$个query 对应的doc 列表的大小;</li>
+<li>$y^{(i)} = (y_1^{(i)}, y_2^{(i)}, \dots, y_{n^{(i)}}^{(i)})$ : $d^{(i)}$ 列表中每一个doc 的rank分.  这个分可以是由人工标注得到, 也可以通过用户行为日志得到(e.g. 基于点击模型挖掘. 基于用户行为的标注对于高频query效果较好, 但对长尾query效果欠佳), . 根据实际需求, 这个rank分可以分为若干级别, 一般为5级$\{0, 1, 2, 3, 4\}$, 数值越大说明对应的 doc 和 query 相关性约高. </li>
+<li>$x_j^{(i)} = \Psi(q^{(i)}, d_j^{(i)})$: 由 $q^{(i)}$ 和 $d_j^{(i)}$ 组成的 query-doc pair 的特征.</li>
+<li>$x^{(i)} = (x_1^{(i)}, x_2^{(i)}, \dots, x_{n^{(i)}}^{(i)})$: query $q^{(i)}$ 对应的query-doc pair 列表 特征集合. note: 上标表示query序号, 下标表示doc序号.</li>
+<li>$\mathcal {T} = \{x^{(i)}, y^{(i)}\}_{i=1}^m$ : 训练集合. </li>
+</ul>
+<p>假设有一个算分函数 $f(x; w)$, 其中 $w$ 为模型参数, $x$ 为输入特征向量, 这个函数可以是简单的线性回归函数，也可以是复杂的神经网络模型. 输入一个 query-doc pair 的特征向量, 输出一个得分 .  对于一个query $q^{(i)}$ 的得分列表可以表示为 $z^{(i)} = \{f(x_1^{(i)}), f(x_2^{(i)}), \dots, f(x_{n^{(i)}}^{(i)})\}$.  我们希望按照 $z^{(i)}$ 对所有doc 进行排序 和 按照 $y^{(i)}$ 对doc进行排序 越相似越好.</p>
+<p>这个相似程度我们使用 损失函数来衡量 :<br>$$<br>\sum_{i-1}^m L(y^{(i)}, z^{(i)})<br>$$<br>我们的目标就是通过最小化损失函数训练一个算分函数 $f(x; w)$ 用来预测. </p>
+<p>ListNet 中 的算分函数 $f(x; w)$ 选用的是一个神经网络模型, 下面介绍 ListNet 是怎么构建这个损失函数的. </p>
+<h1 id="ListNet-损失函数"><a href="#ListNet-损失函数" class="headerlink" title="ListNet 损失函数"></a>ListNet 损失函数</h1><p>ListNet使用 cross-entropy 作为损失函数, cross-entropy 可以定义为 $H(p,q) = \sum p \log q$, 所以我们只需要确定这个公式中 p和q的表示方式.</p>
+<p>根据样本数据的实际标注的 $y$ 值 , $d^{(i)} = (d_1^{(i)}, d_2^{(i)}, \dots, d_{n^{(i)}}^{(i)}) $ 中的 $d_j^{(i)}; j \in \{1, 2, \dots n^{(i)} \}$ 排列在第一个的概率表示为:<br>$$<br>P_{y^{(i)}}(j)<br>$$</p>
+<p>根据算分公式计算得到的 $z$ 值, 集合 $d^{(i)} = (d_1^{(i)}, d_2^{(i)}, \dots, d_{n^{(i)}}^{(i)}) $ 中的 $d_j^{(i)}; j \in \{1, 2, \dots n^{(i)} \}$ 排列在第一个的概率表示为:<br>$$<br>P_{z^{(i)}}(j)<br>$$</p>
+<p>这两个概率就是交叉熵公式中的 $p$和$q$. 那么我们下面推到这个概率是怎么来的.</p>
+<h2 id="Permutation-Probability"><a href="#Permutation-Probability" class="headerlink" title="Permutation Probability"></a>Permutation Probability</h2><blockquote>
+<p>Suppose that $\pi$ is a permutation on the $n$ objects, and $\phi(\cdot)$ is an increasing and strictly positive function. Then, the probability of permutation $ \pi $ given the list of scores $s$ is defined as<br>$$<br>P_s(\pi) = \prod_{j=1}^n \frac{\phi(s_{\pi(j)})}{\sum_{k=j}^n \phi(s_{\pi(k)})}<br>$$<br>where $s_{\pi(j)}$ is the score of object at position $j$ of permutation $\pi$.</p>
+</blockquote>
+<p>即, 和某一query对于 $n$ 个doc对象, 可以得到 $A_n^n$ 个排列 (permutation). 再使用算分公式计算得到 $n$ 个doc的得分列表 $s$ 后,  我们可以使用上面的公式计算任意一个排列 $\pi$ 的概率. 其中: $\pi(j)$ 表示排列 $\pi$ 中的第 $j$ 个元素, $s_{\pi(j)})$ 表示第 $j$ 个元素的得分.</p>
+<p>上式具有如下性质</p>
+<ul>
+<li>所有$A_n^n$个排列(permutation)的概率之和为1;</li>
+<li>概率最大排列是按照得分逆序排列所有doc的;</li>
+<li>交换排列中两个对象的位置，得分高的对象前移会使得排列概率增大;</li>
+<li>如果 $\phi(x) = \alpha x$ 是一个线性函数，可以保证 $P_s(\pi)$ 缩放不变性;</li>
+<li>如果 $\phi(x) = \exp(x)$ 是一个指数函数，可以保证 $P_s(\pi)$ 平移不变性.</li>
+</ul>
+<p>此处不一一证明, 需要深究的话请查看原始论文.</p>
+<p>一个query对应的有 $n$ 个 doc 的列表,  $y^{(i)} = (y_1^{(i)}, y_2^{(i)}, \dots, y_{n}^{(i)})$ 为其一个 score list. $z^{(i)} = \{f(x_1^{(i)}), f(x_2^{(i)}), \dots, f(x_{n}^{(i)})\}$ 为其另一个 score list. 对于这两个 score list 可以分别按照上面的公式计算得到 $A_n^n = n!$ 个 permutation probability. 这样就可以通过 listwise loss function (e.g. cross entropy) 计算得到一个两个score list的相似程度, 能够是两个score list最相似的算分公式 $f(x; w)$ 就是我们要求的算分公式.</p>
+<p>但是复杂度太高, 对于 $n$ 个doc, 就需要计算 $n!$ 个permutation probability, 在实际操作中是很难实现的. ListNet 使用 Top One Probability 来解决这个问题</p>
+<h2 id="Top-One-Probability"><a href="#Top-One-Probability" class="headerlink" title="Top One Probability"></a>Top One Probability</h2><p>top one probability 表示在给定 score list 后, 列表中的第 $j$ 个对象排在第一个的概率.</p>
+<blockquote>
+<p>The top one probability of object $j$ is defined as<br>$$<br>P_s(j) = \sum_{\pi(i)=j,\pi \in \Omega_n}P_s(\pi).<br>$$<br>where $P_s(\pi)$ is permutation probability of $\pi$ given $s$.</p>
+</blockquote>
+<p>其中 $\Omega_n$ 为 $n$ 个对象的所有排列(permutation)的集合, 其中包含 $n!$ 个排列.</p>
+<p>按照上面的公式, 仍然需要 $n!$ 个 permutation probability. 实际上我们可以对上面的公式进行推到得到一个更高效的计算方法. 即:<br>$$<br>P_s(j) = \frac{\phi(s_j)}{\sum_{k=1}^n \phi(s_k)}.<br>$$<br>其中 $s_j$ 是 score list 中第 $j$ 个对象的score.</p>
+<p>此处即可得到以交叉熵损失函数, 如下:<br>$$<br>\begin{align}<br>&amp; P_{y^{(i)}}(j) = \frac{\phi(y_j^{(i)})}{\sum_{k=1}^n \phi(y_k^{(i)})}\\<br>&amp; P_{z^{(i)}}(j) = \frac{\phi(z_j^{(i)})}{\sum_{k=1}^n \phi(z_k^{(i)})}\\<br>&amp; L(y^{(i)}, z^{(i)}) = - \sum_{j=1}^{n^{(i)}} P_{y^{(i)}}(j) \log P_{z^{(i)}}(j) = - \sum_{j=1}^{n^{(i)}} \frac{\phi(y_j^{(i)})}{\sum_{k=1}^n \phi(y_k^{(i)})} \log \frac{\phi(z_j^{(i)})}{\sum_{k=1}^n \phi(z_k^{(i)})} \\<br>&amp; \mathcal{L} = \sum_{i-1}^m L(y^{(i)}, z^{(i)}).<br>\end{align}<br>$$</p>
+<h1 id="模型优化"><a href="#模型优化" class="headerlink" title="模型优化"></a>模型优化</h1><p>为了简化表述, 此处我们假定 $\phi(x) = \exp(x)$ , 此时:<br>$$<br>\begin{align}<br>L(y^{(i)}, z_{f_w}^{(i)}) &amp;= - \sum_{j=1}^{n^{(i)}} P_{y^{(i)}}(j) \log P_{z^{(i)}}(j) \\<br>&amp;= - \sum_{j=1}^{n^{(i)}} \frac{\exp(y_j^{(i)})}{\sum_{k=1}^n \exp(y_k^{(i)})} \log \frac{\exp[f_w(x_j^{(i)})]}{\sum_{k=1}^n \exp[f_w(x_k^{(i)})]}<br>\end{align}<br>$$</p>
+<p>使用随机梯度下降法, $L(y^{(i)}, z^{(i)})$ 对 $w$ 求偏导, 得到 $\Delta w$:<br>$$<br>\begin{align}<br>\Delta w &amp;= \frac{\partial L(y^{(i)}, z_{f_w}^{(i)})}{\partial w} \\<br>&amp;=- \sum_{j=1}^{n^{(i)}} \frac{\exp(y_j^{(i)})}{\sum_{k=1}^n \exp(y_k^{(i)})} \frac{\partial f_w(x_j^{(i)})}{\partial w} + \frac{1}{\sum_{j=1}^{n^{(i)}} \exp[f_w(x_j^{(i)})]} \cdot \sum_{j=1}^{n^{(i)}} \exp[f_w(x_j^{(i)})] \frac {\partial f_w(x_j^{(i)})}{\partial w}<br>\end{align}<br>$$</p>
+<p>使用随机梯度下降法优化求解ListNet模型的算法如下所示</p>
+<p><img src="ListNet-model/listnet-alg.png" alt></p>
+<p>其时间复杂度 $O(m \cdot n_{max})$.</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p>Cao Z , Qin T , Liu T Y , et al. Learning to Rank: From Pairwise Approach to Listwise Approach[C]// International Conference on Machine Learning. ACM, 2007.</p>
+<p><a href="https://x-algo.cn/index.php/2016/08/18/listnet-principle/" target="_blank" rel="noopener">ListNet原理</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/LTR/" rel="tag"># LTR</a>
+          
+            <a href="/tags/IR/" rel="tag"># IR</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Newton-Methods.html" rel="next" title="牛顿法">
+                <i class="fa fa-chevron-left"></i> 牛顿法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Weiping</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">61</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">13</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/weirping" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:zhangweiping1988@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ListWise-方法"><span class="nav-number">1.</span> <span class="nav-text">ListWise 方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ListNet-损失函数"><span class="nav-number">2.</span> <span class="nav-text">ListNet 损失函数</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Permutation-Probability"><span class="nav-number">2.1.</span> <span class="nav-text">Permutation Probability</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Top-One-Probability"><span class="nav-number">2.2.</span> <span class="nav-text">Top One Probability</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#模型优化"><span class="nav-number">3.</span> <span class="nav-text">模型优化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Weiping</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
