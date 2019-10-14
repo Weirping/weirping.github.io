@@ -116,10 +116,14 @@
 <meta property="og:site_name" content="Weiping&#39;s notes">
 <meta property="og:description" content="和 最大似然估计 一样， EM算法是机器学习中的一种参数估计方法，在隐式马尔科夫算法(HMM)、LDA主题模型, Gaussian mixture model 等都有应用。本文从最大似然估计作为切入点，逐步论述EM算法的使用情景和原理。 问题引入 我们有两枚硬币, C1 和 C2, 进行抛掷硬币实验(贝努力实验);假设 C1 取正面的概率 为 $\theta_1$;假设 C2 取正面的概率 为 $">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-10-10T15:51:05.859Z">
+<meta property="og:image" content="http://weirping.coding.me/blog/EM-algorithm/GEM1.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/EM-algorithm/GEM2.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/EM-algorithm/GEM3.png">
+<meta property="og:updated_time" content="2019-10-14T14:45:38.858Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="EM 算法">
 <meta name="twitter:description" content="和 最大似然估计 一样， EM算法是机器学习中的一种参数估计方法，在隐式马尔科夫算法(HMM)、LDA主题模型, Gaussian mixture model 等都有应用。本文从最大似然估计作为切入点，逐步论述EM算法的使用情景和原理。 问题引入 我们有两枚硬币, C1 和 C2, 进行抛掷硬币实验(贝努力实验);假设 C1 取正面的概率 为 $\theta_1$;假设 C2 取正面的概率 为 $">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/EM-algorithm/GEM1.png">
 
 
 
@@ -433,20 +437,24 @@
 <p>$$<br>L(\theta) = \prod_{i=1}^n p(x_i|\theta)<br>$$<br>可以看到 $L(\theta)$ 是连乘的，所以为了便于分析, 可以取对数得到 <strong>对数似然函数</strong>：<br>$$<br>\ln L(\theta) = \ln \prod_{i=1}^n p(x_i|\theta) = \sum_{i=1}^n \ln p(x_i | \theta)<br>$$</p>
 <p>(对数)似然函数对 $\theta$ 求偏导, 并令偏导数等于零即得到了参数 $\theta$ 的估计值.</p>
 <p>通过以上方法可以分别估计  C1 取正面的概率 $\theta_1$ 和 C2 取正面的概率 $\theta_2$.</p>
-<p>那么我们换一个场景: 我们每一次投掷硬币都<strong>有放回的随机的从两枚硬币中选择一个进行投掷</strong>. 共进行 $n=100$ 次实验. 那么此时我们最终拿到的是100次硬币的朝向数据 $D=\{x_1, x_2, \dots, x_n\}$ . 但是每一次是用了哪一枚硬币, 我们并不清楚. 在这种情况下怎么才能估计参数 $\theta_1$和$\theta_2$呢?</p>
-<p>这个时候，对于每一次投掷，就有两个东西需要估计的了，<strong>一是这个数据是C1的还是C2的投掷得到的？二是 C1 取正面的概率 $\theta_1$ 和 C2 取正面的概率 $\theta_2$？</strong> EM算法就是用来解决这类问题的。</p>
+<p>那么我们换一个场景: 我们每一次投掷硬币都<strong>有放回的随机的从两枚硬币中选择一个进行投掷</strong>. 共进行 $n=100$ 次实验. 那么此时我们最终拿到的是100次硬币的朝向数据 $X=\{x_1, x_2, \dots, x_n\}$ . 但是每一次是用了哪一枚硬币, 我们并不清楚. 在这种情况下怎么才能估计参数 $\theta_1$和$\theta_2$呢?</p>
+<p>这个时候，对于每一次投掷，就有两个东西需要估计的了，<strong>一是这个数据是C1的还是C2的投掷得到的？二是 C1 取正面的概率 $\theta_1$ 和 C2 取正面的概率 $\theta_2$？</strong> 其中 用于表示 这个数据是C1的还是C2的投掷得到的 变量就是一个未被观测到的隐含变量.  EM算法就是用来求包含隐含变量的的模型的最大似然解的算法.</p>
+<blockquote>
+<p>The goal of the EM algorithm is to find maximum likelihood solutions for models having latent variables.</p>
+</blockquote>
 <h1 id="EM算法的思想"><a href="#EM算法的思想" class="headerlink" title="EM算法的思想"></a>EM算法的思想</h1><p>假设我们想估计A（C1 or C2）和 B（$\theta$）两个参数，在开始状态下二者都是未知的，但如果知道了A的信息就可以得到B的信息，反过来知道了B也就得到了A。可以考虑首先赋予A某种初值，以此得到B的估计值，然后从B的当前值出发，重新估计A的取值，这个过程一直持续到收敛为止。</p>
-<h1 id="EM算法推导"><a href="#EM算法推导" class="headerlink" title="EM算法推导"></a>EM算法推导</h1><p>假设我们有一个样本集$D=\{ x^{( 1 )},x^{( 2 )} \cdots x^{( m )} \}$，包含m个独立的样本。但每个样本 $i$ 对应的类别 $z^{( i )}$ 是未知的，也即隐含变量。故我们需要估计概率模型 $$p(x,z)$$ 的参数 $\theta$ ，很难用最大似然求解。</p>
-<p>对于参数估计，我们本质上还是想获得一个使似然函数最大化的那个参数 $\theta$ ，现在与最大似然不同的只是似然函数式中多了一个未知的变量 $z$ 。也就是说我们的目标是找到适合的 $\theta$ 和 $z$ 让损失函数最大化。按照最大似然求解求解思路, 可以对未知的 $\theta$ 和 $z$ 分别求偏导，再令其等于0. 但实际施行起来计算是非常复杂的.</p>
-<p>$$<br>\sum_i \log p( x^{( i )};\theta ) = \sum_i \log \sum_{z^{( i )}} p( x^{( i )},z^{( i )};\theta  )<br>$$</p>
-<p>本质上我们是需要最大化上面的公式，也就是似然函数。但是由于加入了因变量$z$, 使得似然函数中有“和的对数”，对 $\theta$ 求导后形式会非常复杂，所以很难求解得到未知参数 $\theta$ 和 $z$ 。</p>
-<p>对该公式做如下变形, 使得公式中只包含“对数的和”，求导就容易了。<br>$$<br>\begin {align}<br>\sum_i \log p( x^{( i )};\theta ) &amp; = \sum_i \log \sum_{z^{( i )}} p( x^{( i )},z^{( i )};\theta  ) \tag{1}    \\<br>&amp; = \sum_i \log \sum_{z^{( i )}} Q ( z^{( i )} ) \frac {p( x^{( i )},z^{( i )};\theta  )} {Q( z^{( i )} )}  \tag{2}  \\<br>&amp; \ge \sum_i \sum_{z^{( i )}} Q( z^{( i )} )\log \frac {p( x^{( i )},z^{( i )};\theta  )} {Q( z^{( i )} )}   \tag{3}<br>\end {align}<br>$$<br>其中: (2)到(3)的变换用到了 <strong>Jensen不等式(Jensen’s inequality)</strong>.</p>
+<p>下面给出两种关于EM算法的推导: 第一种是网上常见的基于 jensen 不等式的方法, 第二种是基于KL距离的推到方法.</p>
+<h1 id="基于-Jensen-不等式"><a href="#基于-Jensen-不等式" class="headerlink" title="基于 Jensen 不等式"></a>基于 Jensen 不等式</h1><h2 id="EM算法推导"><a href="#EM算法推导" class="headerlink" title="EM算法推导"></a>EM算法推导</h2><p>假设我们有一个样本集$\mathbf X=\{ x^{( 1 )},x^{( 2 )} \cdots x^{( n )} \}$，包含n个独立的样本。但每个样本 $i$ 对应的类别 $z^{( i )}$ 是未知的，也即隐含变量。故我们需要估计概率模型 $$p(x,z)$$ 的参数 $\mathbf \theta$ ，很难用最大似然求解。</p>
+<p>对于参数估计，我们本质上还是想获得一个使似然函数最大化的那个参数 $\mathbf \theta$ ，现在与最大似然不同的只是似然函数式中多了一个未知的变量 $z$ 。也就是说我们的目标是找到适合的 $\theta$ 和 $z$ 让损失函数最大化。按照最大似然求解求解思路, 可以对未知的 $\mathbf \theta$ 和 $z$ 分别求偏导，再令其等于0. 但实际施行起来计算是非常复杂的. </p>
+<p>先给出(对数)似然函数:<br>$$<br>\begin {align}<br>p(\mathbf{X}|\mathbf{\theta }) &amp;= \sum _{\mathbf{z}} p(\mathbf{X}, \mathbf{Z}| \mathbf{\theta}) \\<br>\log p(\mathbf{X}|\mathbf{\theta }) &amp;= \log \sum _{\mathbf{z}} p(\mathbf{X}, \mathbf{Z}| \mathbf{\theta}) \\<br>&amp;= \log \prod_i^n \sum_{z^{( i )}} p( x^{( i )},z^{( i )};\theta  ) \\<br>&amp;= \sum_i^n \log \sum_{z^{( i )}} p( x^{( i )},z^{( i )};\theta  ) \\<br>\end {align}<br>$$<br>本质上我们是需要最大化上面的公式，也就是似然函数。但是由于加入了因变量$z$, 使得似然函数中有“和的对数”，对 $\mathbf \theta$ 求导后形式会非常复杂，所以很难求解得到未知参数 $\mathbf \theta$ 和 $z$ 。</p>
+<p>对于每个实例 $x^{( i )}$ ,用 $Q ( z^{( i )} )$ 表示样本实例隐含变量 $z$ 的某种分布，且 $Q ( z^{( i )} )$ 满足条件 $\sum_{z^{( i )}} Q ( z^{( i )} ) =1$, 如果 $Q ( z^{( i )} )$  是连续性的，则 $Q ( z^{( i )} )$  表示概率密度函数，需要将求和符号换成积分符号。</p>
+<p>对该公式做如下变形, 使得公式中只包含“对数的和”，求导就容易了。<br>$$<br>\begin {align}<br>\log p(\mathbf{X}|\mathbf{\theta }) &amp; = \sum_i \log \sum_{z^{( i )}} p( x^{( i )},z^{( i )};\theta  ) \tag{1}    \\<br>&amp; = \sum_i \log \sum_{z^{( i )}} Q ( z^{( i )} ) \frac {p( x^{( i )},z^{( i )};\theta  )} {Q( z^{( i )} )}  \tag{2}  \\<br>&amp; \ge \sum_i \sum_{z^{( i )}} Q( z^{( i )} )\log \frac {p( x^{( i )},z^{( i )};\theta  )} {Q( z^{( i )} )}   \tag{3}<br>\end {align}<br>$$<br>其中: (2)到(3)的变换用到了 <strong>Jensen不等式(Jensen’s inequality)</strong>.</p>
 <blockquote>
 <h2 id="Jensen不等式"><a href="#Jensen不等式" class="headerlink" title="Jensen不等式"></a>Jensen不等式</h2><p>从凸函数说起, 设$\varphi$ 是定义域为实数的函数，如果对于所有的实数$x$，$\varphi(x)$的二次导数大于等于0，那么$\varphi(x)$是凸函数。如果$f(x)$的二次导数只大于0，不等于0，那么称 $\varphi(x)$ 是严格凸函数。当 $x$ 是向量时，如果$\varphi(x)$ 的 Hessian 矩阵H是半正定的，那么$\varphi(x)$是凸函数。如果 Hessian 矩阵H是正定的那么称$\varphi(x)$是严格凸函数。</p>
 <p>如果$\varphi$是凸函数，$X$是随机变量，那么：<br>$$<br>\varphi(E[X]) \le E[\varphi (X)].<br>$$<br>特别地，如果$\varphi$是严格凸函数，当且仅当$X$是常量时，上式取等号。Jensen不等式应用于凹函数时，不等号方向反向。</p>
 </blockquote>
 <p>再回到(2), 因为$f(x)=\log x$为凹函数。EM算法就是使用了凹函数的 Jensen 不等式.</p>
-<p>令 $\sum_{z^{( i )}} Q ( z^{( i )} ) =1$, (2)中的 $\sum_{z^{( i )}} Q ( z^{( i )} ) \frac {p( x^{( i )},z^{( i )};\theta  )} {Q( z^{( i )} )}$ 可以看作是 $ \frac {p( x^{( i )},z^{( i )};\theta  )} {Q( z^{( i )} )}$ 的期望, 根据凹函数 Jensen 不等式, 就可以推导出(3)的不等式了.</p>
+<p>由于 $\sum_{z^{( i )}} Q ( z^{( i )} ) =1$, (2)中的 $\sum_{z^{( i )}} Q ( z^{( i )} ) \frac {p( x^{( i )},z^{( i )};\theta  )} {Q( z^{( i )} )}$ 可以看作是 $ \frac {p( x^{( i )},z^{( i )};\theta  )} {Q( z^{( i )} )}$ 的期望, 根据凹函数 Jensen 不等式, 就可以推导出(3)的不等式了.</p>
 <p>现在(3)容易地求导了，但是(2)和(3)是不等号，而我们想得到(2)的最大值。</p>
 <p>为了方便表述, 可以将不等号两边简化为如下形式:<br>$$<br>L(\theta) \ge J(\theta, Q(z)) \\<br>$$<br>其中: $ L(\theta) = \sum_i \log p( x^{( i )};\theta ) $, $J(\theta, Q(z)) = \sum_i \sum_{z^{( i )}} Q( z^{( i )} )\log \frac {p( x^{( i )},z^{( i )};\theta  )} {Q( z^{( i )} )}$; $Q(z)$对应（3）中 $Q( z^{( i )} )$  的集合，如果$z$是多项式分布，$Q(z)$就表示多项式分布的参数向量。</p>
 <p>EM算法通过不断的最大化 $J(\theta, Q(z))$，使 $L(θ)$ 的下界提高，最终达到 $L(θ)$ 的最大值. 现在有两个未知量 $\theta$ 和 $Q(z)$, EM算法首先会固定$\theta$，然后调整 $Q(z)$ 最大化下界$J(\theta, Q(z))$；接着通过固定$Q(z)$，再使用MLE调整$\theta$，依次迭代，直至收敛到局部最优解。</p>
@@ -454,17 +462,54 @@
 <p>又因为 $\sum_{z^{( i )}} Q ( z^{( i )} ) =1$, 可以做如下推导:<br>$$<br>\sum_{z^{( i )}}p( x^{( i )},z^{( i )};\theta  ) = \frac {\sum_{z^{( i )}}p( x^{( i )},z^{( i )};\theta  )} {1} =<br>\frac {\sum_{z^{( i )}}p( x^{( i )},z^{( i )};\theta  )} {\sum_{z^{( i )}} Q ( z^{( i )} )} = \frac {p( x^{( i )},z^{( i )};\theta  )} {Q( z^{( i )} )} = c \\<br>$$</p>
 <p>$$<br>\begin {align}<br>Q( z^{( i )} ) &amp;= \frac {p( x^{( i )},z^{( i )};\theta  )}{\sum_{z^{( i )}}p( x^{( i )},z^{( i )};\theta  )} \\<br>&amp;= \frac {p( x^{( i )},z^{( i )};\theta  )}{p( x^{( i )};\theta  )} \\<br>&amp;= p(z^{( i )} | x^{( i )};\theta  ) \\<br>\end {align}<br>$$</p>
 <p>可以看出 $Q( z^{( i )} )$ 是在固定参数 $\theta$ 后，根据样本数据调整 $z^{( i )}$ 所得到的后验概率。使用上式也解决了$Q( z^{( i )} )$如何计算的问题, 不需要通过MLE 类计算了。</p>
-<h1 id="EM-算法"><a href="#EM-算法" class="headerlink" title="EM 算法"></a>EM 算法</h1><p>第一步，初始化分布参数θθ；<br>第二步，重复E-step 和 M-step直到收敛：</p>
+<h2 id="EM-算法过程"><a href="#EM-算法过程" class="headerlink" title="EM 算法过程"></a>EM 算法过程</h2><p>第一步，初始化分布参数 $\theta$；<br>第二步，重复E-step 和 M-step直到收敛：</p>
 <ul>
 <li><p>E-step：根据当前的 $\theta$ 来计算出的隐性变量的后验概率（条件概率），其实就是隐性变量的期望值。作为隐藏变量的现有估计值：<br>$$<br>Q( z^{( i )} ) := p(z^{( i )} | x^{( i )};\theta  )<br>$$</p>
 </li>
 <li><p>M-step：固定当前的 $Q( z^{( i )} )$ , 最大化似然函数从而获得新的 $\theta$ :<br>$$<br>\theta := \arg\max_{\theta} \sum_i \sum_{z^{( i )}} Q( z^{( i )} )\log \frac {p( x^{( i )},z^{( i )};\theta  )} {Q( z^{( i )} )}<br>$$</p>
 </li>
 </ul>
-<h1 id="收敛性证明"><a href="#收敛性证明" class="headerlink" title="收敛性证明"></a>收敛性证明</h1><p>假定 $\theta^{(t)}$ 和$\theta^{(t+1)}$是EM第$t$次和$t+1$次迭代后的结果。如果我们证明了$l(\theta^{(t)})&lt;=l(\theta^{(t+1)})$  ，也就是说极大似然估计单调增加，那么最终我们就会得到极大似然估计的最大值。下面来证明，选定  $\theta^{(t)}$ 之后，我们得到E-step：<br>$$<br>Q( z^{( i )} ) := p(z^{( i )} | x^{( i )};\theta  )<br>$$<br>这一步保证了在给定 $\theta^{(t)}$ 时，Jensen不等式中的等式成立，也就是<br>$$<br>l(\theta^{(t)}) = \sum_i \sum_{z^{( i )}} Q( z^{( i )} )\log \frac {p( x^{( i )},z^{( i )};\theta^{(t)} )} {Q( z^{( i )} )}<br>$$<br>然后进行M步，固定$Q^{(t)}(z^{(i)})$,并将 $\theta^{(t)}$ 试作变量，对上面的式子求导，得到 $\theta^{(t+1)}$,这样经过一些推导会有以下式子成立：<br>$$<br>\begin {align}<br>l(\theta^{(t+1)}) &amp;\ge \sum_i \sum_{z^{( i )}} Q( z^{( i )} )\log \frac {p( x^{( i )},z^{( i )};\theta^{(t+1)} )} {Q( z^{( i )} )} \\<br>&amp;\ge \sum_i \sum_{z^{( i )}} Q( z^{( i )} )\log \frac {p( x^{( i )},z^{( i )};\theta^{(t)} )} {Q( z^{( i )} )} \\<br>&amp;= l(\theta^{(t)})<br>\end {align}<br>$$</p>
+<h2 id="收敛性证明"><a href="#收敛性证明" class="headerlink" title="收敛性证明"></a>收敛性证明</h2><p>假定 $\theta^{(t)}$ 和$\theta^{(t+1)}$是EM第$t$次和$t+1$次迭代后的结果。如果我们证明了$l(\theta^{(t)})&lt;=l(\theta^{(t+1)})$  ，也就是说极大似然估计单调增加，那么最终我们就会得到极大似然估计的最大值。下面来证明，选定  $\theta^{(t)}$ 之后，我们得到E-step：<br>$$<br>Q( z^{( i )} ) := p(z^{( i )} | x^{( i )};\theta  )<br>$$<br>这一步保证了在给定 $\theta^{(t)}$ 时，Jensen不等式中的等式成立，也就是<br>$$<br>l(\theta^{(t)}) = \sum_i \sum_{z^{( i )}} Q( z^{( i )} )\log \frac {p( x^{( i )},z^{( i )};\theta^{(t)} )} {Q( z^{( i )} )}<br>$$<br>然后进行M步，固定$Q^{(t)}(z^{(i)})$,并将 $\theta^{(t)}$ 试作变量，对上面的式子求导，得到 $\theta^{(t+1)}$,这样经过一些推导会有以下式子成立：<br>$$<br>\begin {align}<br>l(\theta^{(t+1)}) &amp;\ge \sum_i \sum_{z^{( i )}} Q( z^{( i )} )\log \frac {p( x^{( i )},z^{( i )};\theta^{(t+1)} )} {Q( z^{( i )} )} \\<br>&amp;\ge \sum_i \sum_{z^{( i )}} Q( z^{( i )} )\log \frac {p( x^{( i )},z^{( i )};\theta^{(t)} )} {Q( z^{( i )} )} \\<br>&amp;= l(\theta^{(t)})<br>\end {align}<br>$$</p>
+<h1 id="基于KL距离"><a href="#基于KL距离" class="headerlink" title="基于KL距离"></a>基于KL距离</h1><p>该方法参考自 《Pattern recognition and machine learning》.</p>
+<p>对于包含观测变量 $\mathbf{X}$ 和隐含变量 $\mathbf Z$ 的概率模型, 其联合概率分布可以表示为 $p(\mathbf{X}, \mathbf{Z}| \mathbf{\theta})$. 整个数据集的(对数)似然函数可以表示为:<br>$$<br>\begin {align}<br>p(\mathbf{X}|\mathbf{\theta }) &amp;= \sum _{\mathbf{z}} p(\mathbf{X}, \mathbf{Z}| \mathbf{\theta}) \\<br>\ln p(\mathbf{X}|\mathbf{\theta }) &amp;= \sum _{\mathbf{z}} \ln p(\mathbf{X}, \mathbf{Z}| \mathbf{\theta})<br>\end {align}<br>$$</p>
+<p>为了方便论述, 这里假设 $\mathbf Z$ 是一个离散型变量. 隐含变量  $\mathbf Z$ 的概率分布函数 表示为 $q(\mathbf{Z})$.</p>
+<p>如上文所述, 直接对包含隐含变量的 $\ln p(\mathbf{X}|\mathbf{\theta })$ 求偏导是非常困难的, 但是如果隐含变量是已知的,就可以使用最大似然估计直接求解能够是似然函数 $\ln p(\mathbf{X}, \mathbf{Z}|\mathbf{\theta })$ 最大化的参数 $\theta$.</p>
+<p>我们目标是最大化上面的公式. 可以将对数似然函数做如下变形:<br>$$<br>\begin {align}<br>\ln p(\mathbf{X}|\mathbf{\theta }) &amp;= \mathcal{L}(q, \mathbf{\theta}) + \mathrm{KL}(q || p)  \tag{4}  \\<br>\\<br>\mathcal{L}(q,\mathbf{\theta }) &amp;= \sum _{\mathrm{Z}}q(\mathbf{Z}) \ln \left\{ \frac {p(\mathbf{X}, \mathbf{Z}| \mathbf{\theta})}{q(\mathbf{Z})} \right\}  \tag{5} \\<br>\\<br>\mathrm{KL}(q || p) &amp;= \sum _{\mathrm{Z}}q(\mathbf{Z}) \ln \left\{ \frac {q(\mathbf{Z})}{p (\mathbf{Z}| \mathbf{X}, \mathbf{\theta})} \right\}  \tag{6} \\<br>\end {align}<br>$$</p>
+<p>其中: </p>
+<ul>
+<li>$\mathcal{L}(q,\mathbf{\theta })$ 是包含 $q(\mathbf{Z})$ 和 $p(\mathbf{X}, \mathbf{Z}| \mathbf{\theta})$ 的函数. </li>
+<li>$\mathrm{KL}(q || p)$ 是 $q(\mathbf{Z})$ 和 $p (\mathbf{Z}| \mathbf{X}, \mathbf{\theta})$ 的 KL距离(Kullback-Leibler divergence).  $p (\mathbf{Z}| \mathbf{X}, \mathbf{\theta})$ 表示 $\mathbf{Z}$ 的后验概率, 相应的 $q(\mathbf{Z})$ 就表示 $\mathbf{Z}$ 的先验概率</li>
+</ul>
+<p>根据 KL距离 的定义有 $KL(q || p) \ge 0 $, 当且仅当 $q = p$ 时, 等号成立. 也就是说 对于式 (6) 当 $q(\mathbf{Z}) =  p (\mathbf{Z}| \mathbf{X}, \mathbf{\theta})$ 时, $\mathrm{KL}(q || p) = 0 $. </p>
+<p>同时根据式 (4) 可知 $\ln p(\mathbf{X}|\mathbf{\theta }) \ge \mathcal{L}(q, \mathbf{\theta})$, 即, $\mathcal{L}(q, \mathbf{\theta})$ 是对数似然函数 $\ln p(\mathbf{X}|\mathbf{\theta })$ 的下界. 如下图所示:</p>
+<p><img src="EM-algorithm/GEM1.png" alt></p>
+<p>EM算法分为E-step 和 M-step, 下面分别讲解.</p>
+<p>在E-step我们固定 $\theta$ 记为  $\theta^{\mathrm{old}}$ , 由于似然函数是一个只关于 $\theta$的函数, 此时似然函数是一个常数  $\ln p(\mathbf{X}|\mathbf{\theta^{\mathrm{old}}})$ . E-step 是在给定 $\theta^{\mathrm{old}}$ 后最大化一个关于 $q(\mathbf{Z})$ 的下界函数 $\mathcal{L}(q,\mathbf{ \theta^{\mathrm{old}} })$的过程, 且已知 $\mathcal{L}(q,\mathbf{ \theta^{\mathrm{old}} })$ 的最大值为常数$\ln p(\mathbf{X}|\mathbf{\theta^{\mathrm{old}}})$. 根据上图可知, 当 $\mathrm{KL}(q || p) = 0$ 时, $\mathcal{L}(q,\mathbf{ \theta^{\mathrm{old}} })$ 可以取到最大值 $\ln p(\mathbf{X}|\mathbf{\theta^{\mathrm{old}}})$. 此时 :<br>$$<br>q(\mathbf{Z}) =  p (\mathbf{Z}| \mathbf{X}, \mathbf{\theta^{\mathrm{old}}}).  \tag{7}<br>$$</p>
+<p>E-step 如下图所示:</p>
+<p><img src="EM-algorithm/GEM2.png" alt></p>
+<p>当 $q(\mathbf{Z})$ 确定后, 将(7) 带入下界函数(5)可以做如下变形:<br>$$<br>\begin {align}<br>\mathcal{L}(q,\mathbf{\theta }) &amp;= \sum _{\mathrm{Z}} p (\mathbf{Z}| \mathbf{X}, \mathbf{\theta}^{old}) \ln \left\{ \frac {p(\mathbf{X}, \mathbf{Z}| \mathbf{\theta})}{p (\mathbf{Z}| \mathbf{X}, \mathbf{\theta}^{old}))} \right\}  \tag{8}\\<br>\\<br>&amp;= \sum _{\mathrm{Z}} p (\mathbf{Z}| \mathbf{X}, \mathbf{\theta}^{old}) \ln p (\mathbf{X}, \mathbf{Z}| \mathbf{\theta}) - \sum _{\mathrm{Z}} p (\mathbf{Z}| \mathbf{X}, \mathbf{\theta}^{old}) \ln p (\mathbf{Z}| \mathbf{X}, \mathbf{\theta}^{old}) \tag{9}\\<br>\\<br>&amp;= \mathcal{Q}(\mathbf{\theta}, \mathbf{\theta}^{old}) + \mathrm{const} \tag{10}<br>\end {align}<br>$$</p>
+<p>其中式(9) 右边的一项是一个常数, 用 const表示. 左边一项定义为 似然函数 $\ln p (\mathbf{X}, \mathbf{Z}| \mathbf{\theta})$ 的期望, 即:<br>$$<br>\begin {align}<br>\mathcal{Q}(\mathbf{\theta}, \mathbf{\theta}^{old}) &amp;= \sum _{\mathrm{Z}} p (\mathbf{Z}| \mathbf{X}, \mathbf{\theta}^{old}) \ln p (\mathbf{X}, \mathbf{Z}| \mathbf{\theta}) \\<br>&amp;= E_{\mathbf{Z}| \mathbf{X}, \mathbf{\theta}^{old}} \ln p (\mathbf{X}, \mathbf{Z}| \mathbf{\theta})<br>\end {align}<br>$$<br>可能这就是为什么 这一步叫做 E-step(Expectation step) 的原因吧.</p>
+<p>M-step 是在上一步确定的 $q(\mathbf{Z})$ 的基础上, 最大化关于 $\theta$ 的下界函数 $\mathcal{L}(q,\mathbf{\theta })$ 的过程.通过上问可知, 最大化 $\mathcal{L}(q,\mathbf{\theta })$ 等价与最大化 $\mathcal{Q}(\mathbf{\theta}, \mathbf{\theta}^{old})$. 此时可以使用最大似然估计来求解得到能够使$\mathcal{Q}(\mathbf{\theta}, \mathbf{\theta}^{old})$ 最大化的 $\theta$ 记为 $\theta^{\mathrm{new}}$. </p>
+<p>当$\theta$ 取值为 $\theta^{\mathrm{new}}$时, 下界函数变大, 即 $\mathcal{L}(q,\mathbf{\theta^{\mathrm{new}} }) \ge \mathcal{L}(q,\mathbf{\theta^{\mathrm{old}} })$ . 同时由于 $q(\mathbf{Z}) =  p (\mathbf{Z}| \mathbf{X}, \mathbf{\theta^{\mathrm{old}}}) \ne p (\mathbf{Z}| \mathbf{X}, \mathbf{\theta^{\mathrm{new}}})$, $\mathrm{KL}(q || p) \gt 0$ , 所以似然函数会增加更多. 如下图所示:</p>
+<p><img src="EM-algorithm/GEM3.png" alt></p>
+<p>对EM算法的计算流程整理如下: </p>
+<blockquote>
+<p>Given a joint distribution $p(\mathbf{X}, \mathbf{Z}| \mathbf{\theta})$  over observed variables $\mathbf{X}$ and latent variables $\mathbf{Z}$, governed by parameters $\mathbf{\theta}$, the goal is to maximize the likelihood function  $p(\mathbf{X} | \mathbf{\theta})$  with respect to  $\mathbf{\theta}$.</p>
+<ol>
+<li>Choose an initial setting for the parameters $\theta^{\mathrm{old}} $</li>
+<li><p>E step Evaluate<br>$$<br>q(\mathbf{Z}) =  p (\mathbf{Z}| \mathbf{X}, \mathbf{\theta^{\mathrm{old}}})\<br>$$</p>
+</li>
+<li><p>M step Evaluate $\theta^{\mathrm{new}}$,<br>$$<br>\theta^{\mathrm{new}} = {\arg\max}_{\theta} \mathcal{Q}(\mathbf{\theta}, \mathbf{\theta}^{old})<br>$$<br>where<br>$$<br>\begin {align}<br>\mathcal{Q}(\mathbf{\theta}, \mathbf{\theta}^{old}) &amp;= \sum _{\mathrm{Z}} p (\mathbf{Z}| \mathbf{X}, \mathbf{\theta}^{old}) \ln p (\mathbf{X}, \mathbf{Z}| \mathbf{\theta}) \\<br>&amp;= E_{\mathbf{Z}| \mathbf{X}, \mathbf{\theta}^{old}} \ln p (\mathbf{X}, \mathbf{Z}| \mathbf{\theta})<br>\end {align}<br>$$</p>
+</li>
+<li><p>Check for convergence of either the log likelihood or the parameter values. If the convergence criterion is not satisfied, then let<br>$$<br>\theta^{\mathrm{old}} = \theta^{\mathrm{new}}<br>$$<br>and return to step 2.</p>
+</li>
+</ol>
+</blockquote>
 <h1 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h1><p><a href="https://ibug.doc.ic.ac.uk/media/uploads/documents/expectation_maximization-1.pdf" target="_blank" rel="noopener"> Statistical Machine Learning (course 495)</a></p>
 <p><a href="http://www.cnblogs.com/jerrylead/archive/2011/04/06/2006936.html" target="_blank" rel="noopener">JerryLead博客-（EM算法）The EM Algorithm</a></p>
 <p><a href="http://blog.csdn.net/zouxy09/article/details/8537620" target="_blank" rel="noopener">从最大似然到EM算法浅解</a></p>
+<p>Bishop, Christopher M. Pattern recognition and machine learning. springer, 2006.</p>
+<p><a href="https://en.wikipedia.org/wiki/Expectation–maximization_algorithm" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm</a></p>
 
       
     </div>
@@ -748,7 +793,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#问题引入"><span class="nav-number">1.</span> <span class="nav-text">问题引入</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#从最大似然估计说起"><span class="nav-number">2.</span> <span class="nav-text">从最大似然估计说起</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EM算法的思想"><span class="nav-number">3.</span> <span class="nav-text">EM算法的思想</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EM算法推导"><span class="nav-number">4.</span> <span class="nav-text">EM算法推导</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Jensen不等式"><span class="nav-number">4.1.</span> <span class="nav-text">Jensen不等式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EM-算法"><span class="nav-number">5.</span> <span class="nav-text">EM 算法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#收敛性证明"><span class="nav-number">6.</span> <span class="nav-text">收敛性证明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#reference"><span class="nav-number">7.</span> <span class="nav-text">reference</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#问题引入"><span class="nav-number">1.</span> <span class="nav-text">问题引入</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#从最大似然估计说起"><span class="nav-number">2.</span> <span class="nav-text">从最大似然估计说起</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EM算法的思想"><span class="nav-number">3.</span> <span class="nav-text">EM算法的思想</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基于-Jensen-不等式"><span class="nav-number">4.</span> <span class="nav-text">基于 Jensen 不等式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#EM算法推导"><span class="nav-number">4.1.</span> <span class="nav-text">EM算法推导</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Jensen不等式"><span class="nav-number">4.2.</span> <span class="nav-text">Jensen不等式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EM-算法过程"><span class="nav-number">4.3.</span> <span class="nav-text">EM 算法过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#收敛性证明"><span class="nav-number">4.4.</span> <span class="nav-text">收敛性证明</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基于KL距离"><span class="nav-number">5.</span> <span class="nav-text">基于KL距离</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#reference"><span class="nav-number">6.</span> <span class="nav-text">reference</span></a></li></ol></div>
             
 
           </div>
