@@ -117,11 +117,12 @@
 <meta property="og:description" content="信息量(自信息)信息奠基人香农(Shannon)认为“信息是用来消除随机不确定性的东西”. 一个事件蕴含的信息量与这条信息能够消除的不确定性是正相关的.  信息量应该满足如下条件:  事件发生的概率越低, 信息量越大;  事件发生的概率越高, 信息量越低;  多个对立事件同时发生, 总信息量是多个事件信息量相加.   由此确定的信息量表示为:$$I(x)=-\log_{2}p(x)$$ 其中, $">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://weirping.coding.me/blog/Points-in-Information-Theory/cond-joint-entropy.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Points-in-Information-Theory/KL_in_relevance.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Points-in-Information-Theory/cond-joint-entropy.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Points-in-Information-Theory/cond-joint-entropy-info.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Points-in-Information-Theory/mic01.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Points-in-Information-Theory/Machine-Learning-A-Probabilistic-Perspective.jpg">
-<meta property="og:updated_time" content="2019-08-16T10:48:02.000Z">
+<meta property="og:updated_time" content="2019-12-25T03:32:58.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="信息论中的一些知识点">
 <meta name="twitter:description" content="信息量(自信息)信息奠基人香农(Shannon)认为“信息是用来消除随机不确定性的东西”. 一个事件蕴含的信息量与这条信息能够消除的不确定性是正相关的.  信息量应该满足如下条件:  事件发生的概率越低, 信息量越大;  事件发生的概率越高, 信息量越低;  多个对立事件同时发生, 总信息量是多个事件信息量相加.   由此确定的信息量表示为:$$I(x)=-\log_{2}p(x)$$ 其中, $">
@@ -472,7 +473,7 @@
 <p>有联合熵的链式法则知:<br>$$<br>\frac 1n H(x_1, x_2, \dots, x_n) =  \frac 1n \sum_{i=1}^n H(X_n|X_1,X_2,….X_{n-1})<br>$$<br>即: 熵率为条件熵的时间平均.  由定理一知 条件上趋于极限 $H’(\chi)$.<br>又 由Cesaro 均值可知:<br>$$<br>\begin {align}<br>H(\chi) &amp; = \lim_{n \to \infty} \frac 1nH(x_1, x_2, \dots, x_n) \\<br>        &amp; = \lim_{n \to \infty}H(X_n|X_1,X_2, \dots, X_{n-1})   \\<br>        &amp; = H’(\chi)                                            \\<br>\end {align}<br>$$</p>
 <p><strong>平稳马尔可夫链的熵率</strong></p>
 <p>设 $ \{X_i\}$为平稳马尔可夫链，且其平稳分布为 $\mu$ , 转移矩阵为 $P$  , 则熵率为:</p>
-<p>$$<br>\begin {align}<br>H(\chi) &amp;= H’(\chi) \\<br>        &amp;= \lim_{n \to \infty}H(X_n|X_1,X_2,\dots, X_{n-1}) \\<br>        &amp;= \lim_{n \to \infty} H(X_n \mid X_{n-1}) \\<br>        &amp;= H(X_2 \mid X_1) \\<br>        &amp;= -\sum_{ij} p(X_1 = \mu_i, X_2 = \mu_j) \log p(X_2 = \mu_j \mid X_1 = \mu_i) \ <br>        &amp;= -\sum_{ij} p(X_1 = \mu_i) p(X_2 = \mu_j \mid X_1 = \mu_i) \log p(X_2 = \mu_j \mid X_1 = \mu_i) \ <br>        &amp;= -\sum_{ij} \mu_i P_{ij}\log{P_{ij}} \\<br>\end {align}<br>$$</p>
+<p>$$<br>\begin {align}<br>H(\chi) &amp;= H’(\chi) \\<br>        &amp;= \lim_{n \to \infty}H(X_n|X_1,X_2,\dots, X_{n-1}) \\<br>        &amp;= \lim_{n \to \infty} H(X_n \mid X_{n-1}) \\<br>        &amp;= H(X_2 \mid X_1) \\<br>        &amp;= -\sum_{ij} p(X_1 = \mu_i, X_2 = \mu_j) \log p(X_2 = \mu_j \mid X_1 = \mu_i) \ <br>        &amp;= -\sum_{ij} p(X_1 = \mu_i) p(X_2 = \mu_j \mid X_1 = \mu_i) \log p(X_2 = \mu_j \mid X_1 = \mu_i) \\<br>        &amp;= -\sum_{ij} \mu_i P_{ij}\log{P_{ij}} \\<br>\end {align}<br>$$</p>
 <p>note: <strong>熵率</strong> 可以理解为 <strong>随机过程的 “熵” </strong>. </p>
 <p>应用:</p>
 <ul>
@@ -491,6 +492,9 @@
 </ul>
 <p>应用于推荐系统的一个例子</p>
 <p>在使用LDA(Latent Dirichlet Allocation)计算物品的内容相似度时, 我们可以先计算出物品在话题上的分布, 然后利用两个物品的话题分布计算物品的相似度. 比如, 如果两个物品的话题分布相似, 则认为两个物品具有较高的相似度, 反之则认为两个物品的相似度较低. </p>
+<p>应用与搜索相关性计算中的一个例子</p>
+<p><img src="Points-in-Information-Theory/KL_in_relevance.png" alt="1577244589684"></p>
+<p>以上公式中使用了 $KL(v_q || v_d) + KL(v_d || v_q) $ 的平均值, 应该是考虑到 KL距离的不对称性才这样使用的.</p>
 <p><em>note:</em> 交叉熵和相对熵其实是等价的, 那么在实际问题中该怎么选择呢?<br>交叉熵大量应用在sigmoid函数和softmax函数中，最典型的算法应该就是神经网络和逻辑回归吧，而相对熵大量应用在生成模型中，例如GAN、EM、贝叶斯学习和变分推导中。从这里我们可以看出:</p>
 <ul>
 <li>如果想通过算法对样本数据进行概率分布建模，那么通常都是使用相对熵，因为我们需要明确的知道生成的分布和真实分布的差距，最好的KL散度值应该是0；</li>
@@ -671,7 +675,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">63</span>
+                    <span class="site-state-item-count">64</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -857,7 +861,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
@@ -1343,7 +1347,6 @@
         processEscapes: true,
         skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
       },
-      TeX: {equationNumbers: { autoNumber: "AMS" }}
     });
 </script>
 

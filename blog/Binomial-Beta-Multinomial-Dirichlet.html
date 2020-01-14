@@ -108,28 +108,29 @@
 
 
 
-  <meta name="description" content="泊松分布和指数分布 的实际物理意义经常忘掉, 正好看到 阮一峰 的篇好文, 转载备查. 泊松分布和指数分布就是描述某一时间在一定的时间内时间发生的概率。 泊松分布的参数为  时间t、频率$\lambda$、次数n：描述单位时间平均发生$\lambda$次的现象在时间t内发生n次的概率。 指数分布的参数为  时间t、频率$\lambda$ ：描述单位时间平均发生$\lambda$次的现象在时间t内发">
+  <meta name="description" content="对于参数估计，存在两个学派的不同解决方案。一是频率学派解决方案：通过某些优化准则（比如似然函数）来选择特定参数值；二是贝叶斯学派解决方案：假定参数服从一个先验分布，通过观测到的数据，使用贝叶斯理论计算对应的后验分布。 本文从以参数估计为目标出发，从二项式分布讲述到多项式分布，为使用贝叶斯推断进行参数估计，也讲到了其共轭分布: Beta分布和Dirichlet分布。 Bayesian Inferen">
 <meta name="keywords" content="Mathematics,Probability">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【转】泊松分布和指数分布">
-<meta property="og:url" content="http://weirping.coding.me/blog/exponential-distribution-and-poisson-distribution.html">
+<meta property="og:title" content="从二项式分布到多项式分布">
+<meta property="og:url" content="http://weirping.coding.me/blog/Binomial-Beta-Multinomial-Dirichlet.html">
 <meta property="og:site_name" content="Weiping&#39;s notes">
-<meta property="og:description" content="泊松分布和指数分布 的实际物理意义经常忘掉, 正好看到 阮一峰 的篇好文, 转载备查. 泊松分布和指数分布就是描述某一时间在一定的时间内时间发生的概率。 泊松分布的参数为  时间t、频率$\lambda$、次数n：描述单位时间平均发生$\lambda$次的现象在时间t内发生n次的概率。 指数分布的参数为  时间t、频率$\lambda$ ：描述单位时间平均发生$\lambda$次的现象在时间t内发">
+<meta property="og:description" content="对于参数估计，存在两个学派的不同解决方案。一是频率学派解决方案：通过某些优化准则（比如似然函数）来选择特定参数值；二是贝叶斯学派解决方案：假定参数服从一个先验分布，通过观测到的数据，使用贝叶斯理论计算对应的后验分布。 本文从以参数估计为目标出发，从二项式分布讲述到多项式分布，为使用贝叶斯推断进行参数估计，也讲到了其共轭分布: Beta分布和Dirichlet分布。 Bayesian Inferen">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://weirping.coding.me/blog/exponential-distribution-and-poisson-distribution/poisson-distribution.gif">
-<meta property="og:image" content="http://weirping.coding.me/blog/exponential-distribution-and-poisson-distribution/exponential-distribution.gif">
-<meta property="og:updated_time" content="2019-08-22T15:08:38.386Z">
+<meta property="og:image" content="http://weirping.coding.me/blog/Binomial-Beta-Multinomial-Dirichlet/beta-example.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Binomial-Beta-Multinomial-Dirichlet/bayesian-inference-beta-example.png">
+<meta property="og:image" content="http://weirping.coding.me/blog/Binomial-Beta-Multinomial-Dirichlet/Dirichlet-example.png">
+<meta property="og:updated_time" content="2020-01-14T10:11:37.952Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="【转】泊松分布和指数分布">
-<meta name="twitter:description" content="泊松分布和指数分布 的实际物理意义经常忘掉, 正好看到 阮一峰 的篇好文, 转载备查. 泊松分布和指数分布就是描述某一时间在一定的时间内时间发生的概率。 泊松分布的参数为  时间t、频率$\lambda$、次数n：描述单位时间平均发生$\lambda$次的现象在时间t内发生n次的概率。 指数分布的参数为  时间t、频率$\lambda$ ：描述单位时间平均发生$\lambda$次的现象在时间t内发">
-<meta name="twitter:image" content="http://weirping.coding.me/blog/exponential-distribution-and-poisson-distribution/poisson-distribution.gif">
+<meta name="twitter:title" content="从二项式分布到多项式分布">
+<meta name="twitter:description" content="对于参数估计，存在两个学派的不同解决方案。一是频率学派解决方案：通过某些优化准则（比如似然函数）来选择特定参数值；二是贝叶斯学派解决方案：假定参数服从一个先验分布，通过观测到的数据，使用贝叶斯理论计算对应的后验分布。 本文从以参数估计为目标出发，从二项式分布讲述到多项式分布，为使用贝叶斯推断进行参数估计，也讲到了其共轭分布: Beta分布和Dirichlet分布。 Bayesian Inferen">
+<meta name="twitter:image" content="http://weirping.coding.me/blog/Binomial-Beta-Multinomial-Dirichlet/beta-example.png">
 
 
 
 
 
 
-  <link rel="canonical" href="http://weirping.coding.me/blog/exponential-distribution-and-poisson-distribution.html">
+  <link rel="canonical" href="http://weirping.coding.me/blog/Binomial-Beta-Multinomial-Dirichlet.html">
 
 
 
@@ -139,7 +140,7 @@
   };
 </script>
 
-  <title>【转】泊松分布和指数分布 | Weiping's notes</title>
+  <title>从二项式分布到多项式分布 | Weiping's notes</title>
   
 
 
@@ -331,7 +332,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/exponential-distribution-and-poisson-distribution.html">
+    <link itemprop="mainEntityOfPage" href="http://weirping.coding.me/blog/Binomial-Beta-Multinomial-Dirichlet.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Weiping">
@@ -348,7 +349,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">【转】泊松分布和指数分布
+          <h1 class="post-title" itemprop="name headline">从二项式分布到多项式分布
               
             
           </h1>
@@ -425,53 +426,92 @@
       
 
       
-        <p>泊松分布和指数分布 的实际物理意义经常忘掉, 正好看到 <a href="http://www.ruanyifeng.com/home.html" target="_blank" rel="noopener">阮一峰</a> 的篇好文, 转载备查.</p>
-<p>泊松分布和指数分布就是描述某一时间在一定的时间内时间发生的概率。</p>
-<p>泊松分布的参数为  时间t、频率$\lambda$、次数n：描述单位时间平均发生$\lambda$次的现象在时间t内发生n次的概率。</p>
-<p>指数分布的参数为  时间t、频率$\lambda$ ：描述单位时间平均发生$\lambda$次的现象在时间t内发生的概率(此处没有次数限制)。</p>
-<h1 id="泊松分布"><a href="#泊松分布" class="headerlink" title="泊松分布"></a>泊松分布</h1><p>日常生活中，大量事件是有固定<strong>频率</strong>的。</p>
-<blockquote>
+        <p>对于参数估计，存在两个学派的不同解决方案。一是<strong>频率学派</strong>解决方案：通过某些优化准则（比如似然函数）来选择特定参数值；二是<strong>贝叶斯学派</strong>解决方案：假定参数服从一个先验分布，通过观测到的数据，使用贝叶斯理论计算对应的后验分布。</p>
+<p>本文从以参数估计为目标出发，从二项式分布讲述到多项式分布，为使用贝叶斯推断进行参数估计，也讲到了其共轭分布: Beta分布和Dirichlet分布。</p>
+<h1 id="Bayesian-Inference"><a href="#Bayesian-Inference" class="headerlink" title="Bayesian Inference"></a>Bayesian Inference</h1><p>贝叶斯学派认为模型中的参数 $\mathrm w$ 是一个不确定的值，使用概率分布对其进行建模。首先我们对$\mathrm{w}$可能的分布做一个假设，这个假设是基于经验的、和观测数据无关的，这个分布即为先验分布$p(\mathrm{w})$。依据训练数据集纠正后的$\mathrm{w}$的概率分布为后验分布$p(\mathrm{w} | D)$。按照贝叶斯公式对后验概率分解，即：</p>
+<p>$$<br>p(\mathrm{w}|\mathcal{D})=\frac{p(\mathcal{D}|\mathrm{w})p(\mathrm{w})}{p(\mathcal{D})}<br>$$</p>
+<p>$\mathrm{w}$的后验分布$p(\mathrm{w}| D)$可以分解为三部分:</p>
+<ol>
+<li>$p(\mathrm{w})$：先验分布（prior），是关于$\mathrm{w}$的函数，依赖于先验知识。</li>
+<li>$p(\mathcal{D}|\mathrm{w}) $：似然函数（likelihood），<strong>是关于$\mathrm{w}$的函数</strong>。 表示对于$\mathrm{w}$的不同值，数据集$\mathcal D$被观测到的概率。<br>note，似然函数不是关于$\mathrm{w}$的概率分布函数，所以似然函数对$\mathrm{w}$积分不是1，实际它上是关于$\mathcal D$的概率分布函数。</li>
+<li>$p(\mathcal{D})$ ：归一化项，用于保证公式右边对$\mathrm{w}$积分是1，即，保证后验分布是一个概率密度函数。</li>
+</ol>
+<p>$$<br>p(\mathcal{D})=\int p(\mathcal{D}|\mathrm{w})p(\mathrm{w})\mathrm{dw}<br>$$</p>
+<p>对于固定的数据集$\mathcal D$， $p(\mathcal{D})$是一个常量。所以：<br>$$<br>p(\mathrm{w}|\mathcal{D}) \propto p(\mathcal{D}|\mathrm{w})p(\mathrm{w})<br>$$</p>
+<h1 id="二项式分布-Binomial-distribution-与-Beta-distribution"><a href="#二项式分布-Binomial-distribution-与-Beta-distribution" class="headerlink" title="二项式分布(Binomial distribution) 与 Beta distribution"></a>二项式分布(Binomial distribution) 与 Beta distribution</h1><p>二项式分布(Binomial distribution)源自对二元变量的研究。</p>
+<h2 id="二元变量-Binary-Variables-Bernoulli-distribution"><a href="#二元变量-Binary-Variables-Bernoulli-distribution" class="headerlink" title="二元变量(Binary Variables) - Bernoulli distribution"></a>二元变量(Binary Variables) - Bernoulli distribution</h2><p>一次贝努力抛硬币实验中有两个结果，我们令$x=1$是正面，$x=0$是反面，令是正面的概率为$\mu$，则有：<br>$$<br>p(x=1|\mu) = \mu<br>$$<br>则 $x$ 的概率分布可写成如下形式：<br>$$<br>p(x|\mu) = \mu^x(1-\mu)^{1-x}<br>$$<br>这就是<strong>贝努力分布</strong>（注意是一次实验），它有均值和方差为：<br>$$<br>E[X] = \mu \\<br>Var[X] = \mu(1-\mu)<br>$$<br>现在假定有一个$x$的观测数据集$D={x_1,….,x_N}$，那么我们能够构造出参数$\mu$的<strong>似然函数</strong>：<br>$$<br>P(D|\mu) = \prod_{n=1}^N p(x_n|\mu) = \prod_{n=1}^N \mu^{x_n}(1-\mu)^{1-x_n}<br>$$<br>根据频率学派的思路，我们可以通过最大化似然函数来估算出参数$\mu$的值，等价与最大化对数似然函数。贝努力分的对数似然函数为：<br>$$<br>\ln P(D|\mu) = \sum_{n=1}^N \ln p(x_n|\mu) = \sum_{n=1}^N x_n \ln \mu + (1-x_n) \ln (1-\mu)<br>$$<br>求关于$\mu$的导并将导数设置为0可求得：<br>$$<br>\mu_{ML} = \frac{1}{N} \sum_{n=1}^N x_n<br>$$<br>上式中去掉前面的$\frac{1}{N}$，右边的式子有个名字叫<strong>充分统计量(sufficient statistics)</strong>，这里可用 $m$ 表示，即 $N$ 次贝努力实验中 $m$ 次出现“1”. 所以可得到参数 $\mu$ 的最有可能值：<br>$$<br>\mu_{ML} = \frac{m}{N}<br>$$<br>现在假设 $N=m=3$，那么 $\mu=1$，很明显与我们的经验值不符合，<strong>因此在小的的观测数据集下，最大化似然函数的方法容易与观测数据过度拟合。为了解决这个问题，可以根据贝叶斯学派的观点，引入参数的先验概率分布。</strong></p>
+<h2 id="二项式分布-Binomial-distribution"><a href="#二项式分布-Binomial-distribution" class="headerlink" title="二项式分布(Binomial distribution)"></a>二项式分布(Binomial distribution)</h2><p>在大小为$N$的数据集中（$N$重贝努力实验），以$x=1$的数据出现的次数为随机变量，他服从二项式分布：<br>$$<br>Bin(m|N, \mu) = C_N^m \mu^m (1-\mu)^{N-m}<br>$$<br>其中：<br>$$<br>C_N^m = \frac{N!}{(N-m)!m!}<br>$$</p>
+<p><strong>注意：二项式分布也可以作为参数 $\mu$ 的似然函数。</strong></p>
+<p>二项式分布的随机变量的期望和方差如下:<br>$$<br>E[m] = \sum_{n=0}^N m Bin(m|N,\mu) = N\mu \\<br>Var[m] = \sum_{n=0}^N (m-E[m])^2 Bin(m|N, \mu) = N \mu (1-\mu)<br>$$</p>
+<h2 id="Beta-分布"><a href="#Beta-分布" class="headerlink" title="Beta 分布"></a>Beta 分布</h2><p>以上介绍了使用最大似然估计的方式求参数$\mu$的方法，那么使用贝叶斯理论需要怎么做呢？</p>
+<p>如果用贝叶斯理论求得参数 $\mu$ 的值，需要给 $\mu$ 一个先验分布，然后用贝叶斯理论求$\mu$的后验分布，进而估计$\mu$的值。<br>根据贝叶斯理论 $后验 \propto 似然函数 \times 先验$，当后验与先验同时具有相同的分布时具有一些优秀的性质，能使我们方便的进行$\mu$的估算。</p>
+<p>该选用什么样的分布作为先验分布呢？此处似然函数选用二项式分布的形式，似然函数是$\mu$与$1-\mu$乘积的形式，可以选用了Beta分布作为$\mu$的先验分布，这样可以保证后验分布也是 Beta分布。</p>
+<p>Beta分布：<br>$$<br>Beta(\mu ;a ,b ) ={\frac {\Gamma (a +b )}{\Gamma (a )\Gamma (b )}} \mu^{a -1}(1-\mu)^{b -1}<br>$$<br>其中：<br>$$<br>\Gamma (z)=\int_{0}^{\infty }x^{z-1}e^{-x} dx<br>$$<br>左边的系数是为了确保beta分布是归一化的:<br>$$<br>\int_0^1 Beta(\mu|a,b)du = 1<br>$$<br>注意到Beta分布的参数$\mu$随机变量的取值在0到1之间。可求得Beta随机变量的期望和方差：<br>$$<br>E[\mu] = \frac{a}{a+b} \\<br>Var[\mu] = \frac{ab}{(a + b)^2(a+b+1)}<br>$$</p>
+<p>$a$与$b$的值是参数 $\mu$ 的分布中的参数，称之为超参数。</p>
+<p><img src="Binomial-Beta-Multinomial-Dirichlet/beta-example.png" alt="beta分布"></p>
+<p>现在，参数的$\mu$的后验分布可以通过似然函数 $Bin(m|N, \mu) = C_N^m \mu^m (1-\mu)^{N-m}$ 乘以先验分布 $Beta(\mu ;a ,b ) ={\frac {\Gamma (a +b )}{\Gamma (a )\Gamma (b )}} \mu^{a -1}(1-\mu)^{b -1}$ 来得到，得到的后验分布只保留与参数$\mu$相关的项得：<br>$$<br>p(\mu | l,m,a,b) \propto \mu^{(m+a-1)}(1-\mu)^{(l+b-1)}<br>$$<br>其中$l=N-m$ 。（$N$次采样中 $m$ 次为“1”，$l$ 次为“0”），由于贝叶斯方法是新增数据后的迭代过程，其中的四个参数可以这样理解：</p>
 <ul>
-<li>某医院平均每小时出生3个婴儿</li>
-<li>某公司平均每10分钟接到1个电话</li>
-<li>某超市平均每天销售4包xx牌奶粉</li>
-<li>某网站平均每分钟有2次访问</li>
+<li>$m$：新数据中 “1” 的次数；</li>
+<li>$l$: 新数据中 “0” 的次数；</li>
+<li>$a$： 历史数据中 “1” 的次数，$a \gets  a+m$；</li>
+<li>$b$：历史数据中 “0” 的次数, $b \gets a + l$。</li>
 </ul>
-</blockquote>
-<p>它们的特点就是，我们可以预估这些事件的总数，但是没法知道具体的发生时间。已知平均每小时出生3个婴儿，请问下一个小时，会出生几个？有可能一下子出生6个，也有可能一个都不出生。这是我们没法知道的。</p>
-<p><strong>泊松分布就是描述单位时间内，事件具体的发生概率。</strong></p>
-<p>$$P(N(t)=n)=\frac{(\lambda t)^{n}e^{-\lambda t}}{n!}$$</p>
-<p>上面就是泊松分布的公式。等号的左边，$P$ 表示概率，$N$表示某种函数关系，$t$表示时间，$n$ 表示数量，1小时内出生3个婴儿的概率，就表示为 $P(N(1) = 3)$ 。等号的右边，$\lambda$表示事件的频率。</p>
-<p>泊松分布的参数$\lambda$是单位时间$t$(或单位面积)内随机事件的<strong>平均发生次数</strong>，描述的是该事件在单位时间内发生$n$次的概率。泊松分布的期望和方差均为$\lambda$.</p>
-<p>接下来两个小时，一个婴儿都不出生的概率是0.25%，基本不可能发生。</p>
-<p>$$P(N(2)=0)=\frac{(3\times 2)^{0}e^{-3\times 2}}{0!}\approx 0.0025$$</p>
-<p>接下来一个小时，至少出生两个婴儿的概率是80%。</p>
-<p>$$<br>\begin {align}<br>P(N(1) \ge 2) &amp;= 1 - P(N(1) = 1) - P(N(1) = 0)  \\<br>&amp;  = 1 - \frac {(3 \times 1)^1 e^{-3 \times 1}} {1!} - \frac {(3 \times 1)^0 e^{-3 \times 1}} {0!}  \ <br>&amp;  = 1 - 3e^{ - 3} - e^{ - 3}  \\<br>&amp;  = 1 - 4e^{ - 3} \\<br>&amp; \approx 0.8009 \\<br>\end{align}<br>$$</p>
-<p>泊松分布的图形大概是下面的样子。</p>
-<p><img src="exponential-distribution-and-poisson-distribution/poisson-distribution.gif" alt="poisson_distribution"></p>
-<h1 id="指数分布"><a href="#指数分布" class="headerlink" title="指数分布"></a>指数分布</h1><p><strong>指数分布是事件的时间间隔的概率。</strong>下面这些都属于指数分布。</p>
-<blockquote>
+<p>加入归一化系数后得：<br>$$<br>p(\mu | l,m,a,b) = \frac{\Gamma(m+a+l+b)}{\Gamma(m+a)\Gamma(l+b)} \mu^{(m+a-1)}(1-\mu)^{(l+b-1)}<br>$$<br>可看到后验概率同样是beta分布，<strong>当先验和后验是同一分布时，我们称之为共轭。</strong></p>
+<p>仔细观测，他拥有优秀的性质：</p>
 <ul>
-<li>婴儿出生的时间间隔</li>
-<li>来电的时间间隔</li>
-<li>奶粉销售的时间间隔</li>
-<li>网站访问的时间间隔</li>
+<li>观测以Gamma函数为分子分母的系数，参数a,b可分别看作事件x=1，x=0的有效观测量。a的值通过m的增加而增加，b的值通过l的值增加而增加。</li>
+<li>如果以后有新增的观测值，后验分布又可作为先验分布来进行计算。具体来讲，在某一个时间点，有一个观测值，此时可以得到后验，之后，每一个观测值的到来，都以之前的后验作为先验，乘以似然函数后，得到修正后的新后验。在这每一步中，其实我们不需要管什么似然函数，只需要更新后验分布公式中的四个参数即可。</li>
 </ul>
-</blockquote>
-<p>指数分布的公式可以从泊松分布推断出来。如果下一个婴儿要间隔时间$t$ ，就等同于$t$之内没有任何婴儿出生。</p>
-<p> $P(X&gt;t)=P^{(}N(t)=0)=\frac{(\lambda t)^{0}\mathrm{e}^{-\lambda t}}{0!}$  $= \mathbf{e}^{-\lambda t}$ </p>
-<p>反过来，事件在时间$t$之内发生的概率，就是1减去上面的值。即得指数分布的分布函数：</p>
-<p>$$F(t)=P(X\leq t)=1-P(X&gt;t)=1- \mathbf{e}^{-\lambda t}$$</p>
-<p>其概率密度函数为：</p>
-<p>$$P(X=t)=\lambda e^{\lambda t},t&gt;0$$</p>
-<p>接下来15分钟，会有婴儿出生的概率是52.76%。</p>
-<p> $P(X\leq 0.25)=1- \mathbf{e}^{-3\times 0.25}$  $\approx 0.5276$ </p>
-<p>接下来的15分钟到30分钟，会有婴儿出生的概率是24.92%。</p>
-<p>$$<br>\begin {align}<br>&amp; P(0.25 \le X \le 0.5) = P(X \le 0.5) - P(X \le 0.25)  \\<br>&amp;  = (1 - e^{ - 3 \times 0.5}) - (1 - e^{ - 3 \times 0.25})\ <br>&amp; = e^{ - 0.75} - e^{ - 1.5}  \\<br>&amp; \approx 0.2492<br>\end {align}<br>$$</p>
-<p><img src="exponential-distribution-and-poisson-distribution/exponential-distribution.gif" alt="exponential_distribution"></p>
-<p>可以看到，随着间隔时间变长，事件的发生概率急剧下降，呈指数式衰减。想一想，如果每小时平均出生3个婴儿，上面已经算过了，下一个婴儿间隔2小时才出生的概率是0.25%，那么间隔3小时、间隔4小时的概率，是不是更接近于0？</p>
-<p><strong>一句话总结：泊松分布是单位时间内独立事件发生次数的概率分布，指数分布是独立事件的时间间隔的概率分布。</strong></p>
-<p>本文转自 <a href="http://www.ruanyifeng.com/blog/2015/06/poisson-distribution.html" target="_blank" rel="noopener">泊松分布和指数分布</a></p>
+<p>下图解释了贝叶斯推断的步骤：</p>
+<ul>
+<li><img src="Binomial-Beta-Multinomial-Dirichlet/bayesian-inference-beta-example.png" alt="bayesian-inference-beta-example"></li>
+</ul>
+<p>我们可以把上面第二个优秀的性质所表示的方法看作为<strong>序列方法（sequential approach）</strong>，该方法是贝叶斯观点中很自然得到的学习方法。他非常适合实时学习场景。在某一时刻，有一小批量数据，我们可以在这一小批量数据中得到我们的后验分布模型。当有新的一批数据到来时，只需要更新这个模型就够了。注意到，<strong>因为这种序列方法不需要将所有数据都载入内存，因此他在大数据的应用将非常有效</strong>。</p>
+<p>我们的目标是基于一堆观测数据集 $D$ 对将来的一个数据做出预测。如抛硬币实验中，预测下一次实验出现正面的概率是多少 $p(x=1|D)$。使用 sum and product rules 对$p(x=1|D)$分解：</p>
+<p>$$<br>p(x=1|D) = \int_0^1 p(x=1|\mu) p(\mu|D)du = \int_0^1 \mu p(\mu|D)du = E[\mu|D]<br>$$</p>
+<p>即，下一个预测值就是$\mu$的后验分布的期望。根据上文可知Beta分布的期望是 $E[\mu] = \frac{a}{a+b}$。<br>$$<br>p(x=1|D) = E[\mu|D] = \frac{m+a}{m+a+l+b}<br>$$<br>这个结果是预测的结果，同时也即参数$\mu$的估计值。</p>
+<p>总结：</p>
+<ul>
+<li>贝叶斯学派采用给参数赋予先验分布，并使得先验与后验共轭，<strong>通过求后验均值来得到参数的估计</strong>。频率学派通过某个优化准则比如最大化似然函数来求得参数的估计。</li>
+<li>似然函数：他们都要用到似然函数 但形式不同，频率学派所使用的似然函数是N次贝努力实验下的似然函数，但贝叶斯学派所使用的似然函数是二项式分布形式的似然函数（二项式分布是N次贝努力实验中出现事件A的次数的分布）。</li>
+<li>数据量：当拥有无限数据量时(上式中m和l都趋向于无穷)，贝叶斯方法和频率学派方法所得到的参数估计是一致的。当在有限的数据量下，贝叶斯学派的参数后验均值介于先验均值和频率学派方法得到参数估计值之间。比如在抛硬币实验中，当数据量有限时，先验均值为0.5，后验均值将会比先验大，比频率学派得到参数估计小。</li>
+<li>方差： 随着观测数据的增多，后验分布曲线越来越陡峭（越来越集中），即方差越来越小（后验方差总比前验方差小），由Beta分布方差可知，当数据量无穷大时，方差趋近于0，即随着数据越来越多，后验的不确定性在减小。</li>
+</ul>
+<h1 id="多项式分布与Dirichlet分布"><a href="#多项式分布与Dirichlet分布" class="headerlink" title="多项式分布与Dirichlet分布"></a>多项式分布与Dirichlet分布</h1><p>与上一节对应， 多项是分布是二项式分布的推广 。相应的上一节中的几个概念都进行了泛化：</p>
+<p>二元变量 -&gt; 多元变量</p>
+<p>二项式分布 -&gt;  多项式分布</p>
+<p>Beta分布 -&gt;  Dirichlet分布</p>
+<h2 id="多元变量-Multinomial-Variables-Multinoulli-distribution"><a href="#多元变量-Multinomial-Variables-Multinoulli-distribution" class="headerlink" title="多元变量(Multinomial Variables) - Multinoulli distribution"></a>多元变量(Multinomial Variables) - Multinoulli distribution</h2><p>多项式分布是二项式分布的扩展，在多项式分布所代表的实验中，一次实验会有多个互斥结果，而二项式分布所代表的实验中，一次实验只有两个互斥结果。</p>
+<p>假设事件发生有K=6个互斥的结果，如果这$x_3=1$发生了，则：<br>$$<br>\mathbf{x} = (0,0,1,0,0,0)^{\mathrm{T}}<br>$$</p>
+<p>这个向量满足：<br>$$<br>\sum_{k=0}^K x_k = 1<br>$$</p>
+<p>如果我们用$\mu_k$来表示$x_k=1$的概率，则向量 $\mathbf{x}$ 的分布为：<br>$$<br>p(\mathbf{x}|\mathbf{\mu}) = \prod_{k=1}^K \mu_k^{x_k}<br>$$<br>其中: </p>
+<ul>
+<li>这个分布可以被看座是Bernoulli分布在的一般化推广，称为Multinoulli distribution 或者  Categorical Distribution</li>
+<li>左边的 $\mathbf{x}=(x_1,x_2,\dots,x_K)^{\mathrm{T}}$， 满足 $\sum_k x_k = 1$, 向量中只有一个元素为 “1”， 其他为“0”；</li>
+<li>$\mathbf{\mu} = (\mu_1,\mu_2,\dots,\mu_K)^{\mathrm{T}}$, 且 满足 $\sum_k \mu_k = 1$ ；</li>
+<li>这个分布的归一化形式为 $\sum_x p(\mathbf{x}|\mathbf{\mu}) = \sum_{k=1}^K \mu_k = 1$。</li>
+</ul>
+<p>在已知 $\mu$ 的条件下，向量 $\mathbf{x}$的期望为：<br>$$<br>E[\mathbf{x}|\mathbf{\mu}] = \sum_{\mathbf{x}} p(\mathbf{x}|\mathbf{\mu}) \mathbf{x} = (\mu_1,\mu_2,\dots,\mu_K)^{\mathrm{T}} = \mathbf{\mu}<br>$$</p>
+<p>假定有一个样本量为$N$的观测数据集$\mathcal{D} = \{\mathbf{x}_1, \mathbf{x}_2, \dots, \mathbf{x}_N\}$，其中每个样本都服从参数为 $\mathbf{\mu}$ 的分布：<br>$$<br>p(\mathbf{x}|\mathbf{\mu}) = \prod_{k=1}^K \mu_k^{x_k}<br>$$<br>那么怎么估计参数$\mathbf{\mu}$呢。</p>
+<p>首先给出频率学派的求解方式。 该数据集的似然函数为：<br>$$<br>\begin{align}<br>p(\mathcal{D}|\mathbf{\mu}) &amp;= \prod_{n=1}^N \prod_{k=1}^K \mu_k^{x_{nk}} \\<br>&amp;= \prod_{k=1}^K \mu_k^{(\sum_n x_{nk})} \\<br>&amp;= \prod_{k=1}^K \mu_k^{m_k}<br>\end{align}<br>$$<br>其中： $m_k = \sum_n x_{nk}$, 为<strong>充分统计量(sufficient statistics)</strong> 即 在$N$ 个样本中 $x_k = 1$ 的数量。</p>
+<p>使用拉格朗日乘数法(Lagrange multiplier)可以最大化对数似然函数：<br>$$<br>\begin{align}<br>\mathcal{L} &amp;= \ln p(\mathcal{D}|\mathbf{\mu}) + \lambda(\sum_x p(\mathbf{x}|\mathbf{\mu}) - 1) \\<br>&amp;= \sum_{k=1}^K m_k \ln \mu_k + \lambda(\sum_{k=1}^K \mu_k - 1)<br>\end{align}<br>$$<br>可以求得：<br>$$<br>\begin{align}<br>\lambda &amp;= -N \\<br>\mu_k^{ML} &amp;= -\frac{m_k}{\lambda} = \frac{m_k}{\lambda}<br>\end {align}<br>$$</p>
+<h2 id="多项分布-Multinomial-Distribution"><a href="#多项分布-Multinomial-Distribution" class="headerlink" title="多项分布(Multinomial Distribution)"></a>多项分布(Multinomial Distribution)</h2><p>类似于二项式分布，对于多元变量也可以定义一个多项式分布。<strong>即在观测数据集$\mathcal{D}$上多个充分统计量$\{m_1, m_2, \dots, m_K\}$ 的联合分布（即k个不同互斥结果在N次实验中出现次数的联合分布）</strong>。其分布函数为：<br>$$<br>Mult(m_1, m_2, \dots, m_K | \mathbf{\mu},N) = C_N^{m_1 m_2 \dots m_K} \prod_{k=1}^K \mu_k^{m_k}<br>$$<br>其中：</p>
+<ul>
+<li>$C_N^{m_1 m_2 \dots m_K} = \frac{N!}{m_1!m_2!\dotsm_K!}$；</li>
+<li>$\sum_{k=1}^K = N$</li>
+</ul>
+<p><strong>和二项式分布可以作为作为似然函数一样，多项式分布也作为似然函数</strong></p>
+<h2 id="Dirichlet分布"><a href="#Dirichlet分布" class="headerlink" title="Dirichlet分布"></a>Dirichlet分布</h2><p>为求得参数<strong>向量$\mathbf{\mu}$</strong>的值，根据贝叶斯学派的观点，我们要引入$\mathbf{\mu}$的先验。为了方便求解也需要使先验和后验共轭。同样，通过观察多项式分布似然函数的形式，先验分布为如下形式时可满足共轭的条件：<br>$$<br>p(\mathbf{\mu}|\mathbf{\alpha}) \propto \sum_{k=1}^K \mu_k^{\alpha_k -1}<br>$$<br>其中： $\mathbf{\alpha} = (\alpha_1, \alpha_2, \dots \alpha_K)^{\mathrm{T}}$ 为分布的参数。</p>
+<p>分布 $p(\mathbf{\mu}|\mathbf{\lambda})$ 需要满足条件 $\int_{\mu} p(\mathbf{\mu}|\mathbf{\lambda}) = 1$, 加入归一化项, 可得到<strong>Dirichlet分布</strong>:<br>$$<br>\mathrm{Dir}(\mathbf{\mu}|\mathbf{\alpha}) = \frac{\Gamma(\alpha_0)}{\Gamma(\alpha_1)\dots\Gamma(\alpha_K)} \prod_{k=1}^K \mu_k^{\alpha_k -1}<br>$$<br>其中: </p>
+<ul>
+<li>$\alpha_0 = \sum_{k=1}^K \alpha_k $,</li>
+<li>$\Gamma (z)=\int_{0}^{\infty }x^{z-1}e^{-x} dx$为Gamma函数.</li>
+</ul>
+<p>下图展示了 $K=3$ 时, 在${\alpha_k}=0.1$, ${\alpha_k}=1$, ${\alpha_k}=10$ 取三个不同值时Dirichlet分布函数的图形.</p>
+<p><img src="Binomial-Beta-Multinomial-Dirichlet/Dirichlet-example.png" alt="Dirichlet"></p>
+<p>Dirichlet分布定义的先验分布 乘以 多项式分布形式似然函数，可得参数$\mathbf{\mu}$的后验分布：<br>$$<br>p(\mathbf{\mu} | \mathcal{D},\mathcal{\alpha}) \propto p(\mathcal{D}|\mathbf{\mu}) p(\mathbf{\mu} | \mathcal{\alpha}) \propto \prod_{k=1}^K \mu_k^{\alpha_k + m_k -1}<br>$$<br>可以看到后验分布也是Dirichlet分布的形式. 加入归一化项后验分布可以表示为:<br>$$<br>\begin{align}<br>p(\mathbf{\mu} | \mathcal{D},\mathcal{\alpha}) &amp;= \mathrm{Dir}(\mathbf{\mu}|\mathbf{\alpha} + \mathbf{m}) \\<br>&amp;= \frac{\Gamma(\alpha_0) + N}{\Gamma(\alpha_1 + m_1)\dots\Gamma(\alpha_K + m_K)}\prod_{k=1}^K \mu_k^{\alpha_k + m_k -1}<br>\end{align}<br>$$<br>其中: $\mathbf{m}=(m_1, m_2, \dots, m_K)^{\mathrm{T}}$.</p>
+<p>类似于beta后验把a,b当成x=1和x=0的有效观测量一样，我们也可以把$\alpha_k$当着是$x_k=1$事件的观测量，即$\alpha_k$的值通过$m_k$值增加而增加。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p>Christopher M Bishop. Pattern Recognition and Machine Learning (Information Science and Statistics)[M]. 2006.</p>
 
       
     </div>
@@ -507,18 +547,14 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/Binomial-Beta-Multinomial-Dirichlet.html" rel="next" title="从二项式分布到多项式分布">
-                <i class="fa fa-chevron-left"></i> 从二项式分布到多项式分布
-              </a>
-            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/blog/GBDT.html" rel="prev" title="GBDT">
-                GBDT <i class="fa fa-chevron-right"></i>
+              <a href="/blog/exponential-distribution-and-poisson-distribution.html" rel="prev" title="【转】泊松分布和指数分布">
+                【转】泊松分布和指数分布 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -755,7 +791,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#泊松分布"><span class="nav-number">1.</span> <span class="nav-text">泊松分布</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#指数分布"><span class="nav-number">2.</span> <span class="nav-text">指数分布</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Bayesian-Inference"><span class="nav-number">1.</span> <span class="nav-text">Bayesian Inference</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二项式分布-Binomial-distribution-与-Beta-distribution"><span class="nav-number">2.</span> <span class="nav-text">二项式分布(Binomial distribution) 与 Beta distribution</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#二元变量-Binary-Variables-Bernoulli-distribution"><span class="nav-number">2.1.</span> <span class="nav-text">二元变量(Binary Variables) - Bernoulli distribution</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二项式分布-Binomial-distribution"><span class="nav-number">2.2.</span> <span class="nav-text">二项式分布(Binomial distribution)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Beta-分布"><span class="nav-number">2.3.</span> <span class="nav-text">Beta 分布</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#多项式分布与Dirichlet分布"><span class="nav-number">3.</span> <span class="nav-text">多项式分布与Dirichlet分布</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#多元变量-Multinomial-Variables-Multinoulli-distribution"><span class="nav-number">3.1.</span> <span class="nav-text">多元变量(Multinomial Variables) - Multinoulli distribution</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多项分布-Multinomial-Distribution"><span class="nav-number">3.2.</span> <span class="nav-text">多项分布(Multinomial Distribution)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dirichlet分布"><span class="nav-number">3.3.</span> <span class="nav-text">Dirichlet分布</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
             
 
           </div>

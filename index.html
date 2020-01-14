@@ -1054,7 +1054,7 @@ $Q = \{q^{(1)}, q
       
         
           
-          BM25BM25算法是一种常见用来做相关度打分的公式，思路比较简单，主要就是计算一个query里面所有term和文档的相关度，然后在把分数做累加操作,而每个词的相关度分数主要还是受到tf/idf的影响。公式如下：$$score(Q, d) = \sum_{t \in Q} W_t R(t, d)$$
+          BM25BM25算法是一种常见用来做相关度打分的公式，思路比较简单，就是计算一个query里面所有term和文档的相关度，然后在把分数做累加操作, 而每个词的相关度分数受到tf/idf的影响。公式如下：$$score(Q, d) = \sum_{t \in Q} W_t R(t, d)$$其中：$R
           ...
           <!--noindex-->
           
@@ -1929,7 +1929,7 @@ $s$ : 语言中的一个句子.
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">63</span>
+                    <span class="site-state-item-count">64</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -2099,7 +2099,7 @@ $s$ : 语言中的一个句子.
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
@@ -2603,7 +2603,6 @@ $s$ : 语言中的一个句子.
         processEscapes: true,
         skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
       },
-      TeX: {equationNumbers: { autoNumber: "AMS" }}
     });
 </script>
 

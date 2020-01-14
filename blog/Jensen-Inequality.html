@@ -117,7 +117,7 @@
 <meta property="og:description" content="Jensen不等式以丹麦数学家约翰·詹森（Johan Jensen）命名。它给出均值的凸函数值和凸函数的均值间的大小关系。  if $X$ is a random variable and $\varphi$ is a convex function, then$$\varphi(E[X]) \le E[\varphi (X)].$$特别地，如果$\varphi$是严格凸函数，当且仅当$X$是常量">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://weirping.coding.me/blog/Jensen-Inequality/ConvexFunction.png">
-<meta property="og:updated_time" content="2019-09-20T09:16:12.000Z">
+<meta property="og:updated_time" content="2019-12-25T03:55:49.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Jensen不等式">
 <meta name="twitter:description" content="Jensen不等式以丹麦数学家约翰·詹森（Johan Jensen）命名。它给出均值的凸函数值和凸函数的均值间的大小关系。  if $X$ is a random variable and $\varphi$ is a convex function, then$$\varphi(E[X]) \le E[\varphi (X)].$$特别地，如果$\varphi$是严格凸函数，当且仅当$X$是常量">
@@ -431,7 +431,7 @@
 <p>从凸函数说起, 设$\varphi$ 是定义域为实数的函数，如果对于所有的实数$x$，$\varphi(x)$的二次导数大于等于0，那么$\varphi(x)$是凸函数。如果$f(x)$的二次导数只大于0，不等于0，那么称 $\varphi(x)$ 是严格凸函数。当 $x$ 是向量时，如果$\varphi(x)$ 的 Hessian 矩阵H是半正定的，那么$\varphi(x)$是凸函数。如果 Hessian 矩阵H是正定的那么称$\varphi(x)$是严格凸函数。</p>
 <p>凸函数又如下性质: 过一个凸函数上任意两点所作割线, 割线一定在这两点间的函数图象的上方，即：<br>$$<br>f( tx_1 + (1-t)x_2)\leq tf(x_1)+(1-t)f(x_2). \tag{1}<br>$$</p>
 <p>其中, $f$ 为如函数, 如下图所示:</p>
-<p><img src="Jensen-Inequality/ConvexFunction.png" alt></p>
+<p><img src="Jensen-Inequality/ConvexFunction.png" alt="ConvexFunction"></p>
 <p>将（1）推广到一般情形:</p>
 <p>$$<br>f(\sum_{i=1}^n t_i x_i) \le \sum_{i=1}^n t_i f(x_i). \tag{2}<br>$$<br>其中: $x_i \in I, t_i \ge 0, \sum_{i=1}^n t_i =1, 1 \le i \le n$</p>
 <p>令:<br>$$<br>t_i = \frac {p_i}{\sum_{i=1}^n p_i}.<br>$$<br>则 (2) 可以改写成<br>$$<br>f(\frac{\sum_{i=1}^n p_i x_i}{\sum_{i=1}^n p_i}) \le \frac{\sum_{i=1}^n p_i f(x_i)}{\sum_{i=1}^n p_i}. \tag{3}<br>$$</p>
@@ -440,7 +440,8 @@
 <p>$$<br>f(\frac{\sum_{i=1}^n  x_i}{n}) \le \frac{\sum_{i=1}^n  f(x_i)}{n}<br>$$</p>
 <p>即:<br>$$<br>f(E[X]) \le E[f(X)]. \tag{4}<br>$$<br>其中: $X=\{x_1, x_2, \dots, x_n\}$.</p>
 <p>式(4)就是均值形式Jensen不等式.</p>
-<h1 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h1><p><a href="[https://en.wikipedia.org/wiki/Jensen%27s_inequality](https://en.wikipedia.org/wiki/Jensen&#39;s_inequality">Jensen’s inequality</a>)</p>
+<p>reference</p>
+<p><a href="https://en.wikipedia.org/wiki/Jensen%27s_inequality" target="_blank" rel="noopener">Jensen’s inequality</a></p>
 
       
     </div>
@@ -533,17 +534,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
-          </li>
-        </ul>
-      
 
-      <section class="site-overview-wrap sidebar-panel">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -558,7 +550,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">63</span>
+                    <span class="site-state-item-count">64</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -715,22 +707,6 @@
       </section>
 
       
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#reference"><span class="nav-number">1.</span> <span class="nav-text">reference</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
-      
 
       
 
@@ -744,7 +720,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
@@ -1230,7 +1206,6 @@
         processEscapes: true,
         skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
       },
-      TeX: {equationNumbers: { autoNumber: "AMS" }}
     });
 </script>
 

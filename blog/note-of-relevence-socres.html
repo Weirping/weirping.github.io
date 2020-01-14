@@ -108,19 +108,19 @@
 
 
 
-  <meta name="description" content="BM25BM25算法是一种常见用来做相关度打分的公式，思路比较简单，主要就是计算一个query里面所有term和文档的相关度，然后在把分数做累加操作,而每个词的相关度分数主要还是受到tf/idf的影响。公式如下：$$score(Q, d) = \sum_{t \in Q} W_t R(t, d)$$其中：$R(t,d)$是每个词和文档的相关度值；$t$代表query中的term；$d$代表相关的文">
-<meta name="keywords" content="IR,NLP,Application">
+  <meta name="description" content="BM25BM25算法是一种常见用来做相关度打分的公式，思路比较简单，就是计算一个query里面所有term和文档的相关度，然后在把分数做累加操作, 而每个词的相关度分数受到tf/idf的影响。公式如下：$$score(Q, d) = \sum_{t \in Q} W_t R(t, d)$$其中：$R(t,d)$是每个词和文档的相关度值；$t$代表query中的term；$d$代表相关的文档；$W_">
+<meta name="keywords" content="IR,Application,NLP">
 <meta property="og:type" content="article">
 <meta property="og:title" content="相关性打分公式">
 <meta property="og:url" content="http://weirping.coding.me/blog/note-of-relevence-socres.html">
 <meta property="og:site_name" content="Weiping&#39;s notes">
-<meta property="og:description" content="BM25BM25算法是一种常见用来做相关度打分的公式，思路比较简单，主要就是计算一个query里面所有term和文档的相关度，然后在把分数做累加操作,而每个词的相关度分数主要还是受到tf/idf的影响。公式如下：$$score(Q, d) = \sum_{t \in Q} W_t R(t, d)$$其中：$R(t,d)$是每个词和文档的相关度值；$t$代表query中的term；$d$代表相关的文">
+<meta property="og:description" content="BM25BM25算法是一种常见用来做相关度打分的公式，思路比较简单，就是计算一个query里面所有term和文档的相关度，然后在把分数做累加操作, 而每个词的相关度分数受到tf/idf的影响。公式如下：$$score(Q, d) = \sum_{t \in Q} W_t R(t, d)$$其中：$R(t,d)$是每个词和文档的相关度值；$t$代表query中的term；$d$代表相关的文档；$W_">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://weirping.coding.me/blog/note-of-relevence-socres/bm25top-phi.png">
-<meta property="og:updated_time" content="2019-08-23T16:10:05.460Z">
+<meta property="og:updated_time" content="2020-01-13T08:13:19.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="相关性打分公式">
-<meta name="twitter:description" content="BM25BM25算法是一种常见用来做相关度打分的公式，思路比较简单，主要就是计算一个query里面所有term和文档的相关度，然后在把分数做累加操作,而每个词的相关度分数主要还是受到tf/idf的影响。公式如下：$$score(Q, d) = \sum_{t \in Q} W_t R(t, d)$$其中：$R(t,d)$是每个词和文档的相关度值；$t$代表query中的term；$d$代表相关的文">
+<meta name="twitter:description" content="BM25BM25算法是一种常见用来做相关度打分的公式，思路比较简单，就是计算一个query里面所有term和文档的相关度，然后在把分数做累加操作, 而每个词的相关度分数受到tf/idf的影响。公式如下：$$score(Q, d) = \sum_{t \in Q} W_t R(t, d)$$其中：$R(t,d)$是每个词和文档的相关度值；$t$代表query中的term；$d$代表相关的文档；$W_">
 <meta name="twitter:image" content="http://weirping.coding.me/blog/note-of-relevence-socres/bm25top-phi.png">
 
 
@@ -424,18 +424,21 @@
       
 
       
-        <h1 id="BM25"><a href="#BM25" class="headerlink" title="BM25"></a>BM25</h1><p>BM25算法是一种常见用来做相关度打分的公式，思路比较简单，主要就是计算一个query里面所有term和文档的相关度，然后在把分数做累加操作,而每个词的相关度分数主要还是受到tf/idf的影响。公式如下：<br>$$<br>score(Q, d) = \sum_{t \in Q} W_t R(t, d)<br>$$<br>其中：$R(t,d)$是每个词和文档的相关度值；$t$代表query中的term；$d$代表相关的文档；$W_t$是词$t$的权重。 </p>
+        <h1 id="BM25"><a href="#BM25" class="headerlink" title="BM25"></a>BM25</h1><p>BM25算法是一种常见用来做相关度打分的公式，思路比较简单，就是计算一个query里面所有term和文档的相关度，然后在把分数做累加操作, 而每个词的相关度分数受到tf/idf的影响。公式如下：<br>$$<br>score(Q, d) = \sum_{t \in Q} W_t R(t, d)<br>$$<br>其中：$R(t,d)$是每个词和文档的相关度值；$t$代表query中的term；$d$代表相关的文档；$W_t$是词$t$的权重。 </p>
 <p>$W_t$可由外部设置，默认是$idf$值，idf公式的基本思想是：词的重要程度和其出现在总文档集合里的频率成反比。其公式如下:<br>$$<br>IDF(t) = \log \frac{N-n(t) + 0.5}{n(t) + 0.5}<br>$$<br>其中：$N$是文档总数；$n(t)$是包含该词的文档数；0.5是调教系数，避免$n(t)$为0的情况。取个log是为了让idf的值受N和$n(t)$的影响更加平滑。</p>
 <p>从这个公式可以看出当$N$越大，$n(ti)$越小时$idf$值越大，</p>
 <p>下面是$R(t,d)$的公式，<br>$$<br>\begin {align}<br>&amp; R(t, d) = \frac{tf(t)(k_1 + 1)}{tf(t) + K(d)}   \frac{qf(t)(k_2 + 1)}{qf(t) + k_2} \\<br>\\<br>&amp; K(d) = k_1(1-b + b \frac{dl}{avgdl})<br>\end {align}<br>$$<br>其中: $k_1$，$k_2$，$b$都是调节因子，一般$k1=2$，$k2=1$，$b=0.75$； $tf(t)$是词$t$在文档中的次数，$qf(t)$代表词在查询句里的次数；$dl$是文档长度，$avgdl$是文档平均长度；</p>
-<p>可以看出如果其他因素一样$dl$越大，相关度越低；至于除以一个$avgdl$，我想是拿本篇文档长度和整体文档长度水平做比较 ，以免单独取$dl$值时过大。</p>
-<p>乘积的左边因数代表词在文档中的次数关系，乘积的右边因数代表词在查询语句中的次数关系。绝大多数情况下，查询词在查询语句里面出现一次，所以$qf(t)$可以看成是1，又因为$k_2$为1，所以右边因数其实就等于1，所以公式可化简为下面这样:<br>$$<br>R(q_i, d) = \frac{tf(t)(k_1 + 1)}{tf(t) + K}<br>$$<br>公式化简后可得:<br>$$<br>score(Q, d) = \sum_{t \in Q} IDF(t) \frac{tf(t)(k_1 + 1)}{tf(t) + k_1(1-b + b \frac{dl}{avgdl})}   \\<br>$$<br>影响BM25公式的因数有</p>
-<p>1 $idf$：  $idf$越高分数越高</p>
-<p>2 $tf$：  $tf$越高分数越高</p>
-<p>3 $dl/avgdl$ ： 如果该文档长度在文档水平中越高则分数越低。</p>
-<p>4 $k_1, k_2, b$为分数的调节因子</p>
-<h1 id="BM25F-2004"><a href="#BM25F-2004" class="headerlink" title="BM25F(2004)"></a>BM25F(2004)</h1><p>一般情况下，一篇文章是分为多个部分的，如 title，content，description，anchor 等，在BM25F算分公式中，这些部分被称为域(field)。有两篇文章，一篇文章的title部分与query 的BM25相关性得分为 a， 另一篇文章的content部分与query 的BM25相关性得分也为 a。假设不考虑这两篇文章其他部分与query的相关性情况，根据经验，一般第一篇文章应该应该比第一篇文章更相关。BM25F 引入了文章d的每个域的信息，它将每个term在文章d中的每个域中的相关性进行了处理。公式如下：<br>$$<br>\begin {align}<br>&amp; score(Q, d) = \sum_{t \in Q} IDF(t) \frac{w(t,d)}{k_1 + w(t,d)}   \\<br>\\<br>&amp; w(t,d) = \sum_{f \in d} \frac{tf(t,f,d) \times boost_f}{1-b_f + b_f \frac{len(f, d)}{avglen(f)}}<br>\end {align}<br>$$</p>
-<h1 id><a href="#" class="headerlink" title=" "></a> </h1><h1 id="OkaTP-2003"><a href="#OkaTP-2003" class="headerlink" title="OkaTP(2003)"></a>OkaTP(2003)</h1><p>BM25 被也称为 <strong>Okapi BM25</strong>,  OkaTP是BM25与 term proximity 融合的相关性计算公式。</p>
+<p>可以看出如果其他因素一样$dl$越大，相关度越低；至于除以个$avgdl$，我想是拿本篇文档长度和整体文档长度水平做比较 ，以免单独取$dl$值时过大。</p>
+<p>乘积的左边因数代表词在文档中的次数关系，乘积的右边因数代表词在查询语句中的次数关系。绝大多数情况下，查询词在查询语句里面出现一次，所以$qf(t)$可以看成是1，又因为$k_2$为1，所以右边因数其实就等于1。最终公式可化简为下面这样:<br>$$<br>R(q_i, d) = \frac{tf(t)(k_1 + 1)}{tf(t) + K}<br>$$<br>公式化简后可得:<br>$$<br>score(Q, d) = \sum_{t \in Q} IDF(t) \frac{tf(t)(k_1 + 1)}{tf(t) + k_1(1-b + b \frac{dl}{avgdl})}   \\<br>$$</p>
+<p>影响BM25公式的因数有:</p>
+<ul>
+<li>$idf$：  $idf$越高分数越高</li>
+<li>$tf$：  $tf$越高分数越高</li>
+<li>$dl/avgdl$ ： 如果该文档长度在文档水平中越高则分数越低。</li>
+<li>$k_1, k_2, b$为分数的调节因子</li>
+</ul>
+<h1 id="BM25F-2004"><a href="#BM25F-2004" class="headerlink" title="BM25F(2004)"></a>BM25F(2004)</h1><p>一般情况下，一篇文章是分为多个部分的，如 title，content，description，anchor 等，在BM25F算分公式中，这些部分被称为域(field)。对于两篇，一篇文章的title部分与query 的BM25相关性得分为 a， 另一篇文章的content部分与query 的BM25相关性得分也为 a。假设不考虑这两篇文章其他部分与query的相关性情况，根据经验，一般第一篇文章应该应该比第一篇文章更相关, 因为一般title是比content更重要的。BM25F 引入了文章的每个域的信息，它将每个term在文章中的每个域中的相关性进行了处理。公式如下：<br>$$<br>\begin {align}<br>&amp; score(Q, d) = \sum_{t \in Q} IDF(t) \frac{w(t,d)}{k_1 + w(t,d)}   \\<br>\\<br>&amp; w(t,d) = \sum_{f \in d} \frac{tf(t,f,d) \times boost_f}{1-b_f + b_f \frac{len(f, d)}{avglen(f)}}<br>\end {align}<br>$$</p>
+<h1 id="OkaTP-2003"><a href="#OkaTP-2003" class="headerlink" title="OkaTP(2003)"></a>OkaTP(2003)</h1><p>BM25 被也称为 <strong>Okapi BM25</strong>,  OkaTP是BM25与 term proximity 融合的相关性计算公式。</p>
 <p>query中第 $i$ 个term的权重定义为：</p>
 <p>$$<br>qw_i = \frac{qtf_i}{k_3+qtf_i} \cdot \log \frac{N-DF_i}{DF_i}<br>$$</p>
 <ul>
@@ -453,27 +456,27 @@
 <p>其中TP即 term proximity，在该算法中引入了proximity 信息来优化相关性计算效果。</p>
 <p>假设一个query q中包含n个term $\{t_1, \dots, t_n \}$， $d$ 表示一篇文章，任意两个不同term $t_j, t_k$  在文章 $d$ 中所处位置的距离表示为 $dist(t_j, t_k)$。这两个term的<br>$$<br>\begin {align}<br>&amp; BM25TP(q, d) = BM25(q，d) + \sum_i^n \min\{1, W_{t_i}\} \cdot \frac{acc_d (t_i) \cdot (k_1 + 1)}{acc_d (t_i) + K} \\<br>\\<br>&amp; acc_d (t_i) = \sum_{i \neq j} W_{t_i} \cdot \mathrm{tpi}_d(t_i, t_j) \\<br>\\<br>&amp; \mathrm {tpi}_d = \sum_{ o(t_i) \in \mathrm {occurrences of t_i in document d}} \frac {1}{dist[o(t_i), t_j] ^2}<br>\end {align}<br>$$<br>note: query中的第 $i$ 个term可能在 document 可能出现多次， 每一次出现用 $o(t_i)$ 表示。</p>
 <p>原始论文见 Term proximity scoring for ad-hoc retrieval on very large text collections<br>可以结合文章 Selective Term Proximity Scoring Via BP-ANN 理解上面第2，3两个公式。</p>
-<h1 id="newTP-2008"><a href="#newTP-2008" class="headerlink" title="newTP(2008)"></a>newTP(2008)</h1><p>文章认为OkaTP存在两个方面的问题 1. OkaTP 算分公式的后面部分(可以看做对于prase的算分)和前面的BM25部分是有重叠的，即一个term会同时出现在前后两个部分； 2.Linear combination of scores of  unigrams  and  those of loose phrases may break the non-linear property of term frequency。</p>
+<h1 id="newTP-2008"><a href="#newTP-2008" class="headerlink" title="newTP(2008)"></a>newTP(2008)</h1><p>文章认为OkaTP存在两个方面的问题 1. OkaTP 算分公式的后面部分(可以看做对于phrase的算分)和前面的BM25部分是有重叠的，即一个term会同时出现在前后两个部分； 2.Linear combination of scores of  unigrams  and  those of loose phrases may break the non-linear property of term frequency。</p>
 <p>基于这两点提出了 newTP算法。 newTP中引入了 span的概念。 span 是根据query term在一个docment中的命中位置，将整个命中列表分割为多个片段，每个片段称为一个 expanded span。 span 的确定规则如下。</p>
 <blockquote>
 <p>(1)  The distance between the current and the next is bigger  than a threshold MAX_DIS, then the chain is separated between these two hits;<br>(2)  The current and the next hit are identical, then the chain is separated between these two hits;<br>(3)  The next hit is identical to a hit with former continuous sub-chain, then the distance between the current and the next  and  the  distance  between  the  identical  hit  and  its next  is  compared,  the  chain  is  separated  at  the  bigger gap.<br>(4)  Otherwise, go on scanning the next hit.</p>
 </blockquote>
-<p>其中 MAX_DIS 是认为设定的。</p>
+<p>其中 MAX_DIS 是人为设定的。</p>
 <p>根据span的中 query term的密度和数量来确定一个term对于相关性的贡献。从而取代OkaTP 中的 tpi 和 tf部分。</p>
 <p>一个$span_i$ 中的term t的 对于相关性的贡献表示为:<br>$$<br>f(t, espan_i) = [\frac {n_i}{width(espan_i)}]^x \cdot (n_i)^y<br>$$<br>其中:</p>
 <blockquote>
 <ul>
-<li>t is a query term,</li>
-<li>espan_i is an expanded span that contains t,</li>
-<li>n_i is the number of query terms that occur in espan_i</li>
-<li>Width(espan_i) is the width of espan_i</li>
-<li>x is an exponent that is used  to  restrain  that  the  value  decayed too rapidly with the density of an expanded span increasing,</li>
+<li>$t$ is a query term,</li>
+<li>$espan_i$ is an expanded span that contains $t$,</li>
+<li>$n_i$ is the number of query terms that occur in $espan_i$</li>
+<li>$width(espan_i)$ is the width of $espan_i$</li>
+<li>$x$ is an exponent that is used  to  restrain  that  the  value  decayed too rapidly with the density of an expanded span increasing,</li>
 <li>y is  an  exponent  that  is  used  to  prompting  the  case  that  more unique query terms appear in one expanded span.</li>
 </ul>
 </blockquote>
 <p>一个term t 在整个document 中对相关性的贡献为:<br>$$<br>rc_t = \sum_i f(t, espan_i)<br>$$<br>可以看出 rc 中包含了 proximity的信息 和 tf的信息。</p>
 <p>直接用 rc 替换 BM25 中的 tf， 得到新的相关性计算公式:<br>$$<br>newTP = \sum_{t \in Q} w_t \cdot \frac{rc_t(k_1 + 1)}{rc_t + K}<br>$$</p>
-<h1 id="BM25TOP-2012"><a href="#BM25TOP-2012" class="headerlink" title="BM25TOP(2012)"></a>BM25TOP(2012)</h1><p>其中TOP即 term order proximity.  该算法是在BM25TP的基础上进行的优化。在该算法中引入了 term oder信息， 如果两个term在 query中出现的顺序 与 其在document中的顺序相反则进行惩罚， 如果顺序相同则 reward。</p>
+<h1 id="BM25TOP-2012"><a href="#BM25TOP-2012" class="headerlink" title="BM25TOP(2012)"></a>BM25TOP(2012)</h1><p>其中TOP即 term order proximity.  该算法是在BM25TP的基础上进行的优化。在该算法中引入了 term order信息， 如果两个term在 query中出现的顺序 与 其在document中的顺序相反则进行惩罚， 如果顺序相同则 reward。</p>
 <p>在BM25TP算法中 使用的 $dist[o(t_i), t_j] ^2$ 来计算proximity， 但是这个公式对于term oder是不敏感的。就会认为 John is faster than Mary 和 Mary is faster than John 两个句子是相同的。</p>
 <p>为了说明 BM25TOP算法，先引入如下两个定义。</p>
 <p>$p_{t_i;Q}$: The position of $t_i$ in query Q<br>$p_{t_i;d}$: The position of $t_i$ in document d</p>
@@ -526,9 +529,9 @@
           
             <a href="/tags/IR/" rel="tag"># IR</a>
           
-            <a href="/tags/NLP/" rel="tag"># NLP</a>
-          
             <a href="/tags/Application/" rel="tag"># Application</a>
+          
+            <a href="/tags/NLP/" rel="tag"># NLP</a>
           
         </div>
       
@@ -623,7 +626,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">63</span>
+                    <span class="site-state-item-count">64</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -789,7 +792,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#BM25"><span class="nav-number">1.</span> <span class="nav-text">BM25</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BM25F-2004"><span class="nav-number">2.</span> <span class="nav-text">BM25F(2004)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#"><span class="nav-number">3.</span> <span class="nav-text"> </span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#OkaTP-2003"><span class="nav-number">4.</span> <span class="nav-text">OkaTP(2003)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BM25TP-2006"><span class="nav-number">5.</span> <span class="nav-text">BM25TP(2006)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#newTP-2008"><span class="nav-number">6.</span> <span class="nav-text">newTP(2008)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BM25TOP-2012"><span class="nav-number">7.</span> <span class="nav-text">BM25TOP(2012)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#其他"><span class="nav-number">8.</span> <span class="nav-text">其他</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#未完待续"><span class="nav-number">9.</span> <span class="nav-text">未完待续</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">10.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#BM25"><span class="nav-number">1.</span> <span class="nav-text">BM25</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BM25F-2004"><span class="nav-number">2.</span> <span class="nav-text">BM25F(2004)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#OkaTP-2003"><span class="nav-number">3.</span> <span class="nav-text">OkaTP(2003)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BM25TP-2006"><span class="nav-number">4.</span> <span class="nav-text">BM25TP(2006)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#newTP-2008"><span class="nav-number">5.</span> <span class="nav-text">newTP(2008)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BM25TOP-2012"><span class="nav-number">6.</span> <span class="nav-text">BM25TOP(2012)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#其他"><span class="nav-number">7.</span> <span class="nav-text">其他</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#未完待续"><span class="nav-number">8.</span> <span class="nav-text">未完待续</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">9.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
             
 
           </div>
@@ -809,7 +812,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright"> &copy; 2017 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
@@ -1295,7 +1298,6 @@
         processEscapes: true,
         skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
       },
-      TeX: {equationNumbers: { autoNumber: "AMS" }}
     });
 </script>
 
