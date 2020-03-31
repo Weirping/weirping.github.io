@@ -109,14 +109,14 @@
 
 
   <meta name="description" content="在信息检索中每个term都会赋予一定的权值，TF-IDF是其最常见的权重，本节叙述term的TF-IDF的计算。如其名称，TF-IDF分为两个部分：词频TF和逆文档频率IDF。 词频TF权重词频（TF），即一个term在一个文档中出现的次数，一般来说，在某个文档中反复出现的term，往往能够表征文档的主题信息，即TF值越大，越能代表文档所反映的内容，那么应该给予这个term更大的权值。这是为何引入">
-<meta name="keywords" content="Application,NLP">
+<meta name="keywords" content="NLP,Application">
 <meta property="og:type" content="article">
 <meta property="og:title" content="TF-IDF">
 <meta property="og:url" content="http://weirping.coding.me/blog/TF-IDF.html">
 <meta property="og:site_name" content="Weiping&#39;s notes">
 <meta property="og:description" content="在信息检索中每个term都会赋予一定的权值，TF-IDF是其最常见的权重，本节叙述term的TF-IDF的计算。如其名称，TF-IDF分为两个部分：词频TF和逆文档频率IDF。 词频TF权重词频（TF），即一个term在一个文档中出现的次数，一般来说，在某个文档中反复出现的term，往往能够表征文档的主题信息，即TF值越大，越能代表文档所反映的内容，那么应该给予这个term更大的权值。这是为何引入">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-08-23T05:00:52.000Z">
+<meta property="og:updated_time" content="2020-03-23T10:15:27.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="TF-IDF">
 <meta name="twitter:description" content="在信息检索中每个term都会赋予一定的权值，TF-IDF是其最常见的权重，本节叙述term的TF-IDF的计算。如其名称，TF-IDF分为两个部分：词频TF和逆文档频率IDF。 词频TF权重词频（TF），即一个term在一个文档中出现的次数，一般来说，在某个文档中反复出现的term，往往能够表征文档的主题信息，即TF值越大，越能代表文档所反映的内容，那么应该给予这个term更大的权值。这是为何引入">
@@ -429,7 +429,7 @@
 <h2 id="直接统计法"><a href="#直接统计法" class="headerlink" title="直接统计法"></a>直接统计法</h2><p>$$<br>W_{TF} = TF<br>$$</p>
 <p>即一个term在docment中出现了几次TF就等于几。</p>
 <h2 id="对数"><a href="#对数" class="headerlink" title="对数"></a>对数</h2><p>$$<br>W_{TF} = 1+ \log (TF)<br>$$</p>
-<p>其中$$TF$$是term在document中实际出现的次数。对其通过对数变换后的$W_{TF}$作为term在该document中的权重。该公式是基于如下观点设计的：</p>
+<p>其中 $TF$ 是term在document中实际出现的次数。对其通过对数变换后的$W_{TF}$作为term在该document中的权重。该公式是基于如下观点设计的：</p>
 <ul>
 <li>取对数：即使一个term出现了10次，也不应该在计算特征权值时，比出现1次的情况权值大10倍，所以加入$\log$机制抑制这种过大的差异。</li>
 <li>数字1：公式中的数字1是为了平滑计算用的，因为如果TF值为1的情况下，取$\log$后值为0，即本来出现了一次的term，按照这种方法计算会认为这个term从来没有在文档中出现过，为了避免这种情形，采用加1的方式来进行平滑。</li>
@@ -438,9 +438,24 @@
 <p>公式中的TF代表这个term的实际词频数目，$而\max(TF)$代表了文档中所有单term出现次数最多的那个单term应的词频数目，$a$是调节因子，过去经验取值0.5，新的研究表明取值为0.4效果更好。</p>
 <p>之所以要如此操作，主要出于对长文档的一种抑制，因为如果文档较长，与短文档相比，则长文档中所有term的TF值会普遍比短文档的值高，但是这并不意味着长文档与查询更相关。用term实际词频除以文档中最高词频，等于将绝对的数值进行了规范化转换，公式的含义就转换为：同一个文档内term之间的相对重要性。即使一个文档很长，term词频普遍很高，但是除以文档最高词频，那么通过这种计算方式得出的数值比短文档来说并不一定就大。这样就剔除了文档长度因素的影响，长文档和短文档的词频因子就成为可比的了。</p>
 <h1 id="逆文档频率IDF"><a href="#逆文档频率IDF" class="headerlink" title="逆文档频率IDF"></a>逆文档频率IDF</h1><p>IDF代表的是文档集合范围内term的相对重要性。</p>
-<p>逆文档频率因子IDF，其计算公式如下：<br>$$<br>IDF_k = \log{\frac{N}{n_k}}<br>$$<br>其中的$N$代表文档集合中总共有多少个文档，而$n_k$代表特征term $k$在其中多少个文档中出现过，即文档频率。由公式可知，文档频率n_k越高，则其IDF值越小，即越多的文档包含某个term，那么其IDF权值越小。IDF就是衡量不同term对文档的区分能力的，其值越高，则其区分不同文档差异的能力越强，反之则区分能力越弱。整体而言，IDF的计算公式是基于经验和直觉的，有研究者进一步分析认为：IDF代表了term带有的信息量的多少，其值越高，说明其信息含量越多，就越有价值。</p>
+<p>逆文档频率因子IDF，其计算公式如下：<br>$$<br>IDF_k = \log{\frac{N}{n_k}}<br>$$<br>其中的$N$代表文档集合中总共有多少个文档，而$n_k$代表特征term $k$在其中多少个文档中出现过，即文档频率。由公式可知，文档频率 $n_k$ 越高，则其IDF值越小，即越多的文档包含某个term，那么其IDF权值越小。IDF就是衡量不同term对文档的区分能力的，其值越高，则其区分不同文档差异的能力越强，反之则区分能力越弱。整体而言，IDF的计算公式是基于经验和直觉的，有研究者进一步分析认为：IDF代表了term带有的信息量的多少，其值越高，说明其信息含量越多，就越有价值。</p>
+<blockquote>
+<p>Information theory (aka Shannon’s Theory) states that the amount of information carried in a data token is inversely proportional to its frequency. High frequency tokens contain little information. Low frequency tokens contain a lot of information. </p>
+</blockquote>
+<p><a href="https://www.searchtechnologies.com/blog/relevancy-ranking-301" target="_blank" rel="noopener">IDF 存在的问题</a></p>
+<blockquote>
+<ol>
+<li>IDF does not consider statistical sample size. The statistics for words that occur in a small number of documents are very unreliable. Another way to state this is that words that occur very infrequently have very low confidence values. This issue of diminishing confidence is not incorporated into IDF.</li>
+<li>misspelled words may occur very infrequently, and are therefore rated highly by IDF, but will most often not be that useful.</li>
+<li>Combinations of very common words may themselves be very important. An example of this is the rock band “The Who”, made up of two very frequently used words, but which is very specific when put together.</li>
+<li>Small differences in word count, while significant to the IDF score, may not be that different to the user. For example, a word that occurs in 10 documents is not likely to be that much more important than a word that occurs in 100 documents, out of a database of a million documents.</li>
+<li>Words entered by the user are the best judgment of what’s important. Algorithms that over-weight term quality will inevitably cause problems for a large percentage of queries, undervaluing words that are truly important to the user.</li>
+<li>If the search engine is fast enough, and if dynamic teasers are turned on, users who chose poor query terms will quickly realize that these words should be removed, limiting the effectiveness of IDF over the entire search experience.</li>
+</ol>
+</blockquote>
 <h1 id="TF-IDF"><a href="#TF-IDF" class="headerlink" title="TF-IDF"></a>TF-IDF</h1><p>TF-IDF框架就是结合了上述的词频因子和逆文档频率因子的计算框架，一般是将两者相乘作为特征权值，特征权值越大，则越可能是好的指示词，即：<br>$$<br>W_{Term} = TF \times IDF<br>$$<br>从上述公式可以看出，对于某个文档D来说：<br>如果D中某个term的词频很高，而且这个term在文档集合的其他文档中很少出现，那么这个term的权值会很高。<br>如果D中某个term的词频很高，但是这个term在文档集合的其他文档中也经常出现，或者term词频不高，但是在文档集合的其他文档中很少出现，那么这个term的权值一般。<br>如果D中某个term词频很低，同时这个term在文档集合的其他文档中经常出现，那么这个term权值很低。</p>
 <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p>这就是搜索引擎</p>
+<p><a href="https://www.searchtechnologies.com/blog/relevancy-ranking-301" target="_blank" rel="noopener">Relevancy Ranking Course – A Four-Part Series</a></p>
 
       
     </div>
@@ -461,9 +476,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Application/" rel="tag"># Application</a>
-          
             <a href="/tags/NLP/" rel="tag"># NLP</a>
+          
+            <a href="/tags/Application/" rel="tag"># Application</a>
           
         </div>
       
