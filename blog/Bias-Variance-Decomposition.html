@@ -118,7 +118,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://weirping.coding.me/blog/Bias-Variance-Decomposition/learning-curves.png">
 <meta property="og:image" content="http://weirping.coding.me/blog/Bias-Variance-Decomposition/learning-curves-pra.png">
-<meta property="og:updated_time" content="2019-08-22T16:08:35.957Z">
+<meta property="og:updated_time" content="2020-08-21T02:29:23.952Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="偏差-方差分解">
 <meta name="twitter:description" content="偏差方差分解(The Bias-Variance Decomposition)是用来衡量模型复杂度的数学工具，也称为(the bias variance trade-off)，是解释学习算法泛化能力的一种工具。 note: 为了说明方便，我们只讨论回归问题，损失函数使用平方和损失函数 泛化误差 假设我们现在有数据集$D=\{(x_1,t_1),(x_2,t_2),\dots,(x_N,t_N)\}">
@@ -433,16 +433,17 @@
 <p>$\Omega$中样本服从的分布为$p(x,t)$，存在一个未知函数$h(x)$能够精确计算$x$到$t$的映射。 </p>
 <p>在抽样过程中，(观测值)t是存在误差的，所以不能保证$t_i=h(x_i)$。</p>
 <p>由于是独立同分布抽样，所以$D$也服从分布$p(x, t)$ 。</p>
-<p>我们通过某种方法从数据集$D$中学习到了一个模型$y(x)$ ，即，不同的数据集$D$对应不同的模型超参。</p>
+<p>通过某种方法从数据集$D$中学习到了一个模型$y(x)$ .</p>
+<p><strong>使用同样的方法从总体 $\Omega$ 中抽样多个不同的数据集$D$, 也就可以训练多个不同的模型 $y(x)$ 。</strong></p>
 </blockquote>
 <p>在训练集$D$上的平均误差称为 <strong>经验误差</strong> ：<br>$$<br>L=\int\int{L(t,y(x;D))p(x,t) dx dt}<br>$$<br>对于回归问题本文使用平方和损失函数（squared loss）则$L$为：<br>$$<br>L=\int\int{ [y(x;D)-t]^2p(x,t) dx dt}<br>$$</p>
-<p>模型在总体$\Omega$上的平均误差称为 <strong>泛化误差</strong>。因为我们是无法观察到总体$\Omega$的，所以泛化误差是无法直接计算的。</p>
+<p>模型在总体$\Omega$上的平均误差称为 <strong>泛化误差</strong>。因为无法观察到总体$\Omega$的，所以泛化误差是无法直接计算的。</p>
 <p>但是可以观察到$D$，因为$D$是$\Omega$的独立同分布采样获得的，所以经验误差的期望等于泛化误差。</p>
 <p>$$<br>\begin {aligned}<br>E_D[L] =&amp; \int_D \int\int{ [y(x;D)-t]^2p(x,t) dx dt dD} \\<br>\end {aligned} \tag 1<br>$$</p>
 <p>note: </p>
 <ol>
-<li>泛化误差是经验误差$L$都$D$积分得到的(take the expectation of this expression with respect to $D$)。</li>
-<li>对于不同的数据集$D$，模型的超参是不同的。可以通过贝叶斯理论理解。贝叶斯方法认为超参是一个后验分布，即超参不是一个固定值。频率学派认为超参是一个点估计，对于不同的数据集将得到一个固定估计值，所以超参是不同数据集点估计的期望。</li>
+<li>泛化误差是经验误差 $L$ 对 $D$ 积分得到的(take the expectation of this expression with respect to $D$)。</li>
+<li>对于不同的数据集$D$，模型的超参是不同的。可以通过贝叶斯理论理解。贝叶斯方法认为超参是一个后验分布，即超参不是一个固定值。频率学派认为超参是一个点估计，对于一个数据集将得到一个固定估计值，所以超参是不同数据集点估计的期望。</li>
 <li>公式1 的表述我没有在看到的资料中找到，如果个人表达有误，以后修正。</li>
 <li>下面的公式推导都是以公式1 为基础。</li>
 </ol>
@@ -473,7 +474,7 @@
 </tr>
 <tr>
 <td>$y(x;D)$</td>
-<td>在数据集 $D$ 学到的模型对$D$中样本$x$的预测标记</td>
+<td>在数据集 $D$ 学到的模型 $y$ 对$D$中样本$x$的预测标记</td>
 </tr>
 <tr>
 <td>$L$</td>
@@ -491,15 +492,17 @@
 </table>
 <h1 id="推导过程"><a href="#推导过程" class="headerlink" title="推导过程"></a>推导过程</h1><p>偏差-方差分解通过将模型的<strong>泛化误差</strong>( expected  loss)分解成 方差(variance) 偏差(bias) 和 噪声(noise)三部分，来分析一个模型的泛化能力。</p>
 <p>当样本量足够大时 $h(x)=E_t[t|x] = \int tp(t|x)dt$。</p>
-<p>使用有限样本集$D$ 训练出来的最优模型 $y(x;D) = E_t[t|x]=\int tp(t|x)$。(Pattern Recognition and Machine Learning公式 1.87-1.89推导得到)</p>
+<p>使用有限样本集$D$ 训练出来的最优模型 $y(x;D) = E_t[t|x]=\int tp(t|x)dt$。(Pattern Recognition and Machine Learning公式 1.87-1.89推导得到)</p>
 <p>为了方便下面的公式推导，先列出如下假设：</p>
 <ul>
-<li>样本的噪声的期望为0（note 区别与下面”样本噪声”），即在样本集$D$上 :<br>$$<br>E [t-h(x)] = \int\int [t-h(x)] p(t,x) dxdt = 0<br>$$</li>
+<li>样本噪声的期望为0（note 区别与下面”样本噪声”），即在样本集$D$上 :<br>$$<br>E [t-h(x)] = \int\int [t-h(x)] p(t,x) dxdt = 0<br>$$</li>
 </ul>
 <p>由于泛化误差$E_D[L]$是经验误差的期望$E_D[L]=\int_D L dD$，先将将$L$分解如下：<br>$$<br>\begin {aligned}<br>L &amp;=\int\int{ [y(x;D)-t]^2p(x,t) dx dt} \\<br>     &amp;=\int\int{ [y(x;D)-h(x)+h(x)-t]^2p(x,t) dx dt} \\<br>     &amp;=\int\int{ \{[y(x;D)-h(x)]+[h(x)-t]\}^2 p(x,t) dx dt}\\<br>     &amp;=\int\int{ \{[y(x;D)-h(x)]^2 + 2[y(x;D)-h(x)][h(x)-t] + [h(x)-t]^2\} p(x,t) dx dt} \\<br>\end {aligned}<br>$$</p>
 <p>前两项对t积分，根据噪声为0的假设，消掉交叉项</p>
 <p>$$<br>\begin {aligned}<br>L &amp;=\int{ [y(x;D)-h(x)]^2p(x)dx}  +\int\int{ [h(x)-t]^2 p(x,t) dx dt}<br>\end {aligned}<br>$$</p>
-<p>定义第二项为样本噪声：反应样本抽样值(即观测值)与真实值之间的差异。<br>$$<br>noise = E\{ [t-h(x)]^2\} = \int\int [t-h(x)]^2p(t,x) dxdt \tag 2<br>$$<br>$$<br>\begin {aligned}<br>E_D[L] &amp;=\int_D \int{ [y(x;D)-h(x)]^2p(x)dxdD}  + \int_D noise dD \\<br>&amp;=\int \int_D{ [y(x;D)-h(x)]^2p(x)dDdx}  + noise \\<br>\end {aligned}<br>$$</p>
+<p>定义第二项为样本噪声：反应样本抽样值(即观测值)与真实值之间的差异。<br>$$<br>noise = E\{ [t-h(x)]^2\} = \int\int [t-h(x)]^2p(t,x) dxdt \tag 2<br>$$</p>
+<p>可以发现在抽样方式一定的情况下, 样本噪声和样本集合是无关的. $\int_D noise\; dD = noise$</p>
+<p>$$<br>\begin {aligned}<br>E_D[L] &amp;=\int_D \int{ [y(x;D)-h(x)]^2p(x)dxdD}  + \int_D noise dD \\<br>&amp;=\int \int_D{ [y(x;D)-h(x)]^2p(x)dDdx}  + noise \\<br>\end {aligned}<br>$$</p>
 <p>继续分解第一项，在被积分项中添加$E_D[y(x;D)]$：<br>$$<br>\begin {aligned}<br>\int \int_D{ [y(x;D)-h(x)]^2p(x)dDdx} =&amp; \int\int_D{ \{y(x;D)-E_D[y(x;D)]+E_D[y(x;D)]-h(x)\}^2p(x)dDdx} \\<br>=&amp; \int\int_D\{y(x;D)-E_D[y(x;D)]\}^2p(x)dDdx \\<br>&amp;+ \int\int_D2\{y(x;D)-E_D[y(x;D)]\}\{E_D[y(x;D)]-h(x)\}p(x)dDdx\\<br>&amp;+ \int\int_D\{E_D[y(x;D)]-h(x)\}^2 p(x)dDdx<br>\end {aligned}<br>$$</p>
 <p>三项分别表示如下:</p>
 <p>第一项定义为方差<br>$$<br>\begin {aligned}<br>variance=&amp; \int\int_D\{y(x;D)-E_D[y(x;D)]\}^2p(x)dDdx \\<br>=&amp;\int E_D\{y(x;D)-E_D[y(x;D)]\}^2p(x)dx<br>\end {aligned} \tag 3<br>$$<br>第二项(交叉项)值为0<br>$$<br>\begin {aligned}<br>&amp; \int\int_D2\{y(x;D)-E_D[y(x;D)]\}\{E_D[y(x;D)]-h(x)\}p(x)dDdx\\<br>&amp;= \int2\{E_D[y(x;D)]-h(x)\}p(x) \int_D\{y(x;D)-E_D[y(x;D)]\} dD dx \\<br>&amp;= \int2\{E_D[y(x;D)]-h(x)\}p(x) \{\int_Dy(x;D)dD-E_D[y(x;D)]\} dx \\<br>&amp;= \int2\{E_D[y(x;D)]-h(x)\}p(x) \{E_D[y(x;D)]-E_D[y(x;D)]\} dx \\<br>&amp;=0<br>\end {aligned}<br>$$<br>第三项定义为偏差<br>$$<br>\begin {aligned}<br>bias^2 =&amp; \int\int_D\{E_D[y(x;D)]-h(x)\}^2 p(x)dDdx \\<br>=&amp; \int\{E_D[y(x;D)]-h(x)\}^2 p(x)dx \\<br>\end {aligned} \tag 4<br>$$<br>综上，泛化误差可以分解为如下形式：<br>$$<br>\begin {aligned}<br>E_D[L] =&amp; \int E_D\{y(x;D)-E_D[y(x;D)]\}^2p(x)dx \\<br>&amp;+  \int\{E_D[y(x;D)]-h(x)\}^2 p(x)dx \\<br>&amp;+ \int\int [t-h(x)]^2p(t,x) dxdt \\<br>=&amp; variance + bias^2 + noise<br>\end {aligned}<br>$$</p>
@@ -513,7 +516,7 @@
 <p>使用该方法时首先需要获得多个数据集D，对这些数据集求相应统计量的平均值。</p>
 <p>如果我们真的有多个数据集D，把这些数据集合并成为一个大的数据集来作为训练集会得到更好的模型。</p>
 <p>下面介绍一种验证模型偏差方差的工具。</p>
-<h2 id="Learning-Curves"><a href="#Learning-Curves" class="headerlink" title="Learning Curves"></a>Learning Curves</h2><p>增加训练数据量是解决模型过拟合的一个有效手段，但是通常情况下获取额外的训练数据是比较困难的。通过绘制<strong>随着训练数据量的增长模型在制训练集和验证集上的accuracy的图</strong>可以判断一个模型</p>
+<h2 id="Learning-Curves"><a href="#Learning-Curves" class="headerlink" title="Learning Curves"></a>Learning Curves</h2><p>增加训练数据量是解决模型过拟合的一个有效手段，但是通常情况下获取额外的训练数据是比较困难的。通过绘制<strong>随着训练数据量的增长模型在训练集和验证集上的accuracy的图</strong>可以判断一个模型</p>
 <p><img src="Bias-Variance-Decomposition/learning-curves.png" alt></p>
 <p>如上如所示：</p>
 <ul>
